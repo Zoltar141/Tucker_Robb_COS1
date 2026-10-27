@@ -1,9 +1,5 @@
 # 🚀 Welcome to Project & Portfolio!
-
-**1.** Review the [About](./docs/01_about/README.md) README and all of the links it provides.
-
-**2.** Review the documentation and [Getting Started](./docs/02_getting_started/README.md) steps in this repository's docs folder.
-# Project & Portfolio 1
+# Project W.O.N.K.L.E. PONG
 
 Robb Tucker
 
