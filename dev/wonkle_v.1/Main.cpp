@@ -2,10 +2,45 @@
 //
 
 #include <iostream>
+#include "WonkleRuntime.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    //RunTimeTest
+    WonkleRuntime runtime;
+
+    runtime.SetStateValue("score", 0);//set up initial state
+
+    WonkleRuntime::Rule rule;//create a rule; if score equals 0, add 10
+
+    rule.conditions.push_back({//if score 0
+        "score",
+        Comparison::Equal,
+        0
+        });
+
+    rule.transformations.push_back({//add ten
+        "score",
+        Operation::Add,
+        10
+        });
+
+    runtime.AddRule(rule);//add the rule
+    
+    runtime.Update();//run the engine
+    
+    int score;//check
+
+    if (runtime.GetStateValue("score", score))
+    {
+        std::cout << "Score: " << score << '\n';//should output 10
+    }
+    else
+    {
+        std::cout << "ERROR: Score not found!\n";
+    }
+
+    return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
