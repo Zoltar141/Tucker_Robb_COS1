@@ -4,22 +4,14 @@ WonkleRuntime::WonkleRuntime()//blank game state
 {
 }
 
-void WonkleRuntime::SetStateValue(const std::string& key, int value)//sets value
+void WonkleRuntime::SetStateValue(const std::string& key, int value)//works as before but now pulls from current state
 {
-    current[key] = value;//creates a new key if one doesnt exist
+    current.SetValue(key, value);
 }
 
-bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const //gets state value
+bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const//works as before but now pulls from current state
 {
-    auto it = current.find(key);  //iterator points to key
-
-    if (it == current.end())      //if key doesnt exist 
-    {
-        return false;             //couldnt find key
-    }
-
-    value = it->second;           //otherwise get value from map 
-    return true;
+    return current.GetValue(key, value);
 }
 
 void WonkleRuntime::AddRule(const Rule& rule)//add new rule to game state 
@@ -27,10 +19,12 @@ void WonkleRuntime::AddRule(const Rule& rule)//add new rule to game state
     rules.push_back(rule);//its a vector
 }
 
-const WonkleRuntime::State& WonkleRuntime::GetState() const//read only access
+
+const GameState& WonkleRuntime::GetState() const//read only access
 {
     return current;//current runtime state
 }
+
 
 
 bool WonkleRuntime::EvaluateCondition(const Condition& condition) const//checks whether a condition is true
@@ -71,7 +65,13 @@ bool WonkleRuntime::EvaluateCondition(const Condition& condition) const//checks 
 
 void WonkleRuntime::ApplyTransformation(const Transformation& transformation) //applies transformation to state 
 {
-    int value;
+    if (transformation.operation == Operation::Assign)//assign can now create a new state
+    {
+        SetStateValue(transformation.key, transformation.value);
+        return;
+    }
+
+    int value = 0;
 
     
     if (!GetStateValue(transformation.key, value))//if no key skip transformation
@@ -83,7 +83,6 @@ void WonkleRuntime::ApplyTransformation(const Transformation& transformation) //
     switch (transformation.operation)//apply transformation
     {
     case Operation::Assign:
-        SetStateValue(transformation.key, transformation.value);
         break;
 
     case Operation::Add:

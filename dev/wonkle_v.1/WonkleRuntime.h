@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "GameState.h"
 
 
 enum class Comparison
@@ -25,9 +26,7 @@ enum class Operation
 
 class WonkleRuntime
 {
-public:
-    
-    using State = std::unordered_map<std::string, int>; //so i dont have to type that nonsense out 
+public: 
 
     struct Condition          //what must be true about the state
     {
@@ -60,12 +59,12 @@ public:
                   //Determines which rules apply.
                   //Applies their transformations.
 
-    const State& GetState() const;//read-only access to the entire current state.
+    const GameState& GetState() const;//read-only access to the entire current state.
 
 
 private:
 
-    State current; //the current runState
+    GameState current; //the current runState
     std::vector<Rule> rules; //rules storage
 
     bool EvaluateCondition(const Condition& condition) const;//checks condtition for true

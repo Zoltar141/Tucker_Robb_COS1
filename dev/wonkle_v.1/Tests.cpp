@@ -1,6 +1,5 @@
 #include <iostream>
 #include "Tests.h"
-#include "GameState.h"
 #include "WonkleRuntime.h"
 
 //RunTimeTest
@@ -38,6 +37,28 @@ void RunWonkleRuntimeTest()
     else
     {
         std::cout << "FAIL: WonkleRuntime did not update the score correctly.\n";
+    }
+    
+    WonkleRuntime::Rule assignRule;//check to make sure new assign works as intended 
+
+    assignRule.transformations.push_back({
+        "new_value",
+        Operation::Assign,
+        42
+        });
+
+    runtime.AddRule(assignRule);
+    runtime.Update();
+
+    int value = 0;
+
+    if (runtime.GetStateValue("new_value", value) && value == 42)
+    {
+        std::cout << "PASS: Assign creates missing state entries.\n";
+    }
+    else
+    {
+        std::cout << "FAIL: Assign did not create the state entry.\n";
     }
 }
 

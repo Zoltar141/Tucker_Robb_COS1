@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include "WonkleRuntime.h"
-#include "GameState.h"
 #include "Tests.h"
 
 int main()
