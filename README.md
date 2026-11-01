@@ -1,30 +1,9 @@
 # 🚀 Welcome to Project & Portfolio!
+# Project W.O.N.K.L.E. PONG
 
-This repository will be used to keep track of research and development conducted in this class. Follow the instructions below to get started.
-cos
-### Getting Started
+Robb Tucker
 
-**1.** Review the [About](./docs/01_about/README.md) README and all of the links it provides.
-
-**2.** Review the documentation and [Getting Started](./docs/02_getting_started/README.md) steps in this repository's docs folder.
-
-**3.** Attend the first Live Lecture to see a live setup demo. If you are unable to attend, make sure to watch the archive.
-
-### Next Steps...
-
-After completing the above steps, feel free to begin updating this readme where indicated below. Remember to update this document each week to receive proper credit for the weekly Milestone assignment.
-
-<br>
-
-> ❗️ &nbsp; Now that you have read to this point, go ahead and delete this sentence and everything above it.
-
-<br>
-
-# Project & Portfolio 1
-
-### Student First & Last Name
-
-Hello my name is [enter name]. I am a student from [where are you from?]. The purpose of this repository is to practice development using version control. This work will help me begin to build a portfolio of skills and accomplishment that can be shared in the future.
+Hello my name is [Robb Tucker]. I am a student from [Emmett, Idaho]. The purpose of this repository is to practice development using version control. This work will help me begin to build a portfolio of skills and accomplishment that can be shared in the future.
 
 <br>
 
@@ -44,7 +23,13 @@ Each week I will summarize my milestone activity and progress by writing a stand
 
 ### Week 1
 
-Replace this paragraph with your stand up for this week. Use the prompts above to summarize your most recent milestone activity and work.
+This week, I focused on building the foundation of Wonkle Pong. I created the WonkleRuntime and GameState classes, started implementing the runtime's state management and rule evaluation, and built a menu system with an InputHelper to handle user input. I also created tests to verify that the runtime can evaluate conditions and apply transformations correctly.
+
+One challenge has been figuring out how to connect the runtime and GameState without making the system unnecessarily complicated. I've also had to work through some input-handling issues, particularly when users enter invalid data. I'm addressing these by testing individual components as I develop them.
+
+I've made progress understanding how the different parts of the runtime work together. Getting my first rule-based transformation to execute successfully and return the expected result was a big milestone. I've also established my GitHub repository, development branches, project board, and issues to keep development organized.
+
+My next priority is continuing development of the WonkleRuntime, expanding its rule evaluation and transformation capabilities, and connecting those systems to the actual Pong gameplay. I'll also continue testing each component before moving on to the next milestone.
 
 ### Week 2
 
