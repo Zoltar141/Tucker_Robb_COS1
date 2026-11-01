@@ -1,0 +1,350 @@
+#include "PONG.h"
+#include "InputHelper.h"
+#include <iostream>
+#include <thread>
+#include <chrono>
+
+const int FIELD_WIDTH = 80;
+const int FIELD_HEIGHT = 25;
+const int PADDLE_HEIGHT = 5;
+const int WINNING_SCORE = 10;
+
+void PONG::Run()//controls the game loop
+{
+    InitializeGame();
+    SetupRules();
+
+    running = true;
+
+    while (running)
+    {
+        HandleInput();
+        UpdateGame();
+        RenderGame();
+        CheckGameOver();
+    }
+}
+
+void PONG::InitializeGame()//sets initial state values
+{
+    runtime.SetStateValue("ball_position_x", 40);
+    runtime.SetStateValue("ball_position_y", 12);
+
+    runtime.SetStateValue("ball_velocity_x", 1);
+    runtime.SetStateValue("ball_velocity_y", 1);
+
+    runtime.SetStateValue("player_paddle_y", 10);
+    runtime.SetStateValue("opponent_paddle_y", 10);
+
+    runtime.SetStateValue("player_score", 0);
+    runtime.SetStateValue("opponent_score", 0);
+
+    runtime.SetStateValue("winning_score", WINNING_SCORE);
+}
+
+
+void PONG::SetupRules()//egisters the gameplay rules
+{
+    // Rule 1: reverse ball direction when hitting the top wall
+    WonkleRuntime::Rule topWall;
+
+    topWall.conditions.push_back({
+        "ball_y",
+        Comparison::LessEqual,
+        0
+        });
+
+    topWall.transformations.push_back({
+        "ball_velocity_y",
+        Operation::Multiply,
+        -1
+        });
+
+    runtime.AddRule(topWall);
+
+
+    // Rule 2: reverse ball direction when hitting the bottom wall
+    WonkleRuntime::Rule bottomWall;
+
+    bottomWall.conditions.push_back({
+        "ball_y",
+        Comparison::GreaterEqual,
+        FIELD_HEIGHT - 1
+        });
+
+    bottomWall.transformations.push_back({
+        "ball_velocity_y",
+        Operation::Multiply,
+        -1
+        });
+
+    runtime.AddRule(bottomWall);
+
+
+    // Rule 3: award opponent a point when ball leaves the player side
+    WonkleRuntime::Rule leftScore;
+
+    leftScore.conditions.push_back({
+        "ball_x",
+        Comparison::LessEqual,
+        0
+        });
+
+    leftScore.transformations.push_back({
+        "opponent_score",
+        Operation::Add,
+        1
+        });
+
+    leftScore.transformations.push_back({
+        "ball_x",
+        Operation::Assign,
+        FIELD_WIDTH / 2
+        });
+
+    leftScore.transformations.push_back({
+        "ball_y",
+        Operation::Assign,
+        FIELD_HEIGHT / 2
+        });
+
+    leftScore.transformations.push_back({
+        "ball_velocity_x",
+        Operation::Assign,
+        1
+        });
+
+    runtime.AddRule(leftScore);
+
+
+    // Rule 4: award player a point when ball leaves the opponet side
+    WonkleRuntime::Rule rightScore;
+
+    rightScore.conditions.push_back({
+        "ball_x",
+        Comparison::GreaterEqual,
+        FIELD_WIDTH - 1
+        });
+
+    rightScore.transformations.push_back({
+        "player_score",
+        Operation::Add,
+        1
+        });
+
+    rightScore.transformations.push_back({
+        "ball_x",
+        Operation::Assign,
+        FIELD_WIDTH / 2
+        });
+
+    rightScore.transformations.push_back({
+        "ball_y",
+        Operation::Assign,
+        FIELD_HEIGHT / 2
+        });
+
+    rightScore.transformations.push_back({
+        "ball_velocity_x",
+        Operation::Assign,
+        -1
+        });
+
+    runtime.AddRule(rightScore);
+}
+
+
+void PONG::HandleInput()// Processes player keyboard input.
+{
+    int playerY= 0;
+
+    runtime.GetStateValue("player_paddle_y", playerY);//find position
+
+    if (InputHelper::IsKeyPressed())
+    {
+        char key = InputHelper::GetKey();
+
+        switch (key)
+        {
+        case 'w':
+        case 'W':
+            if (playerY > 0)// Move player paddle up.
+            {
+                playerY--;
+            }
+            break;
+        case 's':
+        case 'S':
+            if (playerY < FIELD_HEIGHT - PADDLE_HEIGHT)// Move player paddle down.
+            {
+                playerY++;
+            }
+            break;
+        case 27://esc key
+            // Exit the current game.
+            running = false;//can add save state here
+            break;
+        }
+    }
+    runtime.SetStateValue("player_paddle_y", playerY);
+}
+
+void PONG::UpdateGame()// Advances the game state.
+
+{
+    int ballX = 0;
+    int ballY = 0;
+    int ballVelocityX = 0;
+    int ballVelocityY = 0;
+    int opponentY = 0;
+    int playerY = 0;
+
+    // Retrieve current game state.
+    runtime.GetStateValue("ball_position_x", ballX);
+    runtime.GetStateValue("ball_position_y", ballY);
+    runtime.GetStateValue("ball_velocity_x", ballVelocityX);
+    runtime.GetStateValue("ball_velocity_y", ballVelocityY);
+    runtime.GetStateValue("opponent_paddle_y", opponentY);
+    runtime.GetStateValue("player_paddle_y", playerY);
+
+    // Move the ball using its current velocity.
+    ballX += ballVelocityX;
+    ballY += ballVelocityY;
+
+    // Move the opponent paddle toward the ball.
+    if (opponentY + PADDLE_HEIGHT / 2 < ballY)
+    {
+        opponentY++;
+    }
+    else if (opponentY + PADDLE_HEIGHT / 2 > ballY)
+    {
+        opponentY--;
+    }
+
+    // Keep the opponent paddle inside the field.
+    if (opponentY < 0)
+    {
+        opponentY = 0;
+    }
+    else if (opponentY > FIELD_HEIGHT - PADDLE_HEIGHT)
+    {
+        opponentY = FIELD_HEIGHT - PADDLE_HEIGHT;
+    }
+
+    // Store updated game values.
+    runtime.SetStateValue("ball_position_x", ballX);
+    runtime.SetStateValue("ball_position_y", ballY);
+    runtime.SetStateValue("opponent_paddle_y", opponentY);
+
+    // Evaluate registered gameplay rules.
+    runtime.Update();
+}
+
+
+void PONG::RenderGame()//Displays the game in the console.
+{
+    int ballX = 0;
+    int ballY = 0;
+    int playerY = 0;
+    int opponentY = 0;
+    int playerScore = 0;
+    int opponentScore = 0;
+
+    // Retrieve current game state.
+    runtime.GetStateValue("ball_position_x", ballX);
+    runtime.GetStateValue("ball_position_y", ballY);
+    runtime.GetStateValue("player_paddle_y", playerY);
+    runtime.GetStateValue("opponent_paddle_y", opponentY);
+    runtime.GetStateValue("player_score", playerScore);
+    runtime.GetStateValue("opponent_score", opponentScore);
+
+    // Clear the console.
+    system("cls");
+
+    // Display the scoreboard.
+    std::cout << "PLAYER: " << playerScore;
+    std::cout << "                 OPPONENT: " << opponentScore << "\n";
+
+    // Draw the top boundary.
+    for (int x = 0; x < FIELD_WIDTH; x++)
+    {
+        std::cout << "-";
+    }
+
+    std::cout << "\n";
+
+    // Draw the playing field.
+    for (int y = 0; y < FIELD_HEIGHT; y++)
+    {
+        for (int x = 0; x < FIELD_WIDTH; x++)
+        {
+            if (x == 0 || x == FIELD_WIDTH - 1)
+            {
+                std::cout << "|";
+            }
+            else if (x == 2 && y >= playerY && y < playerY + PADDLE_HEIGHT)
+            {
+                std::cout << "|";
+            }
+            else if (x == FIELD_WIDTH - 3 && y >= opponentY && y < opponentY + PADDLE_HEIGHT)
+            {
+                std::cout << "|";
+            }
+            else if (x == ballX && y == ballY)
+            {
+                std::cout << "O";
+            }
+            else
+            {
+                std::cout << " ";
+            }
+        }
+
+        std::cout << "\n";
+    }
+
+    // Draw the bottom boundary.
+    for (int x = 0; x < FIELD_WIDTH; x++)
+    {
+        std::cout << "-";
+    }
+
+    std::cout << "\n";
+    std::cout << "W/S: Move Paddle     ESC: Exit\n";
+}
+
+
+void PONG::CheckGameOver()//checks whether the game has ended
+{
+    int playerScore = 0;
+    int opponentScore = 0;
+    int winningScore = 0;
+
+    // Retrieve current scores and winning score.
+    runtime.GetStateValue("player_score", playerScore);
+    runtime.GetStateValue("opponent_score", opponentScore);
+    runtime.GetStateValue("winning_score", winningScore);
+
+    // Check whether the player has won.
+    if (playerScore >= winningScore)
+    {
+        std::cout << "\nYOU WIN!\n";
+        running = false;
+    }
+
+    // Check whether the opponent has won.
+    else if (opponentScore >= winningScore)
+    {
+        std::cout << "\nYOU LOSE!\n";
+        running = false;
+    }
+
+    if (!running)
+    {
+        std::cout << "Final Score: "
+            << playerScore << " - " << opponentScore << "\n";
+
+        std::cout << "Press any key to return to the menu.\n";
+        InputHelper::GetKey();
+    }
+}

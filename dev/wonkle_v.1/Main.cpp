@@ -4,6 +4,7 @@
 #include <iostream>
 #include "WonkleRuntime.h"
 #include "Tests.h"
+#include "PONG.h"
 
 int main()
 {

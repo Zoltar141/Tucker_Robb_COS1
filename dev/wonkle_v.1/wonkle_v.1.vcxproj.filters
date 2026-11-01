@@ -33,6 +33,9 @@
     <ClCompile Include="InputHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PONG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WonkleRuntime.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PONG.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
