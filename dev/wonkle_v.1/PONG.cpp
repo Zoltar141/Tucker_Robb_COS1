@@ -22,6 +22,7 @@ void PONG::Run()//controls the game loop
         UpdateGame();
         RenderGame();
         CheckGameOver();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));//This prevents the game from running as fast as the processor allows.
     }
 }
 
@@ -49,9 +50,9 @@ void PONG::SetupRules()//egisters the gameplay rules
     WonkleRuntime::Rule topWall;
 
     topWall.conditions.push_back({
-        "ball_y",
-        Comparison::LessEqual,
-        0
+    "ball_position_y",
+    Comparison::LessEqual,
+    1
         });
 
     topWall.transformations.push_back({
@@ -67,9 +68,9 @@ void PONG::SetupRules()//egisters the gameplay rules
     WonkleRuntime::Rule bottomWall;
 
     bottomWall.conditions.push_back({
-        "ball_y",
+        "ball_position_y",
         Comparison::GreaterEqual,
-        FIELD_HEIGHT - 1
+        FIELD_HEIGHT - 2
         });
 
     bottomWall.transformations.push_back({
@@ -85,9 +86,9 @@ void PONG::SetupRules()//egisters the gameplay rules
     WonkleRuntime::Rule leftScore;
 
     leftScore.conditions.push_back({
-        "ball_x",
+        "ball_position_x",
         Comparison::LessEqual,
-        0
+        1
         });
 
     leftScore.transformations.push_back({
@@ -97,19 +98,24 @@ void PONG::SetupRules()//egisters the gameplay rules
         });
 
     leftScore.transformations.push_back({
-        "ball_x",
+        "ball_position_x",
         Operation::Assign,
         FIELD_WIDTH / 2
         });
 
     leftScore.transformations.push_back({
-        "ball_y",
+        "ball_position_y",
         Operation::Assign,
         FIELD_HEIGHT / 2
         });
 
     leftScore.transformations.push_back({
         "ball_velocity_x",
+        Operation::Assign,
+        1
+        });
+    leftScore.transformations.push_back({
+        "ball_velocity_y",
         Operation::Assign,
         1
         });
@@ -121,9 +127,9 @@ void PONG::SetupRules()//egisters the gameplay rules
     WonkleRuntime::Rule rightScore;
 
     rightScore.conditions.push_back({
-        "ball_x",
+        "ball_position_x",
         Comparison::GreaterEqual,
-        FIELD_WIDTH - 1
+        FIELD_WIDTH - 2
         });
 
     rightScore.transformations.push_back({
@@ -133,13 +139,13 @@ void PONG::SetupRules()//egisters the gameplay rules
         });
 
     rightScore.transformations.push_back({
-        "ball_x",
+        "ball_position_x",
         Operation::Assign,
         FIELD_WIDTH / 2
         });
 
     rightScore.transformations.push_back({
-        "ball_y",
+        "ball_position_y",
         Operation::Assign,
         FIELD_HEIGHT / 2
         });
@@ -148,6 +154,11 @@ void PONG::SetupRules()//egisters the gameplay rules
         "ball_velocity_x",
         Operation::Assign,
         -1
+        });
+    rightScore.transformations.push_back({
+        "ball_velocity_y",
+        Operation::Assign,
+        1
         });
 
     runtime.AddRule(rightScore);
@@ -211,6 +222,50 @@ void PONG::UpdateGame()// Advances the game state.
     ballX += ballVelocityX;
     ballY += ballVelocityY;
 
+    // Player paddle collision.
+    if (ballVelocityX < 0 &&
+        ballX <= 3 &&
+        ballY >= playerY &&
+        ballY < playerY + PADDLE_HEIGHT)
+    {
+        ballVelocityX = 1;
+
+        // Calculate where the ball hits the paddle.
+        int hitPosition = ballY - playerY;
+
+        // Determine vertical ball direction.
+        if (hitPosition < PADDLE_HEIGHT / 2)
+        {
+            ballVelocityY = -1;
+        }
+        else if (hitPosition > PADDLE_HEIGHT / 2)
+        {
+            ballVelocityY = 1;
+        }
+    }
+
+    // Opponent paddle collision.
+    if (ballVelocityX > 0 &&
+        ballX >= FIELD_WIDTH - 4 &&
+        ballY >= opponentY &&
+        ballY < opponentY + PADDLE_HEIGHT)
+    {
+        ballVelocityX = -1;
+
+        // Calculate where the ball hits the paddle.
+        int hitPosition = ballY - opponentY;
+
+        // Determine vertical ball direction.
+        if (hitPosition < PADDLE_HEIGHT / 2)
+        {
+            ballVelocityY = -1;
+        }
+        else if (hitPosition > PADDLE_HEIGHT / 2)
+        {
+            ballVelocityY = 1;
+        }
+    }
+
     // Move the opponent paddle toward the ball.
     if (opponentY + PADDLE_HEIGHT / 2 < ballY)
     {
@@ -231,6 +286,10 @@ void PONG::UpdateGame()// Advances the game state.
         opponentY = FIELD_HEIGHT - PADDLE_HEIGHT;
     }
 
+    // Store updated ball velocity.
+    runtime.SetStateValue("ball_velocity_x", ballVelocityX);
+    runtime.SetStateValue("ball_velocity_y", ballVelocityY);
+
     // Store updated game values.
     runtime.SetStateValue("ball_position_x", ballX);
     runtime.SetStateValue("ball_position_y", ballY);
@@ -238,6 +297,24 @@ void PONG::UpdateGame()// Advances the game state.
 
     // Evaluate registered gameplay rules.
     runtime.Update();
+
+    // Retrieve values after runtime rules have been applied.
+    runtime.GetStateValue("ball_position_x", ballX);
+    runtime.GetStateValue("ball_position_y", ballY);
+    runtime.GetStateValue("ball_velocity_x", ballVelocityX);
+    runtime.GetStateValue("ball_velocity_y", ballVelocityY);
+
+    // Keep ball inside the vertical boundaries.
+    if (ballY < 1)
+    {
+        ballY = 1;
+    }
+    else if (ballY > FIELD_HEIGHT - 2)
+    {
+        ballY = FIELD_HEIGHT - 2;
+    }
+
+    runtime.SetStateValue("ball_position_y", ballY);
 }
 
 
