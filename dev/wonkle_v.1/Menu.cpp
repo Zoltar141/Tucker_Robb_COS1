@@ -1,5 +1,6 @@
 #include "Menu.h"
 #include <iostream>
+#include "PONG.h"
 
 void Menu::Run()//main loop open ended right now while settings and game dont exist
 {
@@ -32,9 +33,24 @@ void Menu::HandleSelection(int choice)
     switch (choice)
     {
     case 1:
-        std::cout << "\nChoose Game selected.\n";//place holders for now
-        break;
+    {
+        int gameChoice = 0;
 
+        std::cout << "\n=== CHOOSE GAME ===\n";
+        std::cout << "1. Pong\n";
+        std::cout << "2. Back\n";
+        std::cout << "Selection: ";
+
+        std::cin >> gameChoice;
+
+        if (gameChoice == 1)
+        {
+            PONG game;
+            game.Run();
+        }
+
+        break;
+    }
     case 2:
         std::cout << "\nSettings selected.\n";
         break;

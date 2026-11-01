@@ -2,15 +2,12 @@
 //
 
 #include <iostream>
-#include "WonkleRuntime.h"
-#include "Tests.h"
-#include "PONG.h"
+#include"Menu.h"
 
 int main()
 {
-    RunWonkleRuntimeTest();
-
-    RunGameStateTests();
+    Menu menu;
+    menu.Run();
 
     return 0;
 }
