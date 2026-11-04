@@ -3,7 +3,7 @@
 #include <conio.h>
 #include <limits>
 
-int InputHelper::GetInt(const std::string& prompt, int min, int max)
+int InputHelper::GetInt(const std::string& prompt, int min, int max) 
 {
     while (true)
     {

@@ -139,6 +139,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Colors.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="InputHelper.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="WonkleRuntime.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Colors.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InputHelper.h" />
     <ClInclude Include="Menu.h" />

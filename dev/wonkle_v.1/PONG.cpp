@@ -1,5 +1,6 @@
 #include "PONG.h"
 #include "InputHelper.h"
+#include "Colors.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -348,14 +349,17 @@ void PONG::RenderGame()//Displays the game in the console.
     // Move cursor to the top-left corner.
     std::cout << "\033[H";
 
+    Colors::SetBackground(Colors::Color::DarkGreen);
+
     // Display the scoreboard.
-    std::cout << "PLAYER: " << playerScore;
-    std::cout << "                 OPPONENT: " << opponentScore << "\n";
+    Colors::Print("PLAYER: " + std::to_string(playerScore) +
+        "                  OPPONENT: " + std::to_string(opponentScore) + "\n",
+        Colors::Color::White);
 
     // Draw the top boundary.
     for (int x = 0; x < FIELD_WIDTH; x++)
     {
-        std::cout << "-";
+        Colors::Print('_', Colors::Color::Brown);
     }
 
     std::cout << "\n";
@@ -367,19 +371,19 @@ void PONG::RenderGame()//Displays the game in the console.
         {
             if (x == 0 || x == FIELD_WIDTH - 1)
             {
-                std::cout << "|";
+                Colors::Print('|', Colors::Color::Brown);
             }
             else if (x == 2 && y >= playerY && y < playerY + PADDLE_HEIGHT)
             {
-                std::cout << "|";
+                Colors::Print('|', Colors::Color::Blue);
             }
             else if (x == FIELD_WIDTH - 3 && y >= opponentY && y < opponentY + PADDLE_HEIGHT)
             {
-                std::cout << "|";
+                Colors::Print('|', Colors::Color::Yellow);
             }
             else if (x == ballX && y == ballY)
             {
-                std::cout << "O";
+                Colors::Print('O', Colors::Color::Green);
             }
             else
             {
@@ -393,11 +397,11 @@ void PONG::RenderGame()//Displays the game in the console.
     // Draw the bottom boundary.
     for (int x = 0; x < FIELD_WIDTH; x++)
     {
-        std::cout << "-";
+        Colors::Print('-', Colors::Color::Brown);
     }
 
     std::cout << "\n";
-    std::cout << "W/S: Move Paddle     ESC: Exit\n";
+    Colors::Print("W/S: Move Paddle    ESC: Exit\n", Colors::Color::Tan);
 }
 
 
@@ -415,23 +419,23 @@ void PONG::CheckGameOver()//checks whether the game has ended
     // Check whether the player has won.
     if (playerScore >= winningScore)
     {
-        std::cout << "\nYOU WIN!\n";
+        Colors::Print("\nYOU WIN!!!\n", Colors::Color::Cyan);
         running = false;
     }
 
     // Check whether the opponent has won.
     else if (opponentScore >= winningScore)
     {
-        std::cout << "\nYOU LOSE!\n";
+        Colors::Print("\nYOU LOSE!!!\n", Colors::Color::Purple);
         running = false;
     }
 
     if (!running)
     {
-        std::cout << "Final Score: "
-            << playerScore << " - " << opponentScore << "\n";
+        Colors::Print("Final Score: " + std::to_string(playerScore) + " - " 
+            + std::to_string(opponentScore) + "\n", Colors::Color::Brown);
 
-        std::cout << "Press any key to return to the menu.\n";
+        Colors::Print("Press any key to return to the menu.\n", Colors::Color::White);
         InputHelper::GetKey();
     }
 }
