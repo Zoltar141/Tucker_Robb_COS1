@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <Windows.h>
 
 const int FIELD_WIDTH = 80;
 const int FIELD_HEIGHT = 25;
@@ -13,6 +14,15 @@ void PONG::Run()//controls the game loop
 {
     InitializeGame();
     SetupRules();
+
+    //there was a stange artifact showing up in the console when the game ran that I cant capture a screenshot of
+    // identified it as the cursor and solved the problem by just coloring it black
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(console, &cursorInfo);
+    cursorInfo.bVisible = false;
+    SetConsoleCursorInfo(console, &cursorInfo);
+
 
     running = true;
 
@@ -335,8 +345,8 @@ void PONG::RenderGame()//Displays the game in the console.
     runtime.GetStateValue("player_score", playerScore);
     runtime.GetStateValue("opponent_score", opponentScore);
 
-    // Clear the console.
-    system("cls");
+    // Move cursor to the top-left corner.
+    std::cout << "\033[H";
 
     // Display the scoreboard.
     std::cout << "PLAYER: " << playerScore;

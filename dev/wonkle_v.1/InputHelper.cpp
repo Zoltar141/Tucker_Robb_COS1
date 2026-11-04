@@ -3,24 +3,34 @@
 #include <conio.h>
 #include <limits>
 
-int InputHelper::GetInt(const std::string& prompt, int min, int max)//gets a valid int in a specific range
+int InputHelper::GetInt(const std::string& prompt, int min, int max)
 {
-    int value;
-
     while (true)
     {
+        std::string input;
+
         std::cout << prompt;
+        std::getline(std::cin, input);
 
-        if (std::cin >> value && value >= min && value <= max)//check if input is valid
+        try
         {
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');//clear any remaining input
-            return value;
+            int value = std::stoi(input);
+
+            if (value >= min && value <= max)
+            {
+                return value;
+            }
+
+            std::cout << "That is not one of the available choices.\n";
         }
-
-        std::cout << "Invalid input. Try again.\n";//you did it wrong
-
-        std::cin.clear();//reset the stream
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');//discard invalid input
+        catch (const std::invalid_argument&)
+        {
+            std::cout << "That is not a number.\n";
+        }
+        catch (const std::out_of_range&)
+        {
+            std::cout << "That number is beyond W.O.N.K.L.E.'s capabilities.\n";
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 #include "Menu.h"
 #include <iostream>
 #include "PONG.h"
+#include "InputHelper.h"
 
 void Menu::Run()//main loop open ended right now while settings and game dont exist
 {
@@ -10,7 +11,7 @@ void Menu::Run()//main loop open ended right now while settings and game dont ex
     {
         DisplayMainMenu();//show menu
 
-        std::cin >> choice;//get choice
+        choice = InputHelper::GetInt("Please choose a number: ", 1, 3);//get choice
 
         HandleSelection(choice);//execute game or settings or exit 
     }
@@ -25,7 +26,6 @@ void Menu::DisplayMainMenu()
     std::cout << "2. Settings\n";
     std::cout << "3. Exit\n";
     std::cout << "========================\n";
-    std::cout << "Selection: ";
 }
 
 void Menu::HandleSelection(int choice)
