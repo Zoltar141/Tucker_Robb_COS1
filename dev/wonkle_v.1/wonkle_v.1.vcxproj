@@ -147,6 +147,7 @@
     <ClCompile Include="PONG.cpp" />
     <ClCompile Include="Tests.cpp" />
     <ClCompile Include="Theme.cpp" />
+    <ClCompile Include="ThemeManager.cpp" />
     <ClCompile Include="WonkleRuntime.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="PONG.h" />
     <ClInclude Include="Tests.h" />
     <ClInclude Include="Theme.h" />
+    <ClInclude Include="ThemeManager.h" />
     <ClInclude Include="WonkleRuntime.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
