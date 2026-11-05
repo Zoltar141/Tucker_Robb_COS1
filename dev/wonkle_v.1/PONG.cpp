@@ -1,5 +1,6 @@
 #include "PONG.h"
 #include "InputHelper.h"
+#include "ThemeManager.h"
 #include "Colors.h"
 #include <iostream>
 #include <thread>
@@ -10,6 +11,12 @@ const int FIELD_WIDTH = 80;
 const int FIELD_HEIGHT = 25;
 const int PADDLE_HEIGHT = 5;
 const int WINNING_SCORE = 10;
+
+
+PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManager
+    : themeManager(themeManager)
+{
+}
 
 void PONG::Run()//controls the game loop
 {
@@ -35,6 +42,8 @@ void PONG::Run()//controls the game loop
         CheckGameOver();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));//This prevents the game from running as fast as the processor allows.
     }
+    Colors::SetBackground(Colors::Color::Black);
+    Colors::Reset();
 }
 
 void PONG::InitializeGame()//sets initial state values
@@ -346,20 +355,29 @@ void PONG::RenderGame()//Displays the game in the console.
     runtime.GetStateValue("player_score", playerScore);
     runtime.GetStateValue("opponent_score", opponentScore);
 
+    // Retrieve the currently active theme.
+    Theme* activeTheme = themeManager.GetActiveTheme();
+
+    //retrieve colors using semantic roles.
+    ThemeColor background = activeTheme->GetColor(ThemeRoles::Background);
+    ThemeColor foreground = activeTheme->GetColor(ThemeRoles::Foreground);
+    ThemeColor ui = activeTheme->GetColor(ThemeRoles::UI);
+    ThemeColor border = activeTheme->GetColor(ThemeRoles::Border);
+    ThemeColor paddle = activeTheme->GetColor(ThemeRoles::Paddle);
+    ThemeColor ball = activeTheme->GetColor(ThemeRoles::Ball);
+
     // Move cursor to the top-left corner.
     std::cout << "\033[H";
 
-    Colors::SetBackground(Colors::Color::DarkGreen);
+    Colors::SetBackground(background.background);
 
     // Display the scoreboard.
-    Colors::Print("PLAYER: " + std::to_string(playerScore) +
-        "                  OPPONENT: " + std::to_string(opponentScore) + "\n",
-        Colors::Color::White);
+    Colors::Print("PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore) + "\n", ui.foreground);
 
     // Draw the top boundary.
     for (int x = 0; x < FIELD_WIDTH; x++)
     {
-        Colors::Print('_', Colors::Color::Brown);
+        Colors::Print('_', border.foreground);
     }
 
     std::cout << "\n";
@@ -371,19 +389,19 @@ void PONG::RenderGame()//Displays the game in the console.
         {
             if (x == 0 || x == FIELD_WIDTH - 1)
             {
-                Colors::Print('|', Colors::Color::Brown);
+                Colors::Print('|', border.foreground);
             }
             else if (x == 2 && y >= playerY && y < playerY + PADDLE_HEIGHT)
             {
-                Colors::Print('|', Colors::Color::Blue);
+                Colors::Print('|', paddle.foreground);
             }
             else if (x == FIELD_WIDTH - 3 && y >= opponentY && y < opponentY + PADDLE_HEIGHT)
             {
-                Colors::Print('|', Colors::Color::Yellow);
+                Colors::Print('|', paddle.foreground);
             }
             else if (x == ballX && y == ballY)
             {
-                Colors::Print('O', Colors::Color::Green);
+                Colors::Print('O', ball.foreground);
             }
             else
             {
@@ -397,11 +415,11 @@ void PONG::RenderGame()//Displays the game in the console.
     // Draw the bottom boundary.
     for (int x = 0; x < FIELD_WIDTH; x++)
     {
-        Colors::Print('-', Colors::Color::Brown);
+        Colors::Print('-', border.foreground);
     }
 
     std::cout << "\n";
-    Colors::Print("W/S: Move Paddle    ESC: Exit\n", Colors::Color::Tan);
+    Colors::Print("W/S: Move Paddle    ESC: Exit\n", ui.foreground);
 }
 
 
@@ -416,26 +434,29 @@ void PONG::CheckGameOver()//checks whether the game has ended
     runtime.GetStateValue("opponent_score", opponentScore);
     runtime.GetStateValue("winning_score", winningScore);
 
+    Theme* activeTheme = themeManager.GetActiveTheme();
+    ThemeColor ui = activeTheme->GetColor(ThemeRoles::UI);
+
     // Check whether the player has won.
     if (playerScore >= winningScore)
     {
-        Colors::Print("\nYOU WIN!!!\n", Colors::Color::Cyan);
+        Colors::Print("\nYOU WIN!!!\n", ui.foreground);
         running = false;
     }
 
     // Check whether the opponent has won.
     else if (opponentScore >= winningScore)
     {
-        Colors::Print("\nYOU LOSE!!!\n", Colors::Color::Purple);
+        Colors::Print("\nYOU LOSE!!!\n", ui.foreground);
         running = false;
     }
 
     if (!running)
     {
         Colors::Print("Final Score: " + std::to_string(playerScore) + " - " 
-            + std::to_string(opponentScore) + "\n", Colors::Color::Brown);
+            + std::to_string(opponentScore) + "\n", ui.foreground);
 
-        Colors::Print("Press any key to return to the menu.\n", Colors::Color::White);
+        Colors::Print("Press any key to return to the menu.\n", ui.foreground);
         InputHelper::GetKey();
     }
 }

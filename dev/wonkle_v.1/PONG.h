@@ -1,13 +1,16 @@
 #pragma once
 #include "WonkleRuntime.h"
-
+#include "ThemeManager.h"
 
 class PONG
 {
 public:
     void Run();//controls gameloop
+    PONG(ThemeManager& themeManager);
 
 private:
+    ThemeManager& themeManager;//colored theme addition
+
     WonkleRuntime runtime;//creates gamestate
 
     bool running = false;
@@ -21,5 +24,6 @@ private:
     void UpdateGame();//advances the gamestate
     void RenderGame();///shows it in console
     void CheckGameOver();//win/loss check
+
 };
 

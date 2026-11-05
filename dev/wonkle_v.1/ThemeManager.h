@@ -18,6 +18,7 @@ public:
     Theme* GetActiveTheme();//gets current
 
     void LoadThemes();
+    const std::vector<Theme>& GetThemes() const;
 private:
     std::vector<Theme> themes;
     std::string activeThemeName;

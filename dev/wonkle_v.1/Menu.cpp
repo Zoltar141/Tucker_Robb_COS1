@@ -45,14 +45,14 @@ void Menu::HandleSelection(int choice)
 
         if (gameChoice == 1)
         {
-            PONG game;
+            PONG game(themeManager);
             game.Run();
         }
 
         break;
     }
     case 2:
-        std::cout << "\nSettings selected.\n";
+        RunSettings();
         break;
 
     case 3:
@@ -62,5 +62,46 @@ void Menu::HandleSelection(int choice)
     default:
         std::cout << "\nInvalid selection.\n";
         break;
+    }
+}
+
+void Menu::RunSettings()
+{
+    int choice = 0;
+
+    const std::vector<Theme>& themes = themeManager.GetThemes();
+
+    while (choice != static_cast<int>(themes.size()) + 1)
+    {
+        std::cout << "\n======= SETTINGS =======\n";
+
+        std::cout << "Active Theme: "                               //display currently active theme
+            << themeManager.GetActiveTheme()->GetName() << "\n\n";
+
+        int index = 1;
+
+        for (const Theme& theme : themes)                           //display available themes
+        {
+            std::cout << index << ". " << theme.GetName() << "\n";
+            index++;
+        }
+
+        std::cout << index << ". Back\n";
+        std::cout << "========================\n";
+
+        choice = InputHelper::GetInt(
+            "Select a theme: ", 1, index);
+
+        if (choice < index)                                          //change active theme if theme selected
+        {
+            const std::string& selectedName =
+                themes[choice - 1].GetName();
+
+            themeManager.SetActiveTheme(selectedName);
+
+            std::cout << "\nTheme changed to: "
+                << selectedName << "\n";
+            break;
+        }
     }
 }
