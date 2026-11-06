@@ -21,7 +21,7 @@ public:
     void SetBackground();
 
     // Frame management.
-    void BeginFrame(int width, int height, const std::string& backgroundRole);
+    void BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY = 0);
     void PresentFrame();
 
     void DrawCharacter(int x, int y, char character, const std::string& role);
@@ -47,6 +47,8 @@ private:
     int frameWidth = 0;
     int frameHeight = 0;
     bool frameActive = false;
+
+    int worldOffsetY = 0;
 
     ThemeColor GetThemeColor(const std::string& role);
 };

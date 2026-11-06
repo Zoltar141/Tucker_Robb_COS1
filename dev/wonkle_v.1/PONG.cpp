@@ -290,7 +290,7 @@ void PONG::RenderGame()
     std::vector<RenderObject> objects;
 
     // Begin a new frame.
-    render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + 4, ThemeRoles::Background);
+    render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + 4, ThemeRoles::Background, 2);
 
     // Draw scoreboard.
     render.DrawText( 0, 0, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
@@ -302,17 +302,17 @@ void PONG::RenderGame()
     // Player paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({Position(2, playerY + 2 + i), '|', ThemeRoles::Paddle});
+        objects.push_back({ Position(2, playerY + i), '|', ThemeRoles::Paddle });
     }
 
     // Opponent paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({Position(FIELD_WIDTH - 3, opponentY + 2 + i), '|', ThemeRoles::Paddle});
+        objects.push_back({ Position(FIELD_WIDTH - 3, opponentY + i), '|', ThemeRoles::Paddle });
     }
 
     // Ball.
-    objects.push_back({Position(ballX, ballY + 2), 'O', ThemeRoles::Ball});
+    objects.push_back({ Position(ballX, ballY), 'O', ThemeRoles::Ball });
 
     // Submit objects to the renderer.
     render.DrawObjects(objects);

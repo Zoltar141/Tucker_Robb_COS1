@@ -10,25 +10,25 @@ void Boundary::Draw(Render& render, std::vector<RenderObject>& objects)
     // Top boundary.
     for (int i = 0; i < width; i++)
     {
-        objects.push_back({ Position(i, 1), '_', ThemeRoles::Border });
+        objects.push_back({ Position(i, -1), '_', ThemeRoles::Border });
     }
 
     // Bottom boundary.
     for (int i = 0; i < width; i++)
     {
-        objects.push_back({ Position(i, height + 2), '-', ThemeRoles::Border });
+        objects.push_back({ Position(i, height), '-', ThemeRoles::Border });
     }
 
     // Left boundary.
     for (int j = 0; j < height; j++)
     {
-        objects.push_back({ Position(0, j + 2), '|', ThemeRoles::Border });
+        objects.push_back({ Position(0, j), '|', ThemeRoles::Border });
     }
 
     // Right boundary.
     for (int j = 0; j < height; j++)
     {
-        objects.push_back({ Position(width - 1, j + 2), '|', ThemeRoles::Border });
+        objects.push_back({ Position(width - 1, j), '|', ThemeRoles::Border });
     }
 }
 

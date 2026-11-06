@@ -35,16 +35,16 @@ void Render::SetBackground()
 }
 
 // Starts a new frame.
-void Render::BeginFrame(int width, int height, const std::string& backgroundRole)
+void Render::BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY)
 {
     frameWidth = width;
     frameHeight = height;
+    this->worldOffsetY = worldOffsetY;
 
     frameActive = true;
 
     currentFrame.assign(width * height, { ' ', backgroundRole });
 }
-
 // Writes only characters that changed.
 void Render::PresentFrame()
 {
@@ -184,7 +184,7 @@ void Render::DrawObjects(const std::vector<RenderObject>& objects)
     {
         DrawCharacter(
             objects[i].position.GetX(),
-            objects[i].position.GetY(),
+            objects[i].position.GetY() + worldOffsetY,
             objects[i].character,
             objects[i].role
         );
