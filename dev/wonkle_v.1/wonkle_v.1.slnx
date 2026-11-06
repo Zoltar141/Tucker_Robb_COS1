@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="wonkle_v.1.vcxproj" />
+  <Project Path="wonkle_v.1.vcxproj" Id="c4bd90d1-a32d-4e06-8664-90bfdc654e4d" />
 </Solution>

@@ -2,6 +2,17 @@
 #include <iostream>
 #include "PONG.h"
 #include "InputHelper.h"
+#include "Theme.h"
+#include "ThemeManager.h"
+
+
+void PrintTheme(ThemeManager& themeManager, const std::string& text, const std::string& role)
+{
+    Theme* activeTheme = themeManager.GetActiveTheme();
+    ThemeColor color = activeTheme->GetColor(role);
+
+    Colors::Print(text, color.foreground);
+}
 
 void Menu::Run()//main loop open ended right now while settings and game dont exist
 {
@@ -19,13 +30,15 @@ void Menu::Run()//main loop open ended right now while settings and game dont ex
 
 void Menu::DisplayMainMenu()
 {
-    std::cout << "\n========================\n";
-    std::cout << "       WONKLE\n";
-    std::cout << "========================\n";
-    std::cout << "1. Choose Game\n";
-    std::cout << "2. Settings\n";
-    std::cout << "3. Exit\n";
-    std::cout << "========================\n";
+    PrintTheme(themeManager, "\n========================\n", ThemeRoles::Border);
+    PrintTheme(themeManager, "       WONKLE\n", ThemeRoles::MenuHighlight);
+    PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
+
+    PrintTheme(themeManager, "1. Choose Game\n", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "2. Settings\n", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "3. Exit\n", ThemeRoles::MenuText);
+
+    PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
 }
 
 void Menu::HandleSelection(int choice)
@@ -36,12 +49,11 @@ void Menu::HandleSelection(int choice)
     {
         int gameChoice = 0;
 
-        std::cout << "\n=== CHOOSE GAME ===\n";
-        std::cout << "1. Pong\n";
-        std::cout << "2. Back\n";
-        std::cout << "Selection: ";
+        PrintTheme(themeManager, "\n=== CHOOSE GAME ===\n", ThemeRoles::Border);
+        PrintTheme(themeManager, "1. Pong\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "2. Back\n", ThemeRoles::MenuText);
 
-        std::cin >> gameChoice;
+        gameChoice = InputHelper::GetInt("Selection: ", 1, 2);
 
         if (gameChoice == 1)
         {
@@ -56,11 +68,11 @@ void Menu::HandleSelection(int choice)
         break;
 
     case 3:
-        std::cout << "\nExiting Wonkle.\n";
+        PrintTheme(themeManager, "\nExiting Wonkle.\n", ThemeRoles::MenuHighlight);
         break;
 
     default:
-        std::cout << "\nInvalid selection.\n";
+        PrintTheme(themeManager, "\nInvalid selection.\n", ThemeRoles::MenuHighlight);
         break;
     }
 }
@@ -73,24 +85,23 @@ void Menu::RunSettings()
 
     while (choice != static_cast<int>(themes.size()) + 1)
     {
-        std::cout << "\n======= SETTINGS =======\n";
+        PrintTheme(themeManager, "\n======= SETTINGS =======\n", ThemeRoles::Border);
 
-        std::cout << "Active Theme: "                               //display currently active theme
-            << themeManager.GetActiveTheme()->GetName() << "\n\n";
+        PrintTheme(themeManager, "Active Theme: ", ThemeRoles::MenuHighlight);
+        PrintTheme(themeManager, themeManager.GetActiveTheme()->GetName() + "\n\n", ThemeRoles::MenuText);
 
         int index = 1;
 
         for (const Theme& theme : themes)                           //display available themes
         {
-            std::cout << index << ". " << theme.GetName() << "\n";
+            PrintTheme(themeManager, std::to_string(index) + ". " + theme.GetName() + "\n", ThemeRoles::MenuText);
             index++;
         }
 
-        std::cout << index << ". Back\n";
-        std::cout << "========================\n";
+        PrintTheme(themeManager, std::to_string(index) + ". Back\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
 
-        choice = InputHelper::GetInt(
-            "Select a theme: ", 1, index);
+        choice = InputHelper::GetInt("Select a theme: ", 1, index);
 
         if (choice < index)                                          //change active theme if theme selected
         {
@@ -99,9 +110,9 @@ void Menu::RunSettings()
 
             themeManager.SetActiveTheme(selectedName);
 
-            std::cout << "\nTheme changed to: "
-                << selectedName << "\n";
+            PrintTheme(themeManager, "\nTheme changed to: ", ThemeRoles::MenuHighlight);
+            PrintTheme(themeManager, selectedName + "\n", ThemeRoles::MenuText);
             break;
         }
     }
-}
+}}

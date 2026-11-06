@@ -270,7 +270,7 @@ void ThemeManager::LoadThemes()
         Colors::Color::Green, Colors::Color::Black);
 
     classicTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::Black, Colors::Color::Green);
+        Colors::Color::Green, Colors::Color::Black);
 
     classicTheme.SetColor(ThemeRoles::Border,
         Colors::Color::Green, Colors::Color::Black);

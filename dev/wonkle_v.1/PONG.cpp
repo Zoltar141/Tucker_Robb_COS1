@@ -2,6 +2,7 @@
 #include "InputHelper.h"
 #include "ThemeManager.h"
 #include "Colors.h"
+#include "Boundary.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -370,51 +371,30 @@ void PONG::RenderGame()
     // Define game objects.
     std::vector<RenderObject> objects;
 
-
     // Begin a new frame.
     render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + 4, ThemeRoles::Background);
 
     // Draw scoreboard.
     render.DrawText( 0, 0, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
 
-    // Top boundary.
-    for (int i = 0; i < FIELD_WIDTH; i++)
-    {
-        objects.push_back({ i, 1, '_', ThemeRoles::Border });
-    }
+    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT);
 
-    // Bottom boundary.
-    for (int i = 0; i < FIELD_WIDTH; i++)
-    {
-        objects.push_back({ i, FIELD_HEIGHT + 2, '-', ThemeRoles::Border });
-    }
-
-    // Left boundary.
-    for (int j = 0; j < FIELD_HEIGHT; j++)
-    {
-        objects.push_back({ 0, j + 2, '|', ThemeRoles::Border });
-    }
-
-    // Right boundary.
-    for (int j = 0; j < FIELD_HEIGHT; j++)
-    {
-        objects.push_back({ FIELD_WIDTH - 1, j + 2, '|', ThemeRoles::Border });
-    }
+    boundary.Draw(render, objects);
 
     // Player paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({2, playerY + 2 + i, '|', ThemeRoles::Paddle});
+        objects.push_back({Position(2, playerY + 2 + i), '|', ThemeRoles::Paddle});
     }
 
     // Opponent paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({FIELD_WIDTH - 3, opponentY + 2 + i, '|', ThemeRoles::Paddle});
+        objects.push_back({Position(FIELD_WIDTH - 3, opponentY + 2 + i), '|', ThemeRoles::Paddle});
     }
 
     // Ball.
-    objects.push_back({ballX, ballY + 2, 'O', ThemeRoles::Ball});
+    objects.push_back({Position(ballX, ballY + 2), 'O', ThemeRoles::Ball});
 
     // Submit objects to the renderer.
     render.DrawObjects(objects);
@@ -457,10 +437,14 @@ void PONG::CheckGameOver()//checks whether the game has ended
 
     if (!running)
     {
+        render.SetCursorPosition(0, FIELD_HEIGHT + 4);
+
         Colors::Print("Final Score: " + std::to_string(playerScore) + " - " 
             + std::to_string(opponentScore) + "\n", ui.foreground);
 
         Colors::Print("Press any key to return to the menu.\n", ui.foreground);
         InputHelper::GetKey();
+
+        system("cls");
     }
 }

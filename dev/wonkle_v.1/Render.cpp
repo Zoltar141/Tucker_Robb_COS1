@@ -182,7 +182,11 @@ void Render::DrawObjects(const std::vector<RenderObject>& objects)
 {
     for (int i = 0; i < objects.size(); i++)
     {
-        DrawCharacter(objects[i].x, objects[i].y, objects[i].character, objects[i].role);
+        DrawCharacter(
+            objects[i].position.GetX(),
+            objects[i].position.GetY(),
+            objects[i].character,
+            objects[i].role
+        );
     }
 }
-              

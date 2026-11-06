@@ -3,11 +3,11 @@
 #include "Colors.h"
 #include <string>
 #include <vector>
+#include "Position.h"
 
 struct RenderObject
 {
-    int x;
-    int y;
+    Position position;
     char character;
     std::string role;
 };

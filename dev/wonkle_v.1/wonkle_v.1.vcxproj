@@ -139,12 +139,14 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Boundary.cpp" />
     <ClCompile Include="Colors.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="InputHelper.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="PONG.cpp" />
+    <ClCompile Include="Position.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="Tests.cpp" />
     <ClCompile Include="Theme.cpp" />
@@ -152,11 +154,13 @@
     <ClCompile Include="WonkleRuntime.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Boundary.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InputHelper.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="PONG.h" />
+    <ClInclude Include="Position.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Tests.h" />
     <ClInclude Include="Theme.h" />
