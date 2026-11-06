@@ -94,6 +94,9 @@ namespace Colors
             }
 
             std::cout.flush();
+
+            attribute |= (original.wAttributes & 0x00F0);
+
             SetConsoleTextAttribute(output, attribute);
 
             std::cout << words;

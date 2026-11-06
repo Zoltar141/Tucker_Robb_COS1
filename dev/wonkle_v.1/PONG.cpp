@@ -6,6 +6,7 @@
 #include <thread>
 #include <chrono>
 #include <Windows.h>
+#include <vector>
 
 const int FIELD_WIDTH = 80;
 const int FIELD_HEIGHT = 25;
@@ -14,7 +15,7 @@ const int WINNING_SCORE = 10;
 
 
 PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManager
-    : themeManager(themeManager)
+    : themeManager(themeManager), render(themeManager)
 {
 }
 
@@ -30,6 +31,21 @@ void PONG::Run()//controls the game loop
     GetConsoleCursorInfo(console, &cursorInfo);
     cursorInfo.bVisible = false;
     SetConsoleCursorInfo(console, &cursorInfo);
+
+    // Clear the previous menu from the console buffer.
+    CONSOLE_SCREEN_BUFFER_INFO screenInfo;
+    GetConsoleScreenBufferInfo(console, &screenInfo);
+
+    DWORD consoleSize = screenInfo.dwSize.X * screenInfo.dwSize.Y;
+    DWORD charactersWritten;
+
+    COORD homePosition = { 0, 0 };
+
+    FillConsoleOutputCharacterA(console, ' ', consoleSize, homePosition, &charactersWritten);
+
+    FillConsoleOutputAttribute( console, screenInfo.wAttributes, consoleSize, homePosition, &charactersWritten);
+
+    SetConsoleCursorPosition(console, homePosition);
 
 
     running = true;
@@ -243,10 +259,7 @@ void PONG::UpdateGame()// Advances the game state.
     ballY += ballVelocityY;
 
     // Player paddle collision.
-    if (ballVelocityX < 0 &&
-        ballX <= 3 &&
-        ballY >= playerY &&
-        ballY < playerY + PADDLE_HEIGHT)
+    if (ballVelocityX < 0 && ballX <= 3 && ballY >= playerY && ballY < playerY + PADDLE_HEIGHT)
     {
         ballVelocityX = 1;
 
@@ -265,10 +278,7 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Opponent paddle collision.
-    if (ballVelocityX > 0 &&
-        ballX >= FIELD_WIDTH - 4 &&
-        ballY >= opponentY &&
-        ballY < opponentY + PADDLE_HEIGHT)
+    if (ballVelocityX > 0 && ballX >= FIELD_WIDTH - 4 && ballY >= opponentY && ballY < opponentY + PADDLE_HEIGHT)
     {
         ballVelocityX = -1;
 
@@ -338,7 +348,7 @@ void PONG::UpdateGame()// Advances the game state.
 }
 
 
-void PONG::RenderGame()//Displays the game in the console.
+void PONG::RenderGame()
 {
     int ballX = 0;
     int ballY = 0;
@@ -355,71 +365,65 @@ void PONG::RenderGame()//Displays the game in the console.
     runtime.GetStateValue("player_score", playerScore);
     runtime.GetStateValue("opponent_score", opponentScore);
 
-    // Retrieve the currently active theme.
-    Theme* activeTheme = themeManager.GetActiveTheme();
+    render.SetBackground();
 
-    //retrieve colors using semantic roles.
-    ThemeColor background = activeTheme->GetColor(ThemeRoles::Background);
-    ThemeColor foreground = activeTheme->GetColor(ThemeRoles::Foreground);
-    ThemeColor ui = activeTheme->GetColor(ThemeRoles::UI);
-    ThemeColor border = activeTheme->GetColor(ThemeRoles::Border);
-    ThemeColor paddle = activeTheme->GetColor(ThemeRoles::Paddle);
-    ThemeColor ball = activeTheme->GetColor(ThemeRoles::Ball);
+    // Define game objects.
+    std::vector<RenderObject> objects;
 
-    // Move cursor to the top-left corner.
-    std::cout << "\033[H";
 
-    Colors::SetBackground(background.background);
+    // Begin a new frame.
+    render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + 4, ThemeRoles::Background);
 
-    // Display the scoreboard.
-    Colors::Print("PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore) + "\n", ui.foreground);
+    // Draw scoreboard.
+    render.DrawText( 0, 0, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
 
-    // Draw the top boundary.
-    for (int x = 0; x < FIELD_WIDTH; x++)
+    // Top boundary.
+    for (int i = 0; i < FIELD_WIDTH; i++)
     {
-        Colors::Print('_', border.foreground);
+        objects.push_back({ i, 1, '_', ThemeRoles::Border });
     }
 
-    std::cout << "\n";
-
-    // Draw the playing field.
-    for (int y = 0; y < FIELD_HEIGHT; y++)
+    // Bottom boundary.
+    for (int i = 0; i < FIELD_WIDTH; i++)
     {
-        for (int x = 0; x < FIELD_WIDTH; x++)
-        {
-            if (x == 0 || x == FIELD_WIDTH - 1)
-            {
-                Colors::Print('|', border.foreground);
-            }
-            else if (x == 2 && y >= playerY && y < playerY + PADDLE_HEIGHT)
-            {
-                Colors::Print('|', paddle.foreground);
-            }
-            else if (x == FIELD_WIDTH - 3 && y >= opponentY && y < opponentY + PADDLE_HEIGHT)
-            {
-                Colors::Print('|', paddle.foreground);
-            }
-            else if (x == ballX && y == ballY)
-            {
-                Colors::Print('O', ball.foreground);
-            }
-            else
-            {
-                std::cout << " ";
-            }
-        }
-
-        std::cout << "\n";
+        objects.push_back({ i, FIELD_HEIGHT + 2, '-', ThemeRoles::Border });
     }
 
-    // Draw the bottom boundary.
-    for (int x = 0; x < FIELD_WIDTH; x++)
+    // Left boundary.
+    for (int j = 0; j < FIELD_HEIGHT; j++)
     {
-        Colors::Print('-', border.foreground);
+        objects.push_back({ 0, j + 2, '|', ThemeRoles::Border });
     }
 
-    std::cout << "\n";
-    Colors::Print("W/S: Move Paddle    ESC: Exit\n", ui.foreground);
+    // Right boundary.
+    for (int j = 0; j < FIELD_HEIGHT; j++)
+    {
+        objects.push_back({ FIELD_WIDTH - 1, j + 2, '|', ThemeRoles::Border });
+    }
+
+    // Player paddle.
+    for (int i = 0; i < PADDLE_HEIGHT; i++)
+    {
+        objects.push_back({2, playerY + 2 + i, '|', ThemeRoles::Paddle});
+    }
+
+    // Opponent paddle.
+    for (int i = 0; i < PADDLE_HEIGHT; i++)
+    {
+        objects.push_back({FIELD_WIDTH - 3, opponentY + 2 + i, '|', ThemeRoles::Paddle});
+    }
+
+    // Ball.
+    objects.push_back({ballX, ballY + 2, 'O', ThemeRoles::Ball});
+
+    // Submit objects to the renderer.
+    render.DrawObjects(objects);
+
+    // Draw controls.
+    render.DrawText(0, FIELD_HEIGHT + 3, "W/S: Move Paddle    ESC: Exit", ThemeRoles::UI);
+
+    // Present completed frame.
+    render.PresentFrame();
 }
 
 

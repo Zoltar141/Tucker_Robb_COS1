@@ -1,6 +1,7 @@
 #pragma once
 #include "WonkleRuntime.h"
 #include "ThemeManager.h"
+#include "Render.h"
 
 class PONG
 {
@@ -10,6 +11,7 @@ public:
 
 private:
     ThemeManager& themeManager;//colored theme addition
+    Render render;//render seperated from PONG
 
     WonkleRuntime runtime;//creates gamestate
 
