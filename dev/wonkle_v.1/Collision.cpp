@@ -14,10 +14,27 @@ bool Collision::CheckRectangle(const Position& position, const Position& rectang
         position.GetY() < rectanglePosition.GetY() + height;
 }
 
-bool Collision::CheckBoundary(const Position& position, const Boundary& boundary)
+BoundarySide Collision::CheckBoundary(const Position& position, const Boundary& boundary)
 {
-    return position.GetX() <= boundary.GetLeft() ||
-        position.GetX() >= boundary.GetRight() ||
-        position.GetY() <= boundary.GetTop() ||
-        position.GetY() >= boundary.GetBottom();
+    if (position.GetX() <= boundary.GetLeft())
+    {
+        return BoundarySide::Left;
+    }
+
+    if (position.GetX() >= boundary.GetRight())
+    {
+        return BoundarySide::Right;
+    }
+
+    if (position.GetY() <= boundary.GetTop())
+    {
+        return BoundarySide::Top;
+    }
+
+    if (position.GetY() >= boundary.GetBottom())
+    {
+        return BoundarySide::Bottom;
+    }
+
+    return BoundarySide::None;
 }

@@ -84,19 +84,8 @@ void PONG::InitializeGame()//sets initial state values
 
 void PONG::SetupRules()//registers the gameplay rules
 {
-    // Rule 1: reverse ball direction when hitting the top wall
-    WonkleRuntime::Rule topWall;
-    topWall.conditions.push_back({ "ball_position_y", Comparison::LessEqual, 1 });
-    topWall.transformations.push_back({ "ball_velocity_y", Operation::Multiply, -1 });
-    runtime.AddRule(topWall);
-
-    // Rule 2: reverse ball direction when hitting the bottom wall
-    WonkleRuntime::Rule bottomWall;
-    bottomWall.conditions.push_back({ "ball_position_y", Comparison::GreaterEqual, FIELD_HEIGHT - 2 });
-    bottomWall.transformations.push_back({ "ball_velocity_y", Operation::Multiply, -1 });
-    runtime.AddRule(bottomWall);
-
-    // Rule 3: award opponent a point when ball leaves the player side
+   
+    // Rule 1: award opponent a point when ball leaves the player side
     WonkleRuntime::Rule leftScore;
     leftScore.conditions.push_back({ "ball_position_x", Comparison::LessEqual, 1 });
     leftScore.transformations.push_back({ "opponent_score", Operation::Add, 1 });
@@ -106,7 +95,7 @@ void PONG::SetupRules()//registers the gameplay rules
     leftScore.transformations.push_back({ "ball_velocity_y", Operation::Assign, 1 });
     runtime.AddRule(leftScore);
 
-    // Rule 4: award player a point when ball leaves the opponent side
+    // Rule 2: award player a point when ball leaves the opponent side
     WonkleRuntime::Rule rightScore;
     rightScore.conditions.push_back({ "ball_position_x", Comparison::GreaterEqual, FIELD_WIDTH - 2 });
     rightScore.transformations.push_back({ "player_score", Operation::Add, 1 });
@@ -174,6 +163,16 @@ void PONG::UpdateGame()// Advances the game state.
     ballX += ballVelocityX;
     ballY += ballVelocityY;
 
+    // Check for boundary collisions.
+    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, 1, FIELD_WIDTH - 1, FIELD_HEIGHT - 2);
+
+    BoundarySide collision = Collision::CheckBoundary(Position(ballX, ballY), boundary);
+
+    if (collision == BoundarySide::Top || collision == BoundarySide::Bottom)
+    {
+        ballVelocityY *= -1;
+    }
+
     // Player paddle collision.
     if (ballVelocityX < 0 && Collision::CheckRectangle(Position(ballX, ballY), Position(0, playerY), 4, PADDLE_HEIGHT))
     {
@@ -212,14 +211,18 @@ void PONG::UpdateGame()// Advances the game state.
         }
     }
 
-    // Move the opponent paddle toward the ball.
-    if (opponentY + PADDLE_HEIGHT / 2 < ballY)
+    // Give the opponent a chance to miss its movement.
+    if (rand() % 4 != 0)
     {
-        opponentY++;
-    }
-    else if (opponentY + PADDLE_HEIGHT / 2 > ballY)
-    {
-        opponentY--;
+        // Move the opponent paddle toward the ball.
+        if (opponentY + PADDLE_HEIGHT / 2 < ballY)
+        {
+            opponentY++;
+        }
+        else if (opponentY + PADDLE_HEIGHT / 2 > ballY)
+        {
+            opponentY--;
+        }
     }
 
     // Keep the opponent paddle inside the field.
