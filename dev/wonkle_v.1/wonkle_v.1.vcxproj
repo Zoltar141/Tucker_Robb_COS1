@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Boundary.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Colors.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="InputHelper.cpp" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boundary.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InputHelper.h" />

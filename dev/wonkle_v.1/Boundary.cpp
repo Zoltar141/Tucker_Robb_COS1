@@ -1,7 +1,7 @@
 #include "Boundary.h"
 
-Boundary::Boundary(int width, int height)
-    : width(width), height(height)
+Boundary::Boundary(int width, int height, int left, int top, int right, int bottom)
+    : width(width), height(height), left(left), top(top), right(right), bottom(bottom)
 {
 }
 
@@ -40,4 +40,24 @@ int Boundary::GetWidth() const
 int Boundary::GetHeight() const
 {
     return height;
+}
+
+int Boundary::GetLeft() const 
+{ 
+    return left; 
+}
+
+int Boundary::GetTop() const 
+{ 
+    return top; 
+}
+
+int Boundary::GetRight() const 
+{ 
+    return right; 
+}
+
+int Boundary::GetBottom() const 
+{ 
+    return bottom; 
 }

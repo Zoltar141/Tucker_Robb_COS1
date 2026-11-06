@@ -115,4 +115,4 @@ void Menu::RunSettings()
             break;
         }
     }
-}}
+}

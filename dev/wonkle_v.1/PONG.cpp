@@ -3,6 +3,7 @@
 #include "ThemeManager.h"
 #include "Colors.h"
 #include "Boundary.h"
+#include "Collision.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -81,126 +82,40 @@ void PONG::InitializeGame()//sets initial state values
 }
 
 
-void PONG::SetupRules()//egisters the gameplay rules
+void PONG::SetupRules()//registers the gameplay rules
 {
     // Rule 1: reverse ball direction when hitting the top wall
     WonkleRuntime::Rule topWall;
-
-    topWall.conditions.push_back({
-    "ball_position_y",
-    Comparison::LessEqual,
-    1
-        });
-
-    topWall.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Multiply,
-        -1
-        });
-
+    topWall.conditions.push_back({ "ball_position_y", Comparison::LessEqual, 1 });
+    topWall.transformations.push_back({ "ball_velocity_y", Operation::Multiply, -1 });
     runtime.AddRule(topWall);
-
 
     // Rule 2: reverse ball direction when hitting the bottom wall
     WonkleRuntime::Rule bottomWall;
-
-    bottomWall.conditions.push_back({
-        "ball_position_y",
-        Comparison::GreaterEqual,
-        FIELD_HEIGHT - 2
-        });
-
-    bottomWall.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Multiply,
-        -1
-        });
-
+    bottomWall.conditions.push_back({ "ball_position_y", Comparison::GreaterEqual, FIELD_HEIGHT - 2 });
+    bottomWall.transformations.push_back({ "ball_velocity_y", Operation::Multiply, -1 });
     runtime.AddRule(bottomWall);
-
 
     // Rule 3: award opponent a point when ball leaves the player side
     WonkleRuntime::Rule leftScore;
-
-    leftScore.conditions.push_back({
-        "ball_position_x",
-        Comparison::LessEqual,
-        1
-        });
-
-    leftScore.transformations.push_back({
-        "opponent_score",
-        Operation::Add,
-        1
-        });
-
-    leftScore.transformations.push_back({
-        "ball_position_x",
-        Operation::Assign,
-        FIELD_WIDTH / 2
-        });
-
-    leftScore.transformations.push_back({
-        "ball_position_y",
-        Operation::Assign,
-        FIELD_HEIGHT / 2
-        });
-
-    leftScore.transformations.push_back({
-        "ball_velocity_x",
-        Operation::Assign,
-        1
-        });
-    leftScore.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Assign,
-        1
-        });
-
+    leftScore.conditions.push_back({ "ball_position_x", Comparison::LessEqual, 1 });
+    leftScore.transformations.push_back({ "opponent_score", Operation::Add, 1 });
+    leftScore.transformations.push_back({ "ball_position_x", Operation::Assign, FIELD_WIDTH / 2 });
+    leftScore.transformations.push_back({ "ball_position_y", Operation::Assign, FIELD_HEIGHT / 2 });
+    leftScore.transformations.push_back({ "ball_velocity_x", Operation::Assign, 1 });
+    leftScore.transformations.push_back({ "ball_velocity_y", Operation::Assign, 1 });
     runtime.AddRule(leftScore);
 
-
-    // Rule 4: award player a point when ball leaves the opponet side
+    // Rule 4: award player a point when ball leaves the opponent side
     WonkleRuntime::Rule rightScore;
-
-    rightScore.conditions.push_back({
-        "ball_position_x",
-        Comparison::GreaterEqual,
-        FIELD_WIDTH - 2
-        });
-
-    rightScore.transformations.push_back({
-        "player_score",
-        Operation::Add,
-        1
-        });
-
-    rightScore.transformations.push_back({
-        "ball_position_x",
-        Operation::Assign,
-        FIELD_WIDTH / 2
-        });
-
-    rightScore.transformations.push_back({
-        "ball_position_y",
-        Operation::Assign,
-        FIELD_HEIGHT / 2
-        });
-
-    rightScore.transformations.push_back({
-        "ball_velocity_x",
-        Operation::Assign,
-        -1
-        });
-    rightScore.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Assign,
-        1
-        });
-
+    rightScore.conditions.push_back({ "ball_position_x", Comparison::GreaterEqual, FIELD_WIDTH - 2 });
+    rightScore.transformations.push_back({ "player_score", Operation::Add, 1 });
+    rightScore.transformations.push_back({ "ball_position_x", Operation::Assign, FIELD_WIDTH / 2 });
+    rightScore.transformations.push_back({ "ball_position_y", Operation::Assign, FIELD_HEIGHT / 2 });
+    rightScore.transformations.push_back({ "ball_velocity_x", Operation::Assign, -1 });
+    rightScore.transformations.push_back({ "ball_velocity_y", Operation::Assign, 1 });
     runtime.AddRule(rightScore);
 }
-
 
 void PONG::HandleInput()// Processes player keyboard input.
 {
@@ -260,7 +175,7 @@ void PONG::UpdateGame()// Advances the game state.
     ballY += ballVelocityY;
 
     // Player paddle collision.
-    if (ballVelocityX < 0 && ballX <= 3 && ballY >= playerY && ballY < playerY + PADDLE_HEIGHT)
+    if (ballVelocityX < 0 && Collision::CheckRectangle(Position(ballX, ballY), Position(0, playerY), 4, PADDLE_HEIGHT))
     {
         ballVelocityX = 1;
 
@@ -279,7 +194,7 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Opponent paddle collision.
-    if (ballVelocityX > 0 && ballX >= FIELD_WIDTH - 4 && ballY >= opponentY && ballY < opponentY + PADDLE_HEIGHT)
+    if (ballVelocityX > 0 && Collision::CheckRectangle(Position(ballX, ballY), Position(FIELD_WIDTH - 4, opponentY), 4, PADDLE_HEIGHT))
     {
         ballVelocityX = -1;
 
@@ -377,7 +292,7 @@ void PONG::RenderGame()
     // Draw scoreboard.
     render.DrawText( 0, 0, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
 
-    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT);
+    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, 1, FIELD_WIDTH - 1, FIELD_HEIGHT - 2);
 
     boundary.Draw(render, objects);
 
