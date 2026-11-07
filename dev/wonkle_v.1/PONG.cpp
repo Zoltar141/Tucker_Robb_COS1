@@ -174,7 +174,9 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Player paddle collision.
-    if (ballVelocityX < 0 && Collision::CheckRectangle(Position(ballX, ballY), Position(0, playerY), 4, PADDLE_HEIGHT))
+    bool playerPaddleCollision = Collision::CheckRectangle(Position(ballX, ballY), Position(0, playerY), 4, PADDLE_HEIGHT);
+
+    if (ballVelocityX < 0 && playerPaddleCollision)
     {
         ballVelocityX = 1;
 
@@ -193,7 +195,9 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Opponent paddle collision.
-    if (ballVelocityX > 0 && Collision::CheckRectangle(Position(ballX, ballY), Position(FIELD_WIDTH - 4, opponentY), 4, PADDLE_HEIGHT))
+    bool opponentPaddleCollision = Collision::CheckRectangle(Position(ballX, ballY), Position(FIELD_WIDTH - 4, opponentY), 4, PADDLE_HEIGHT);
+
+    if (ballVelocityX > 0 && opponentPaddleCollision)
     {
         ballVelocityX = -1;
 
