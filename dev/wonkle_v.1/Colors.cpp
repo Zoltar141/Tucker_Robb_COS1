@@ -228,3 +228,27 @@ namespace Colors
 #endif
     }
 }
+
+Colors::Color Colors::FromString(const std::string& name)
+{
+    if (name == "Black") return Color::Black;
+    if (name == "White") return Color::White;
+    if (name == "Blue") return Color::Blue;
+    if (name == "DarkBlue") return Color::DarkBlue;
+    if (name == "Green") return Color::Green;
+    if (name == "DarkGreen") return Color::DarkGreen;
+    if (name == "Cyan") return Color::Cyan;
+    if (name == "DarkCyan") return Color::DarkCyan;
+    if (name == "Red") return Color::Red;
+    if (name == "DarkRed") return Color::DarkRed;
+    if (name == "Purple") return Color::Purple;
+    if (name == "DarkPurple") return Color::DarkPurple;
+    if (name == "Yellow") return Color::Yellow;
+    if (name == "DarkYellow") return Color::DarkYellow;
+    if (name == "Gray") return Color::Gray;
+    if (name == "DarkGray") return Color::DarkGray;
+    if (name == "Tan") return Color::Tan;
+    if (name == "Brown") return Color::Brown;
+
+    return Color::White;
+}

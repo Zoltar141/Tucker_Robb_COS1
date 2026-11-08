@@ -1,4 +1,6 @@
 #include "ThemeManager.h"
+#include "FileBoss.h"
+#include <unordered_map>
 
 ThemeManager::ThemeManager()//constructor
 {
@@ -59,242 +61,67 @@ const std::vector<Theme>& ThemeManager::GetThemes() const//returns collection re
 
 void ThemeManager::LoadThemes()
 {
-    Theme defaultTheme("Default");
-
-    defaultTheme.SetColor(ThemeRoles::Background,
-        Colors::Color::Black, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::Foreground,
-        Colors::Color::White, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::MenuText,
-        Colors::Color::White, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::Yellow, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::Ball,
-        Colors::Color::White, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::Border,
-        Colors::Color::Gray, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::GameBoundary,
-        Colors::Color::White, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::Paddle,
-        Colors::Color::White, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::SnakeBody,
-        Colors::Color::Green, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::SnakeFood,
-        Colors::Color::Red, Colors::Color::Black);
-
-    defaultTheme.SetColor(ThemeRoles::UI,
-        Colors::Color::White, Colors::Color::Black);
-
-    RegisterTheme(defaultTheme);
-
-
-    Theme forestTheme("Forest");
-
-    forestTheme.SetColor(ThemeRoles::Background,
-        Colors::Color::DarkGreen, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::Foreground,
-        Colors::Color::Tan, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::MenuText,
-        Colors::Color::Tan, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::Yellow, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::Ball,
-        Colors::Color::Red, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::Border,
-        Colors::Color::Brown, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::GameBoundary,
-        Colors::Color::Green, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::Paddle,
-        Colors::Color::Tan, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::SnakeBody,
-        Colors::Color::Tan, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::SnakeFood,
-        Colors::Color::Red, Colors::Color::DarkGreen);
-
-    forestTheme.SetColor(ThemeRoles::UI,
-        Colors::Color::Tan, Colors::Color::DarkGreen);
-
-    RegisterTheme(forestTheme);
-
-
-    Theme iceTheme("Ice");
-
-    iceTheme.SetColor(ThemeRoles::Background,
-        Colors::Color::DarkBlue, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::Foreground,
-        Colors::Color::White, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::MenuText,
-        Colors::Color::Cyan, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::White, Colors::Color::Blue);
-
-    iceTheme.SetColor(ThemeRoles::Border,
-        Colors::Color::Cyan, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::GameBoundary,
-        Colors::Color::White, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::Paddle,
-        Colors::Color::Cyan, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::Ball,
-        Colors::Color::White, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::Brick,
-        Colors::Color::Cyan, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::SnakeBody,
-        Colors::Color::White, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::SnakeFood,
-        Colors::Color::Red, Colors::Color::DarkBlue);
-
-    iceTheme.SetColor(ThemeRoles::UI,
-        Colors::Color::White, Colors::Color::DarkBlue);
-
-    RegisterTheme(iceTheme);
-
-
-    Theme darkTheme("Dark");
-
-    darkTheme.SetColor(ThemeRoles::Background,
-        Colors::Color::Black, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::Foreground,
-        Colors::Color::Gray, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::MenuText,
-        Colors::Color::Gray, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::Purple, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::Border,
-        Colors::Color::DarkGray, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::GameBoundary,
-        Colors::Color::DarkGray, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::Paddle,
-        Colors::Color::White, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::Ball,
-        Colors::Color::DarkRed, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::Brick,
-        Colors::Color::DarkPurple, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::SnakeBody,
-        Colors::Color::Gray, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::SnakeFood,
-        Colors::Color::Red, Colors::Color::Black);
-
-    darkTheme.SetColor(ThemeRoles::UI,
-        Colors::Color::White, Colors::Color::Black);
-
-    RegisterTheme(darkTheme);
-
-
-    Theme lightTheme("Light");
-
-    lightTheme.SetColor(ThemeRoles::Background,
-        Colors::Color::White, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::Foreground,
-        Colors::Color::Black, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::MenuText,
-        Colors::Color::Black, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::White, Colors::Color::Blue);
-
-    lightTheme.SetColor(ThemeRoles::Border,
-        Colors::Color::DarkGray, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::GameBoundary,
-        Colors::Color::Black, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::Paddle,
-        Colors::Color::Blue, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::Ball,
-        Colors::Color::Red, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::Brick,
-        Colors::Color::DarkRed, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::SnakeBody,
-        Colors::Color::Green, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::SnakeFood,
-        Colors::Color::Red, Colors::Color::White);
-
-    lightTheme.SetColor(ThemeRoles::UI,
-        Colors::Color::Black, Colors::Color::White);
-
-    RegisterTheme(lightTheme);
-
-
-    Theme classicTheme("Classic");
-
-    classicTheme.SetColor(ThemeRoles::Background,
-        Colors::Color::Black, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::Foreground,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::MenuText,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::MenuHighlight,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::Border,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::GameBoundary,
-        Colors::Color::DarkGreen, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::Paddle,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::Ball,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::Brick,
-        Colors::Color::Cyan, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::SnakeBody,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::SnakeFood,
-        Colors::Color::Green, Colors::Color::Black);
-
-    classicTheme.SetColor(ThemeRoles::UI,
-        Colors::Color::Green, Colors::Color::Black);
-
-    RegisterTheme(classicTheme);
+    FileBoss fileBoss;
+    nlohmann::json data;
+
+    // Read the themes JSON file.
+    if (!fileBoss.ReadJSON("themes.json", data))
+    {
+        return;
+    }
+
+    // Verify the themes array exists.
+    if (!data.contains("themes") || !data["themes"].is_array())
+    {
+        return;
+    }
+
+    // Load each theme.
+    for (const auto& themeData : data["themes"])
+    {
+        if (!themeData.is_object() ||
+            !themeData.contains("name") ||
+            !themeData["name"].is_string() ||
+            !themeData.contains("colors") ||
+            !themeData["colors"].is_object())
+        {
+            continue;
+        }
+
+        // Create theme using its JSON name.
+        Theme theme(themeData["name"].get<std::string>());
+
+        // Load its semantic color roles.
+        for (auto it = themeData["colors"].begin();
+            it != themeData["colors"].end(); ++it)
+        {
+            const auto& colorData = it.value();
+
+            if (!colorData.is_object() ||
+                !colorData.contains("foreground") ||
+                !colorData.contains("background") ||
+                !colorData["foreground"].is_string() ||
+                !colorData["background"].is_string())
+            {
+                continue;
+            }
+
+            // Convert JSON strings using the existing Colors system.
+            Colors::Color foreground =
+                Colors::FromString(colorData["foreground"].get<std::string>());
+
+            Colors::Color background =
+                Colors::FromString(colorData["background"].get<std::string>());
+
+            // Assign colors to their semantic roles.
+            theme.SetColor(
+                it.key(),
+                foreground,
+                background
+            );
+        }
+
+        // Register the completed theme.
+        RegisterTheme(theme);
+    }
 }

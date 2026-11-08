@@ -19,4 +19,5 @@ namespace Colors
     void Print(char character, Color color);
     void SetBackground(Color color);
     void Reset();
+    Color FromString(const std::string& name);
 }

@@ -60,8 +60,29 @@ void PONG::Run()//controls the game loop
         CheckGameOver();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));//This prevents the game from running as fast as the processor allows.
     }
+
+    // Clear the console and force a black background.
     Colors::SetBackground(Colors::Color::Black);
-    Colors::Reset();
+    GetConsoleScreenBufferInfo(console, &screenInfo);
+
+    consoleSize = screenInfo.dwSize.X * screenInfo.dwSize.Y;
+    charactersWritten = 0;
+
+    FillConsoleOutputCharacterA(
+        console, ' ', consoleSize, homePosition, &charactersWritten
+    );
+
+    FillConsoleOutputAttribute(
+        console, screenInfo.wAttributes, consoleSize,
+        homePosition, &charactersWritten
+    );
+
+    SetConsoleCursorPosition(console, homePosition);
+
+
+    // Restore cursor visibility.
+    cursorInfo.bVisible = true;
+    SetConsoleCursorInfo(console, &cursorInfo);
 }
 
 void PONG::InitializeGame()//sets initial state values
@@ -359,6 +380,7 @@ void PONG::CheckGameOver()//checks whether the game has ended
 
     if (!running)
     {
+        Colors::SetBackground(Colors::Color::Black);
         render.SetCursorPosition(0, FIELD_HEIGHT + 4);
 
         Colors::Print("Final Score: " + std::to_string(playerScore) + " - " 
