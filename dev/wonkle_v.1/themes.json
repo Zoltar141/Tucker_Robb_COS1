@@ -77,7 +77,7 @@
                     "background": "DarkGreen"
                 },
                 "GameBoundary": {
-                    "foreground": "Green",
+                    "foreground": "Brown",
                     "background": "DarkGreen"
                 },
                 "Paddle": {
@@ -85,7 +85,7 @@
                     "background": "DarkGreen"
                 },
                 "SnakeBody": {
-                    "foreground": "Tan",
+                    "foreground": "Brown",
                     "background": "DarkGreen"
                 },
                 "SnakeFood": {
@@ -93,7 +93,7 @@
                     "background": "DarkGreen"
                 },
                 "UI": {
-                    "foreground": "Tan",
+                    "foreground": "Yellow",
                     "background": "DarkGreen"
                 }
             }
@@ -118,19 +118,19 @@
                     "background": "Blue"
                 },
                 "Border": {
-                    "foreground": "Cyan",
+                    "foreground": "Blue",
                     "background": "DarkBlue"
                 },
                 "GameBoundary": {
-                    "foreground": "White",
-                    "background": "DarkBlue"
-                },
-                "Paddle": {
                     "foreground": "Cyan",
                     "background": "DarkBlue"
                 },
-                "Ball": {
+                "Paddle": {
                     "foreground": "White",
+                    "background": "DarkBlue"
+                },
+                "Ball": {
+                    "foreground": "Cyan",
                     "background": "DarkBlue"
                 },
                 "Brick": {
@@ -138,7 +138,7 @@
                     "background": "DarkBlue"
                 },
                 "SnakeBody": {
-                    "foreground": "White",
+                    "foreground": "Blue",
                     "background": "DarkBlue"
                 },
                 "SnakeFood": {
@@ -163,23 +163,23 @@
                     "background": "Black"
                 },
                 "MenuText": {
-                    "foreground": "Gray",
+                    "foreground": "DarkPurple",
                     "background": "Black"
                 },
                 "MenuHighlight": {
-                    "foreground": "Purple",
+                    "foreground": "DarkPurple",
                     "background": "Black"
                 },
                 "Border": {
-                    "foreground": "DarkGray",
+                    "foreground": "Purple",
                     "background": "Black"
                 },
                 "GameBoundary": {
-                    "foreground": "DarkGray",
+                    "foreground": "Purple",
                     "background": "Black"
                 },
                 "Paddle": {
-                    "foreground": "White",
+                    "foreground": "Purple",
                     "background": "Black"
                 },
                 "Ball": {
@@ -191,7 +191,7 @@
                     "background": "Black"
                 },
                 "SnakeBody": {
-                    "foreground": "Gray",
+                    "foreground": "Purple",
                     "background": "Black"
                 },
                 "SnakeFood": {
@@ -199,7 +199,7 @@
                     "background": "Black"
                 },
                 "UI": {
-                    "foreground": "White",
+                    "foreground": "Purple",
                     "background": "Black"
                 }
             }
@@ -216,7 +216,7 @@
                     "background": "White"
                 },
                 "MenuText": {
-                    "foreground": "Black",
+                    "foreground": "White",
                     "background": "White"
                 },
                 "MenuHighlight": {
@@ -232,11 +232,11 @@
                     "background": "White"
                 },
                 "Paddle": {
-                    "foreground": "Blue",
+                    "foreground": "Black",
                     "background": "White"
                 },
                 "Ball": {
-                    "foreground": "Red",
+                    "foreground": "Black",
                     "background": "White"
                 },
                 "Brick": {
@@ -244,7 +244,7 @@
                     "background": "White"
                 },
                 "SnakeBody": {
-                    "foreground": "Green",
+                    "foreground": "Black",
                     "background": "White"
                 },
                 "SnakeFood": {
@@ -301,7 +301,7 @@
                     "background": "Black"
                 },
                 "SnakeFood": {
-                    "foreground": "Green",
+                    "foreground": "Red",
                     "background": "Black"
                 },
                 "UI": {
