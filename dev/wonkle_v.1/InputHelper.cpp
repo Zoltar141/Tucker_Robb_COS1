@@ -2,6 +2,7 @@
 #include <iostream>
 #include <conio.h>
 #include <limits>
+#include <Windows.h>
 
 int InputHelper::GetInt(const std::string& prompt, int min, int max) 
 {
@@ -37,6 +38,11 @@ int InputHelper::GetInt(const std::string& prompt, int min, int max)
 bool InputHelper::IsKeyPressed()//checks for key pressed
 {
     return _kbhit();
+}
+
+bool InputHelper::IsKeyDown(int key)
+{
+    return (GetAsyncKeyState(key) & 0x8000) != 0;
 }
 
 char InputHelper::GetKey()//returns key pressed without enter

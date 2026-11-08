@@ -4,6 +4,27 @@
 #include <unordered_map>
 #include "GameState.h"
 
+struct Operand
+{
+    int literal = 0;
+    std::string stateKey;
+    bool isStateReference = false;
+
+    Operand() = default;
+
+    Operand(int value)
+        : literal(value)
+    {
+    }
+
+    static Operand State(const std::string& key)
+    {
+        Operand operand;
+        operand.stateKey = key;
+        operand.isStateReference = true;
+        return operand;
+    }
+};
 
 enum class Comparison
 {
@@ -32,14 +53,14 @@ public:
     {
         std::string key;      //which value to inspect
         Comparison operation; //how to compare it 
-        int value;              //value to compare it against
+        Operand value;              //value to compare it against
     };
 
     struct Transformation  //how it should change the state
     {
         std::string key;    //which target to change 
         Operation operation;//how to change it 
-        int value;            //by how much
+        Operand value;            //by how much
     };
 
     struct Rule  //combines the condition and transformation 

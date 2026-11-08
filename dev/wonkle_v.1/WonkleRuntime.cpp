@@ -27,85 +27,103 @@ const GameState& WonkleRuntime::GetState() const//read only access
 
 
 
-bool WonkleRuntime::EvaluateCondition(const Condition& condition) const//checks whether a condition is true
+bool WonkleRuntime::EvaluateCondition(const Condition& condition) const
 {
-    int value;
+    int value = 0;
+    int comparisonValue = condition.value.literal;
 
-    
-    if (!GetStateValue(condition.key, value))//if key missing
+    // Retrieve the state value being evaluated.
+    if (!GetStateValue(condition.key, value))
     {
-        return false;//stop
+        return false;
     }
 
-   
-    switch (condition.operation)//compare state to condition
+    // Resolve the comparison operand.
+    if (condition.value.isStateReference)
+    {
+        if (!GetStateValue(condition.value.stateKey, comparisonValue))
+        {
+            return false;
+        }
+    }
+
+    switch (condition.operation)
     {
     case Comparison::Equal:
-        return value == condition.value;
+        return value == comparisonValue;
 
     case Comparison::NotEqual:
-        return value != condition.value;
+        return value != comparisonValue;
 
     case Comparison::Less:
-        return value < condition.value;
+        return value < comparisonValue;
 
     case Comparison::LessEqual:
-        return value <= condition.value;
+        return value <= comparisonValue;
 
     case Comparison::Greater:
-        return value > condition.value;
+        return value > comparisonValue;
 
     case Comparison::GreaterEqual:
-        return value >= condition.value;
+        return value >= comparisonValue;
     }
 
     return false;
 }
 
 
-void WonkleRuntime::ApplyTransformation(const Transformation& transformation) //applies transformation to state 
+void WonkleRuntime::ApplyTransformation(const Transformation& transformation)
 {
-    if (transformation.operation == Operation::Assign)//assign can now create a new state
+    int operandValue = transformation.value.literal;
+
+    // Resolve the operand.
+    if (transformation.value.isStateReference)
     {
-        SetStateValue(transformation.key, transformation.value);
+        if (!GetStateValue(transformation.value.stateKey, operandValue))
+        {
+            return;
+        }
+    }
+
+    // Assignment can create a new state value.
+    if (transformation.operation == Operation::Assign)
+    {
+        SetStateValue(transformation.key, operandValue);
         return;
     }
 
     int value = 0;
 
-    
-    if (!GetStateValue(transformation.key, value))//if no key skip transformation
+    if (!GetStateValue(transformation.key, value))
     {
         return;
     }
 
-    
-    switch (transformation.operation)//apply transformation
+    switch (transformation.operation)
     {
     case Operation::Assign:
         break;
 
     case Operation::Add:
-        SetStateValue(transformation.key, value + transformation.value);
+        SetStateValue(transformation.key, value + operandValue);
         break;
 
     case Operation::Subtract:
-        SetStateValue(transformation.key, value - transformation.value);
+        SetStateValue(transformation.key, value - operandValue);
         break;
 
     case Operation::Multiply:
-        SetStateValue(transformation.key, value * transformation.value);
+        SetStateValue(transformation.key, value * operandValue);
         break;
 
     case Operation::Divide:
-        if (transformation.value != 0)
+        if (operandValue != 0)
         {
-            SetStateValue(transformation.key, value / transformation.value);
+            SetStateValue(transformation.key, value / operandValue);
         }
         break;
     }
 }
-
 
 void WonkleRuntime::Update()//combine conditions transforms and state
 {

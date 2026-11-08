@@ -133,32 +133,30 @@ void PONG::HandleInput()// Processes player keyboard input.
 
     runtime.GetStateValue("player_paddle_y", playerY);//find position
 
-    if (InputHelper::IsKeyPressed())
+    // Move paddle continuously while W or S is held.
+    if (InputHelper::IsKeyDown('W'))
     {
-        char key = InputHelper::GetKey();
-
-        switch (key)
+        if (playerY > 0)
         {
-        case 'w':
-        case 'W':
-            if (playerY > 0)// Move player paddle up.
-            {
-                playerY--;
-            }
-            break;
-        case 's':
-        case 'S':
-            if (playerY < FIELD_HEIGHT - PADDLE_HEIGHT)// Move player paddle down.
-            {
-                playerY++;
-            }
-            break;
-        case 27://esc key
-            // Exit the current game.
-            running = false;//can add save state here
-            break;
+            playerY--;
         }
     }
+
+    if (InputHelper::IsKeyDown('S'))
+    {
+        if (playerY < FIELD_HEIGHT - PADDLE_HEIGHT)
+        {
+            playerY++;
+        }
+    }
+
+    // Exit the current game.
+    if (InputHelper::IsKeyDown(VK_ESCAPE))
+    {
+        running = false;
+    }
+
+    runtime.SetStateValue("player_paddle_y", playerY);
     runtime.SetStateValue("player_paddle_y", playerY);
 }
 
