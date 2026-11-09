@@ -21,7 +21,7 @@ public:
     void SetBackground();
 
     // Frame management.
-    void BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY = 0);
+    void BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY = 0, const Position& framePosition = Position(0,0));
     void PresentFrame();
 
     void DrawCharacter(int x, int y, char character, const std::string& role);
@@ -43,6 +43,7 @@ private:
 
     std::vector<Cell> currentFrame;
     std::vector<Cell> previousFrame;
+    Position framePosition{ 0, 0 };
 
     int frameWidth = 0;
     int frameHeight = 0;

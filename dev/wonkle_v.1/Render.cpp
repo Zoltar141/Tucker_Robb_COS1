@@ -35,11 +35,12 @@ void Render::SetBackground()
 }
 
 // Starts a new frame.
-void Render::BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY)
+void Render::BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY, const Position& framePosition)
 {
     frameWidth = width;
     frameHeight = height;
     this->worldOffsetY = worldOffsetY;
+    this->framePosition = framePosition;
 
     frameActive = true;
 
@@ -97,7 +98,7 @@ void Render::PresentFrame()
 
             ThemeColor color = GetThemeColor(role);
             Colors::SetBackground(color.background);
-            DrawText(startX, j, text, role);
+            DrawText(startX + framePosition.GetX(), j + framePosition.GetY(), text, role);
         }
     }
 

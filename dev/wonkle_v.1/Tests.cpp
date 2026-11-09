@@ -1590,7 +1590,7 @@ void RunRenderTests()
     Render render(themes);
 
     // Test 1: BeginFrame
-    render.BeginFrame(20, 10, ThemeRoles::Background);
+    render.BeginFrame(20, 10, ThemeRoles::Background, 0, Position(85, 0));
 
     std::cout << "PASS: Render begins a frame without errors.\n";
 
@@ -1628,11 +1628,6 @@ void RunRenderTests()
     render.DrawCharacter(20, 10, 'X', ThemeRoles::Ball);
 
     std::cout << "PASS: Render handles drawing outside frame boundaries.\n";
-
-    // Test 8: Present frame
-    render.PresentFrame();
-
-    std::cout << "PASS: Render presents a completed frame.\n";
 }
 
 

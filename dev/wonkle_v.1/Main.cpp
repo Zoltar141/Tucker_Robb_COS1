@@ -9,7 +9,7 @@
 int main()
 {
     // Run tests before starting Wonkle.
-    /*std::cout << "===== WonkLE TESTS =====\n\n";
+   /* std::cout << "===== WonkLE TESTS =====\n\n";
     RunGameStateTests();
     RunWonkleRuntimeTest();
     RunWonkleRuntimeComparisonTests();
