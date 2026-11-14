@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <nlohmann/json.hpp>
 #include "GameState.h"
 
 struct Operand
@@ -75,6 +76,7 @@ public:
     bool GetStateValue(const std::string& key, int& value) const;//a missing key won't automatically create a new state entry.
 
     void AddRule(const Rule& rule);//Register a rule for the runtime to evaluate during its update cycle.
+    void LoadRules(const nlohmann::json& ruleData);
 
     void Update();//Evaluates the conditions for registered rules.
                   //Determines which rules apply.

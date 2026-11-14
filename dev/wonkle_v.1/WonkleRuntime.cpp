@@ -1,5 +1,34 @@
 #include "WonkleRuntime.h"
 
+static Comparison GetComparison(const std::string& name)
+{
+    static const std::unordered_map<std::string, Comparison> comparisons =
+    {
+        {"Equal", Comparison::Equal},
+        {"NotEqual", Comparison::NotEqual},
+        {"Less", Comparison::Less},
+        {"LessEqual", Comparison::LessEqual},
+        {"Greater", Comparison::Greater},
+        {"GreaterEqual", Comparison::GreaterEqual}
+    };
+
+    return comparisons.at(name);
+}
+
+static Operation GetOperation(const std::string& name)
+{
+    static const std::unordered_map<std::string, Operation> operations =
+    {
+        {"Assign", Operation::Assign},
+        {"Add", Operation::Add},
+        {"Subtract", Operation::Subtract},
+        {"Multiply", Operation::Multiply},
+        {"Divide", Operation::Divide}
+    };
+
+    return operations.at(name);
+};
+
 WonkleRuntime::WonkleRuntime()//blank game state
 {
 }
@@ -12,6 +41,36 @@ void WonkleRuntime::SetStateValue(const std::string& key, int value)//works as b
 bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const//works as before but now pulls from current state
 {
     return currentState.GetValue(key, value);
+}
+
+void WonkleRuntime::LoadRules(const nlohmann::json& ruleData)
+{
+    rules.clear();
+
+    for (const auto& ruleDataEntry : ruleData)
+    {
+        Rule rule;
+
+        for (const auto& conditionData : ruleDataEntry.at("conditions"))
+        {
+            rule.conditions.push_back({
+                conditionData.at("key").get<std::string>(),
+                GetComparison(conditionData.at("comparison").get<std::string>()),
+                Operand(conditionData.at("value").get<int>())
+                });
+        }
+
+        for (const auto& transformationData : ruleDataEntry.at("transformations"))
+        {
+            rule.transformations.push_back({
+                transformationData.at("key").get<std::string>(),
+                GetOperation(transformationData.at("operation").get<std::string>()),
+                Operand(transformationData.at("value").get<int>())
+                });
+        }
+
+        AddRule(rule);
+    }
 }
 
 void WonkleRuntime::AddRule(const Rule& rule)//add new rule to game state 

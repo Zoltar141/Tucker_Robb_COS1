@@ -2,6 +2,7 @@
 #include "WonkleRuntime.h"
 #include "ThemeManager.h"
 #include "Render.h"
+#include "FileBoss.h"
 
 class PONG
 {
@@ -27,5 +28,7 @@ private:
     void RenderGame();///shows it in console
     void CheckGameOver();//win/loss check
 
+    FileBoss fileBoss;
+    nlohmann::json pongConfig;
 };
 

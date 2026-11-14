@@ -9,6 +9,9 @@
 #include <chrono>
 #include <Windows.h>
 #include <vector>
+#include <stdexcept>
+#include <filesystem>
+#include <string>
 
 const int FIELD_WIDTH = 80;
 const int FIELD_HEIGHT = 25;
@@ -45,10 +48,13 @@ struct PongState
 };
 
 
-
 PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManager
     : themeManager(themeManager), render(themeManager)
 {
+    if (!fileBoss.ReadJSON("pong.json", pongConfig))
+    {
+        throw std::runtime_error("Failed to load pong.json");
+    }
 }
 
 void PONG::Run()//controls the game loop
@@ -115,46 +121,29 @@ void PONG::Run()//controls the game loop
     SetConsoleCursorInfo(console, &cursorInfo);
 }
 
-void PONG::InitializeGame()//sets initial state values
+void PONG::InitializeGame()
 {
-    runtime.SetStateValue("ball_position_x", FIELD_WIDTH / 2);
-    runtime.SetStateValue("ball_position_y", FIELD_HEIGHT / 2);
+    const auto& initialState = pongConfig["game"]["initial_state"];
 
-    runtime.SetStateValue("ball_velocity_x", 1);
-    runtime.SetStateValue("ball_velocity_y", 1);
+    runtime.SetStateValue("ball_position_x", initialState["ball"]["position"]["x"]);
+    runtime.SetStateValue("ball_position_y", initialState["ball"]["position"]["y"]);
 
-    runtime.SetStateValue("player_paddle_y", INITIAL_PADDLE_Y);
-    runtime.SetStateValue("opponent_paddle_y", INITIAL_PADDLE_Y);
+    runtime.SetStateValue("ball_velocity_x", initialState["ball"]["velocity"]["x"]);
+    runtime.SetStateValue("ball_velocity_y", initialState["ball"]["velocity"]["y"]);
 
-    runtime.SetStateValue("player_score", 0);
-    runtime.SetStateValue("opponent_score", 0);
+    runtime.SetStateValue("player_paddle_y", initialState["paddles"]["player_y"]);
+    runtime.SetStateValue("opponent_paddle_y", initialState["paddles"]["opponent_y"]);
 
-    runtime.SetStateValue("winning_score", WINNING_SCORE);
+    runtime.SetStateValue("player_score", initialState["score"]["player"]);
+    runtime.SetStateValue("opponent_score", initialState["score"]["opponent"]);
+
+    runtime.SetStateValue("winning_score", pongConfig["game"]["scoring"]["winning_score"]);
 }
 
 
-void PONG::SetupRules()//registers the gameplay rules
+void PONG::SetupRules()
 {
-   
-    // Rule 1: award opponent a point when ball leaves the player side
-    WonkleRuntime::Rule leftScore;
-    leftScore.conditions.push_back({ "ball_position_x", Comparison::LessEqual, LEFT_SCORING_BOUNDARY });
-    leftScore.transformations.push_back({ "opponent_score", Operation::Add, 1 });
-    leftScore.transformations.push_back({ "ball_position_x", Operation::Assign, FIELD_WIDTH / 2 });
-    leftScore.transformations.push_back({ "ball_position_y", Operation::Assign, FIELD_HEIGHT / 2 });
-    leftScore.transformations.push_back({ "ball_velocity_x", Operation::Assign, 1 });
-    leftScore.transformations.push_back({ "ball_velocity_y", Operation::Assign, 1 });
-    runtime.AddRule(leftScore);
-
-    // Rule 2: award player a point when ball leaves the opponent side
-    WonkleRuntime::Rule rightScore;
-    rightScore.conditions.push_back({ "ball_position_x", Comparison::GreaterEqual, RIGHT_SCORING_BOUNDARY });
-    rightScore.transformations.push_back({ "player_score", Operation::Add, 1 });
-    rightScore.transformations.push_back({ "ball_position_x", Operation::Assign, FIELD_WIDTH / 2 });
-    rightScore.transformations.push_back({ "ball_position_y", Operation::Assign, FIELD_HEIGHT / 2 });
-    rightScore.transformations.push_back({ "ball_velocity_x", Operation::Assign, -1 });
-    rightScore.transformations.push_back({ "ball_velocity_y", Operation::Assign, 1 });
-    runtime.AddRule(rightScore);
+    runtime.LoadRules(pongConfig["game"]["rules"]);
 }
 
 void PONG::HandleInput()// Processes player keyboard input.
