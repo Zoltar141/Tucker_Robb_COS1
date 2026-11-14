@@ -14,5 +14,5 @@ public:
 
     bool AppendFile(const std::string& filePath, const std::string& content);
 
-    bool ReadJSON(const std::string& filePath, nlohmann::json& data);
+    bool ReadJSON(const std::string& filePath, nlohmann::json& jsonData);
 };

@@ -85,7 +85,7 @@ public:
 
 private:
 
-    GameState current; //the current runState
+    GameState currentState; //the current runState
     std::vector<Rule> rules; //rules storage
 
     bool EvaluateCondition(const Condition& condition) const;//checks condtition for true

@@ -62,22 +62,22 @@ const std::vector<Theme>& ThemeManager::GetThemes() const//returns collection re
 void ThemeManager::LoadThemes()
 {
     FileBoss fileBoss;
-    nlohmann::json data;
+    nlohmann::json themeConfiguration;
 
     // Read the themes JSON file.
-    if (!fileBoss.ReadJSON("themes.json", data))
+    if (!fileBoss.ReadJSON("themes.json", themeConfiguration))
     {
         return;
     }
 
     // Verify the themes array exists.
-    if (!data.contains("themes") || !data["themes"].is_array())
+    if (!themeConfiguration.contains("themes") || !themeConfiguration["themes"].is_array())
     {
         return;
     }
 
     // Load each theme.
-    for (const auto& themeData : data["themes"])
+    for (const auto& themeData : themeConfiguration["themes"])
     {
         if (!themeData.is_object() ||
             !themeData.contains("name") ||

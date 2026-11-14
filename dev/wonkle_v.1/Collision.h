@@ -14,7 +14,7 @@ enum class BoundarySide
 class Collision
 {
 public:
-    static bool CheckPosition(const Position& first, const Position& second);
+    static bool CheckPosition(const Position& firstPosition, const Position& secondPosition);
 
     static bool CheckRectangle(const Position& position, const Position& rectanglePosition, int width, int height);
 

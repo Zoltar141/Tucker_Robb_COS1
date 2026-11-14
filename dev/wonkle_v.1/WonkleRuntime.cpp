@@ -6,12 +6,12 @@ WonkleRuntime::WonkleRuntime()//blank game state
 
 void WonkleRuntime::SetStateValue(const std::string& key, int value)//works as before but now pulls from current state
 {
-    current.SetValue(key, value);
+    currentState.SetValue(key, value);
 }
 
 bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const//works as before but now pulls from current state
 {
-    return current.GetValue(key, value);
+    return currentState.GetValue(key, value);
 }
 
 void WonkleRuntime::AddRule(const Rule& rule)//add new rule to game state 
@@ -22,7 +22,7 @@ void WonkleRuntime::AddRule(const Rule& rule)//add new rule to game state
 
 const GameState& WonkleRuntime::GetState() const//read only access
 {
-    return current;//current runtime state
+    return currentState;//current runtime state
 }
 
 

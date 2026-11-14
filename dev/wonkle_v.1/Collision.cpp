@@ -1,9 +1,9 @@
 #include "Collision.h"
 
-bool Collision::CheckPosition(const Position& first, const Position& second)
+bool Collision::CheckPosition(const Position& firstPosition, const Position& secondPosition)
 {
-    return first.GetX() == second.GetX() &&
-        first.GetY() == second.GetY();
+    return firstPosition.GetX() == secondPosition.GetX() &&
+        firstPosition.GetY() == secondPosition.GetY();
 }
 
 bool Collision::CheckRectangle(const Position& position, const Position& rectanglePosition, int width, int height)

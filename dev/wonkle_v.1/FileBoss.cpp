@@ -100,7 +100,7 @@ bool FileBoss::AppendFile(const std::string& filePath, const std::string& conten
 }
 
 //reads and parses JSON
-bool FileBoss::ReadJSON(const std::string& filePath, nlohmann::json& data)
+bool FileBoss::ReadJSON(const std::string& filePath, nlohmann::json& jsonData)
 {
     if (filePath.empty())
     {
@@ -116,7 +116,7 @@ bool FileBoss::ReadJSON(const std::string& filePath, nlohmann::json& data)
 
     try
     {
-        file >> data;
+        file >> jsonData;
     }
     catch (const nlohmann::json::parse_error&)
     {
