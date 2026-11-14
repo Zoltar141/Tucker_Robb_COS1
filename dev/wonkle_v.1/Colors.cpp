@@ -1,5 +1,8 @@
 #include "Colors.h"
 
+constexpr WORD BACKGROUND = 0x00F0;
+constexpr WORD FOREGROUND = 0X000F;
+
 namespace Colors
 {
     void Print(const std::string& words, Color color)
@@ -95,7 +98,7 @@ namespace Colors
 
             std::cout.flush();
 
-            attribute |= (original.wAttributes & 0x00F0);
+            attribute |= (original.wAttributes & BACKGROUND);
 
             SetConsoleTextAttribute(output, attribute);
 
@@ -205,7 +208,7 @@ namespace Colors
                 attribute = BACKGROUND_RED | BACKGROUND_GREEN;
             }
 
-            WORD background = original.wAttributes & 0x000F;
+            WORD background = original.wAttributes & FOREGROUND;
 
             SetConsoleTextAttribute(output, background | attribute);
         }

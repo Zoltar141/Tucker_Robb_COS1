@@ -5,6 +5,7 @@
 #include "Theme.h"
 #include "ThemeManager.h"
 
+constexpr int MAIN_MENU_EXIT = 3;
 
 void PrintTheme(ThemeManager& themeManager, const std::string& text, const std::string& role)
 {
@@ -18,11 +19,11 @@ void Menu::Run()//main loop open ended right now while settings and game dont ex
 {
     int choice = 0;
 
-    while (choice != 3)
+    while (choice != MAIN_MENU_EXIT)
     {
         DisplayMainMenu();//show menu
 
-        choice = InputHelper::GetInt("Please choose a number: ", 1, 3);//get choice
+        choice = InputHelper::GetInt("Please choose a number: ", 1, MAIN_MENU_EXIT);//get choice
 
         HandleSelection(choice);//execute game or settings or exit 
     }
@@ -67,7 +68,7 @@ void Menu::HandleSelection(int choice)
         RunSettings();
         break;
 
-    case 3:
+    case MAIN_MENU_EXIT:
         PrintTheme(themeManager, "\nExiting Wonkle.\n", ThemeRoles::MenuHighlight);
         break;
 

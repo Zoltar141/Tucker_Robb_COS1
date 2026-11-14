@@ -1,5 +1,7 @@
 #include "Boundary.h"
 
+constexpr int TOP_BOUNDARY_OFFSET = -1;
+
 Boundary::Boundary(int width, int height, int left, int top, int right, int bottom)
     : width(width), height(height), left(left), top(top), right(right), bottom(bottom)
 {
@@ -10,7 +12,7 @@ void Boundary::Draw(Render& render, std::vector<RenderObject>& objects)
     // Top boundary.
     for (int i = 0; i < width; i++)
     {
-        objects.push_back({ Position(i, -1), '_', ThemeRoles::Border });
+        objects.push_back({ Position(i, TOP_BOUNDARY_OFFSET), '_', ThemeRoles::Border });
     }
 
     // Bottom boundary.

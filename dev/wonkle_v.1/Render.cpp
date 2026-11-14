@@ -2,6 +2,8 @@
 #include <iostream>
 #include <Windows.h>
 
+constexpr int TAB_WIDTH = 8;
+
 // Connects the renderer to ThemeManager.
 Render::Render(ThemeManager& themeManager)
     : themeManager(themeManager)
@@ -137,7 +139,7 @@ void Render::DrawText(int x, int y, const std::string& text, const std::string& 
         {
             if (character == '\t')
             {
-                currentX = ((currentX / 8) + 1) * 8;
+                currentX = ((currentX / TAB_WIDTH) + 1) * TAB_WIDTH;
             }
             else if (character == '\n')
             {

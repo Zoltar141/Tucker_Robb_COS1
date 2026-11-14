@@ -14,6 +14,22 @@ const int FIELD_WIDTH = 80;
 const int FIELD_HEIGHT = 25;
 const int PADDLE_HEIGHT = 5;
 const int WINNING_SCORE = 10;
+constexpr std::chrono::milliseconds FRAME_DELAY{ 50 };
+constexpr int OPPONENT_MISS_CHANCE = 4;
+constexpr int PLAYFIELD_TOP = 1;
+constexpr int PLAYFIELD_BOTTOM = FIELD_HEIGHT - 2;
+constexpr int PADDLE_WIDTH = 4;
+constexpr int INITIAL_PADDLE_Y =(FIELD_HEIGHT - PADDLE_HEIGHT) / 2;
+constexpr int LEFT_SCORING_BOUNDARY = 1;
+constexpr int RIGHT_SCORING_BOUNDARY = FIELD_WIDTH - 2;
+constexpr int RENDER_EXTRA_HEIGHT = 4;
+constexpr int CONTROLS_ROW_OFFSET = 3;
+constexpr int WORLD_VERTICAL_OFFSET = 2;
+constexpr int PADDLE_TOP_LIMIT = 0;
+constexpr int PADDLE_BOTTOM_LIMIT = FIELD_HEIGHT - PADDLE_HEIGHT;
+constexpr int FIELD_RIGHT_EDGE = FIELD_WIDTH - 1;
+constexpr int PLAYER_PADDLE_X = 2;
+constexpr int OPPONENT_PADDLE_X = FIELD_WIDTH - 3;
 
 
 PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManager
@@ -58,7 +74,7 @@ void PONG::Run()//controls the game loop
         UpdateGame();
         RenderGame();
         CheckGameOver();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));//This prevents the game from running as fast as the processor allows.
+        std::this_thread::sleep_for(FRAME_DELAY);//This prevents the game from running as fast as the processor allows.
     }
 
     // Clear the console and force a black background.
@@ -87,14 +103,14 @@ void PONG::Run()//controls the game loop
 
 void PONG::InitializeGame()//sets initial state values
 {
-    runtime.SetStateValue("ball_position_x", 40);
-    runtime.SetStateValue("ball_position_y", 12);
+    runtime.SetStateValue("ball_position_x", FIELD_WIDTH / 2);
+    runtime.SetStateValue("ball_position_y", FIELD_HEIGHT / 2);
 
     runtime.SetStateValue("ball_velocity_x", 1);
     runtime.SetStateValue("ball_velocity_y", 1);
 
-    runtime.SetStateValue("player_paddle_y", 10);
-    runtime.SetStateValue("opponent_paddle_y", 10);
+    runtime.SetStateValue("player_paddle_y", INITIAL_PADDLE_Y);
+    runtime.SetStateValue("opponent_paddle_y", INITIAL_PADDLE_Y);
 
     runtime.SetStateValue("player_score", 0);
     runtime.SetStateValue("opponent_score", 0);
@@ -108,7 +124,7 @@ void PONG::SetupRules()//registers the gameplay rules
    
     // Rule 1: award opponent a point when ball leaves the player side
     WonkleRuntime::Rule leftScore;
-    leftScore.conditions.push_back({ "ball_position_x", Comparison::LessEqual, 1 });
+    leftScore.conditions.push_back({ "ball_position_x", Comparison::LessEqual, LEFT_SCORING_BOUNDARY });
     leftScore.transformations.push_back({ "opponent_score", Operation::Add, 1 });
     leftScore.transformations.push_back({ "ball_position_x", Operation::Assign, FIELD_WIDTH / 2 });
     leftScore.transformations.push_back({ "ball_position_y", Operation::Assign, FIELD_HEIGHT / 2 });
@@ -118,7 +134,7 @@ void PONG::SetupRules()//registers the gameplay rules
 
     // Rule 2: award player a point when ball leaves the opponent side
     WonkleRuntime::Rule rightScore;
-    rightScore.conditions.push_back({ "ball_position_x", Comparison::GreaterEqual, FIELD_WIDTH - 2 });
+    rightScore.conditions.push_back({ "ball_position_x", Comparison::GreaterEqual, RIGHT_SCORING_BOUNDARY });
     rightScore.transformations.push_back({ "player_score", Operation::Add, 1 });
     rightScore.transformations.push_back({ "ball_position_x", Operation::Assign, FIELD_WIDTH / 2 });
     rightScore.transformations.push_back({ "ball_position_y", Operation::Assign, FIELD_HEIGHT / 2 });
@@ -136,7 +152,7 @@ void PONG::HandleInput()// Processes player keyboard input.
     // Move paddle continuously while W or S is held.
     if (InputHelper::IsKeyDown('W'))
     {
-        if (playerY > 0)
+        if (playerY > PADDLE_TOP_LIMIT)
         {
             playerY--;
         }
@@ -144,7 +160,7 @@ void PONG::HandleInput()// Processes player keyboard input.
 
     if (InputHelper::IsKeyDown('S'))
     {
-        if (playerY < FIELD_HEIGHT - PADDLE_HEIGHT)
+        if (playerY < PADDLE_BOTTOM_LIMIT)
         {
             playerY++;
         }
@@ -183,7 +199,7 @@ void PONG::UpdateGame()// Advances the game state.
     ballY += ballVelocityY;
 
     // Check for boundary collisions.
-    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, 1, FIELD_WIDTH - 1, FIELD_HEIGHT - 2);
+    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_BOTTOM);
 
     BoundarySide collision = Collision::CheckBoundary(Position(ballX, ballY), boundary);
 
@@ -193,7 +209,7 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Player paddle collision.
-    bool playerPaddleCollision = Collision::CheckRectangle(Position(ballX, ballY), Position(0, playerY), 4, PADDLE_HEIGHT);
+    bool playerPaddleCollision = Collision::CheckRectangle(Position(ballX, ballY), Position(0, playerY), PADDLE_WIDTH, PADDLE_HEIGHT);
 
     if (ballVelocityX < 0 && playerPaddleCollision)
     {
@@ -214,7 +230,7 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Opponent paddle collision.
-    bool opponentPaddleCollision = Collision::CheckRectangle(Position(ballX, ballY), Position(FIELD_WIDTH - 4, opponentY), 4, PADDLE_HEIGHT);
+    bool opponentPaddleCollision = Collision::CheckRectangle(Position(ballX, ballY), Position(FIELD_WIDTH - PADDLE_WIDTH, opponentY), PADDLE_WIDTH, PADDLE_HEIGHT);
 
     if (ballVelocityX > 0 && opponentPaddleCollision)
     {
@@ -235,7 +251,7 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Give the opponent a chance to miss its movement.
-    if (rand() % 4 != 0)
+    if (rand() % OPPONENT_MISS_CHANCE != 0)
     {
         // Move the opponent paddle toward the ball.
         if (opponentY + PADDLE_HEIGHT / 2 < ballY)
@@ -249,13 +265,13 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Keep the opponent paddle inside the field.
-    if (opponentY < 0)
+    if (opponentY < PADDLE_TOP_LIMIT)
     {
-        opponentY = 0;
+        opponentY = PADDLE_TOP_LIMIT;
     }
-    else if (opponentY > FIELD_HEIGHT - PADDLE_HEIGHT)
+    else if (opponentY > PADDLE_BOTTOM_LIMIT)
     {
-        opponentY = FIELD_HEIGHT - PADDLE_HEIGHT;
+        opponentY = PADDLE_BOTTOM_LIMIT;
     }
 
     // Store updated ball velocity.
@@ -277,13 +293,13 @@ void PONG::UpdateGame()// Advances the game state.
     runtime.GetStateValue("ball_velocity_y", ballVelocityY);
 
     // Keep ball inside the vertical boundaries.
-    if (ballY < 1)
+    if (ballY < PLAYFIELD_TOP)
     {
-        ballY = 1;
+        ballY = PLAYFIELD_TOP;
     }
-    else if (ballY > FIELD_HEIGHT - 2)
+    else if (ballY > PLAYFIELD_BOTTOM)
     {
-        ballY = FIELD_HEIGHT - 2;
+        ballY = PLAYFIELD_BOTTOM;
     }
 
     runtime.SetStateValue("ball_position_y", ballY);
@@ -313,25 +329,25 @@ void PONG::RenderGame()
     std::vector<RenderObject> objects;
 
     // Begin a new frame.
-    render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + 4, ThemeRoles::Background, 2);
+    render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + RENDER_EXTRA_HEIGHT, ThemeRoles::Background, WORLD_VERTICAL_OFFSET);
 
     // Draw scoreboard.
-    render.DrawText( 0, 0, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
+    render.DrawText( 0, FIELD_HEIGHT + CONTROLS_ROW_OFFSET, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
 
-    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, 1, FIELD_WIDTH - 1, FIELD_HEIGHT - 2);
+    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_TOP);
 
     boundary.Draw(render, objects);
 
     // Player paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({ Position(2, playerY + i), '|', ThemeRoles::Paddle });
+        objects.push_back({ Position(PLAYER_PADDLE_X, playerY + i), '|', ThemeRoles::Paddle });
     }
 
     // Opponent paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({ Position(FIELD_WIDTH - 3, opponentY + i), '|', ThemeRoles::Paddle });
+        objects.push_back({ Position(OPPONENT_PADDLE_X, opponentY + i), '|', ThemeRoles::Paddle });
     }
 
     // Ball.
@@ -341,7 +357,7 @@ void PONG::RenderGame()
     render.DrawObjects(objects);
 
     // Draw controls.
-    render.DrawText(0, FIELD_HEIGHT + 3, "W/S: Move Paddle    ESC: Exit", ThemeRoles::UI);
+    render.DrawText(0, FIELD_HEIGHT + CONTROLS_ROW_OFFSET, "W/S: Move Paddle    ESC: Exit", ThemeRoles::UI);
 
     // Present completed frame.
     render.PresentFrame();
@@ -379,7 +395,7 @@ void PONG::CheckGameOver()//checks whether the game has ended
     if (!running)
     {
         Colors::SetBackground(Colors::Color::Black);
-        render.SetCursorPosition(0, FIELD_HEIGHT + 4);
+        render.SetCursorPosition(0, FIELD_HEIGHT + RENDER_EXTRA_HEIGHT);
 
         Colors::Print("Final Score: " + std::to_string(playerScore) + " - " 
             + std::to_string(opponentScore) + "\n", ui.foreground);
