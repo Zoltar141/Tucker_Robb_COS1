@@ -13,26 +13,6 @@
 #include <filesystem>
 #include <string>
 
-const int FIELD_WIDTH = 80;
-const int FIELD_HEIGHT = 25;
-const int PADDLE_HEIGHT = 5;
-const int WINNING_SCORE = 10;
-constexpr std::chrono::milliseconds FRAME_DELAY{ 50 };
-constexpr int OPPONENT_MISS_CHANCE = 4;
-constexpr int PLAYFIELD_TOP = 1;
-constexpr int PLAYFIELD_BOTTOM = FIELD_HEIGHT - 2;
-constexpr int PADDLE_WIDTH = 4;
-constexpr int INITIAL_PADDLE_Y =(FIELD_HEIGHT - PADDLE_HEIGHT) / 2;
-constexpr int LEFT_SCORING_BOUNDARY = 1;
-constexpr int RIGHT_SCORING_BOUNDARY = FIELD_WIDTH - 2;
-constexpr int RENDER_EXTRA_HEIGHT = 4;
-constexpr int CONTROLS_ROW_OFFSET = 3;
-constexpr int WORLD_VERTICAL_OFFSET = 2;
-constexpr int PADDLE_TOP_LIMIT = 0;
-constexpr int PADDLE_BOTTOM_LIMIT = FIELD_HEIGHT - PADDLE_HEIGHT;
-constexpr int FIELD_RIGHT_EDGE = FIELD_WIDTH - 1;
-constexpr int PLAYER_PADDLE_X = 2;
-constexpr int OPPONENT_PADDLE_X = FIELD_WIDTH - 3;
 
 struct PongState
 {
@@ -95,7 +75,8 @@ void PONG::Run()//controls the game loop
         UpdateGame();
         RenderGame();
         CheckGameOver();
-        std::this_thread::sleep_for(FRAME_DELAY);//This prevents the game from running as fast as the processor allows.
+        //This prevents the game from running as fast as the processor allows.
+        std::this_thread::sleep_for(std::chrono::milliseconds(pongConfig["game"]["timing"]["frame_delay_ms"].get<int>()));
     }
 
     // Clear the console and force a black background.
@@ -154,24 +135,24 @@ void PONG::HandleInput()// Processes player keyboard input.
     runtime.GetStateValue("player_paddle_y", playerPaddle);//find position
 
     // Move paddle continuously while W or S is held.
-    if (InputHelper::IsKeyDown('W'))
+    if (InputHelper::IsKeyDown(pongConfig["game"]["controls"]["up"].get<int>()))
     {
-        if (playerPaddle > PADDLE_TOP_LIMIT)
+        if (playerPaddle > pongConfig["game"]["paddle"]["top_limit"].get<int>())
         {
             playerPaddle--;
         }
     }
 
-    if (InputHelper::IsKeyDown('S'))
+    if (InputHelper::IsKeyDown(pongConfig["game"]["controls"]["down"].get<int>()))
     {
-        if (playerPaddle < PADDLE_BOTTOM_LIMIT)
+        if (playerPaddle < pongConfig["game"]["paddle"]["bottom_limit"].get<int>())
         {
             playerPaddle++;
         }
     }
 
     // Exit the current game.
-    if (InputHelper::IsKeyDown(VK_ESCAPE))
+    if (InputHelper::IsKeyDown(pongConfig["game"]["controls"]["exit"].get<int>()))
     {
         running = false;
     }
@@ -211,7 +192,14 @@ void PONG::UpdateGame()// Advances the game state.
     state.ballPosY += state.ballVelY;
 
     // Check for boundary collisions.
-    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_BOTTOM);
+    Boundary boundary(
+        pongConfig["game"]["field"]["width"].get<int>(),
+        pongConfig["game"]["field"]["height"].get<int>(),
+        0,
+        pongConfig["game"]["field"]["top"].get<int>(),
+        pongConfig["game"]["field"]["right_edge"].get<int>(),
+        pongConfig["game"]["field"]["bottom"].get<int>()
+    );
 
     BoundarySide collision = Collision::CheckBoundary(Position(state.ballPosX, state.ballPosY), boundary);
 
@@ -221,69 +209,80 @@ void PONG::UpdateGame()// Advances the game state.
     }
 
     // Player paddle collision.
-    bool playerPaddleCollision = Collision::CheckRectangle(Position(state.ballPosX, state.ballPosY), Position(0, state.playerPaddleY), PADDLE_WIDTH, PADDLE_HEIGHT);
+    bool playerPaddleCollision = Collision::CheckRectangle(
+        Position(state.ballPosX, state.ballPosY),
+        Position(pongConfig["game"]["paddle"]["player_x"].get<int>(), state.playerPaddleY),
+        pongConfig["game"]["paddle"]["width"].get<int>(),
+        pongConfig["game"]["paddle"]["height"].get<int>()
+    );
 
     if (state.ballVelX < 0 && playerPaddleCollision)
     {
-        state.ballVelX = 1;
+        state.ballVelX = pongConfig["game"]["collision"]["player_bounce_velocity_x"].get<int>();
 
         // Calculate where the ball hits the paddle.
         int hitPosition = state.ballPosY - state.playerPaddleY;
 
         // Determine vertical ball direction.
-        if (hitPosition < PADDLE_HEIGHT / 2)
+        if (hitPosition < pongConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            state.ballVelY = -1;
+            state.ballVelY = pongConfig["game"]["collision"]["upper_bounce_velocity_y"].get<int>();
         }
-        else if (hitPosition > PADDLE_HEIGHT / 2)
+        else if (hitPosition > pongConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            state.ballVelY = 1;
+            state.ballVelY = pongConfig["game"]["collision"]["lower_bounce_velocity_y"].get<int>();
         }
     }
 
     // Opponent paddle collision.
-    bool opponentPaddleCollision = Collision::CheckRectangle(Position(state.ballPosX, state.ballPosY), Position(FIELD_WIDTH - PADDLE_WIDTH, state.opponentPaddleY), PADDLE_WIDTH, PADDLE_HEIGHT);
+    bool opponentPaddleCollision = Collision::CheckRectangle(
+        Position(state.ballPosX, state.ballPosY),
+        Position(pongConfig["game"]["paddle"]["opponent_x"].get<int>(), state.opponentPaddleY),
+        pongConfig["game"]["paddle"]["width"].get<int>(),
+        pongConfig["game"]["paddle"]["height"].get<int>()
+    );
 
     if (state.ballVelX > 0 && opponentPaddleCollision)
     {
-        state.ballVelX = -1;
+        state.ballVelX = pongConfig["game"]["collision"]["opponent_bounce_velocity_x"].get<int>();
 
         // Calculate where the ball hits the paddle.
         int hitPosition = state.ballPosY - state.opponentPaddleY;
 
         // Determine vertical ball direction.
-        if (hitPosition < PADDLE_HEIGHT / 2)
+        if (hitPosition < pongConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            state.ballVelY = -1;
+            state.ballVelY = pongConfig["game"]["collision"]["upper_bounce_velocity_y"].get<int>();
         }
-        else if (hitPosition > PADDLE_HEIGHT / 2)
+        else if (hitPosition > pongConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            state.ballVelY = 1;
+            state.ballVelY = pongConfig["game"]["collision"]["lower_bounce_velocity_y"].get<int>();
         }
     }
 
     // Give the opponent a chance to miss its movement.
-    if (rand() % OPPONENT_MISS_CHANCE != 0)
+    if (pongConfig["game"]["opponent"]["follow_ball"].get<bool>() &&
+        rand() % pongConfig["game"]["opponent"]["miss_chance"].get<int>() != 0)
     {
         // Move the opponent paddle toward the ball.
-        if (state.opponentPaddleY + PADDLE_HEIGHT / 2 < state.ballPosY)
+        if (state.opponentPaddleY + pongConfig["game"]["paddle"]["height"].get<int>() / 2 < state.ballPosY)
         {
             state.opponentPaddleY++;
         }
-        else if (state.opponentPaddleY + PADDLE_HEIGHT / 2 > state.ballPosY)
+        else if (state.opponentPaddleY + pongConfig["game"]["paddle"]["height"].get<int>() / 2 > state.ballPosY)
         {
             state.opponentPaddleY--;
         }
     }
 
     // Keep the opponent paddle inside the field.
-    if (state.opponentPaddleY < PADDLE_TOP_LIMIT)
+    if (state.opponentPaddleY < pongConfig["game"]["paddle"]["top_limit"].get<int>())
     {
-        state.opponentPaddleY = PADDLE_TOP_LIMIT;
+        state.opponentPaddleY = pongConfig["game"]["paddle"]["top_limit"].get<int>();
     }
-    else if (state.opponentPaddleY > PADDLE_BOTTOM_LIMIT)
+    else if (state.opponentPaddleY > pongConfig["game"]["paddle"]["bottom_limit"].get<int>())
     {
-        state.opponentPaddleY = PADDLE_BOTTOM_LIMIT;
+        state.opponentPaddleY = pongConfig["game"]["paddle"]["bottom_limit"].get<int>();
     }
 
     // Store updated ball velocity.
@@ -305,13 +304,13 @@ void PONG::UpdateGame()// Advances the game state.
     runtime.GetStateValue("ball_velocity_y", state.ballVelY);
 
     // Keep ball inside the vertical boundaries.
-    if (state.ballPosY < PLAYFIELD_TOP)
+    if (state.ballPosY < pongConfig["game"]["field"]["top"].get<int>())
     {
-        state.ballPosY = PLAYFIELD_TOP;
+        state.ballPosY = pongConfig["game"]["field"]["top"].get<int>();
     }
-    else if (state.ballPosY > PLAYFIELD_BOTTOM)
+    else if (state.ballPosY > pongConfig["game"]["field"]["bottom"].get<int>())
     {
-        state.ballPosY = PLAYFIELD_BOTTOM;
+        state.ballPosY = pongConfig["game"]["field"]["bottom"].get<int>();
     }
 
     runtime.SetStateValue("ball_position_y", state.ballPosY);
@@ -331,40 +330,69 @@ void PONG::RenderGame()
     std::vector<RenderObject> objects;
 
     // Begin a new frame.
-    render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + RENDER_EXTRA_HEIGHT, ThemeRoles::Background, WORLD_VERTICAL_OFFSET);
+    render.BeginFrame(pongConfig["game"]["field"]["width"].get<int>(), 
+        pongConfig["game"]["field"]["height"].get<int>() + pongConfig["game"]["rendering"]["extra_height"].get<int>(),
+        pongConfig["game"]["rendering"]["roles"]["background"].get<std::string>(), 
+        pongConfig["game"]["rendering"]["world_vertical_offset"].get<int>());
 
     // Draw scoreboard.
-    render.DrawText( 0, 0, "PLAYER: " + std::to_string(state.playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(state.opponentScore), ThemeRoles::UI);
+    render.DrawText(0, pongConfig["game"]["rendering"]["scoreboard_row"].get<int>(), 
+        pongConfig["game"]["rendering"]["scoreboard"]["player_label"].get<std::string>() + " " + std::to_string(state.playerScore) + 
+        pongConfig["game"]["rendering"]["scoreboard"]["separator"].get<std::string>() + 
+        pongConfig["game"]["rendering"]["scoreboard"]["opponent_label"].get<std::string>() + " " + std::to_string(state.opponentScore), 
+        pongConfig["game"]["rendering"]["roles"]["ui"].get<std::string>());
 
-    Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_TOP);
+    Boundary boundary(
+        pongConfig["game"]["field"]["width"].get<int>(),
+        pongConfig["game"]["field"]["height"].get<int>(),
+        0,
+        pongConfig["game"]["field"]["top"].get<int>(),
+        pongConfig["game"]["field"]["right_edge"].get<int>(),
+        pongConfig["game"]["field"]["bottom"].get<int>());
 
     const auto& ascii = pongConfig["game"]["rendering"]["ascii"];
 
-    boundary.Draw(render, objects, ascii["top_border"].get<std::string>()[0],
-        ascii["bottom_border"].get<std::string>()[0], ascii["vertical_border"].get<std::string>()[0],
-        pongConfig["game"]["rendering"]["border_role"].get<std::string>()
+   
+
+    boundary.Draw(render, objects, 
+        ascii["top_border"].get<std::string>()[0],
+        ascii["bottom_border"].get<std::string>()[0], 
+        ascii["vertical_border"].get<std::string>()[0],
+        pongConfig["game"]["rendering"]["roles"]["border"].get<std::string>()
     );
 
     // Player paddle.
-    for (int i = 0; i < PADDLE_HEIGHT; i++)
+    for (int i = 0; i < pongConfig["game"]["paddle"]["height"].get<int>(); i++)
     {
-        objects.push_back({ Position(PLAYER_PADDLE_X, state.playerPaddleY + i), '|', ThemeRoles::Paddle });
+        objects.push_back({
+            Position(pongConfig["game"]["paddle"]["player_x"].get<int>(), state.playerPaddleY + i),
+            ascii["paddle"].get<std::string>()[0],
+            pongConfig["game"]["rendering"]["roles"]["paddle"].get<std::string>()
+            });
     }
 
     // Opponent paddle.
-    for (int i = 0; i < PADDLE_HEIGHT; i++)
+    for (int i = 0; i < pongConfig["game"]["paddle"]["height"].get<int>(); i++)
     {
-        objects.push_back({ Position(OPPONENT_PADDLE_X, state.opponentPaddleY + i), '|', ThemeRoles::Paddle });
+        objects.push_back({
+            Position(pongConfig["game"]["paddle"]["opponent_x"].get<int>(), state.opponentPaddleY + i),
+            ascii["paddle"].get<std::string>()[0],
+            pongConfig["game"]["rendering"]["roles"]["paddle"].get<std::string>()
+            });
     }
 
     // Ball.
-    objects.push_back({ Position(state.ballPosX, state.ballPosY), 'O', ThemeRoles::Ball });
+    objects.push_back({Position(state.ballPosX, state.ballPosY), 
+        ascii["ball"].get<std::string>()[0],  
+        pongConfig["game"]["rendering"]["roles"]["ball"].get<std::string>()});
 
     // Submit objects to the renderer.
     render.DrawObjects(objects);
 
     // Draw controls.
-    render.DrawText(0, FIELD_HEIGHT + CONTROLS_ROW_OFFSET, "W/S: Move Paddle    ESC: Exit", ThemeRoles::UI);
+    render.DrawText(0, 
+        pongConfig["game"]["field"]["height"].get<int>() + pongConfig["game"]["rendering"]["controls_row_offset"].get<int>(),
+        pongConfig["game"]["controls"]["display_text"].get<std::string>(), ThemeRoles::UI);
 
     // Present completed frame.
     render.PresentFrame();
@@ -388,26 +416,39 @@ void PONG::CheckGameOver()//checks whether the game has ended
     // Check whether the player has won.
     if (playerScore >= winningScore)
     {
-        Colors::Print("\nYOU WIN!!!\n", ui.foreground);
+        Colors::Print(pongConfig["game"]["rendering"]["messages"]["player_wins"].get<std::string>(), ui.foreground);
         running = false;
     }
 
     // Check whether the opponent has won.
     else if (opponentScore >= winningScore)
     {
-        Colors::Print("\nYOU LOSE!!!\n", ui.foreground);
+        Colors::Print(pongConfig["game"]["rendering"]["messages"]["opponent_wins"].get<std::string>(), ui.foreground);
         running = false;
     }
 
     if (!running)
     {
         Colors::SetBackground(Colors::Color::Black);
-        render.SetCursorPosition(0, FIELD_HEIGHT + RENDER_EXTRA_HEIGHT);
 
-        Colors::Print("Final Score: " + std::to_string(playerScore) + " - " 
-            + std::to_string(opponentScore) + "\n", ui.foreground);
+        render.SetCursorPosition(
+            0,
+            pongConfig["game"]["field"]["height"].get<int>() +
+            pongConfig["game"]["rendering"]["extra_height"].get<int>()
+        );
 
-        Colors::Print("Press any key to return to the menu.\n", ui.foreground);
+        Colors::Print(
+            pongConfig["game"]["rendering"]["messages"]["final_score"].get<std::string>() +
+            std::to_string(playerScore) + " - " +
+            std::to_string(opponentScore) + "\n",
+            ui.foreground
+        );
+
+        Colors::Print(
+            pongConfig["game"]["rendering"]["messages"]["return_prompt"].get<std::string>(),
+            ui.foreground
+        );
+
         InputHelper::GetKey();
 
         system("cls");
