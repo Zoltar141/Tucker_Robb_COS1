@@ -31,6 +31,20 @@ constexpr int FIELD_RIGHT_EDGE = FIELD_WIDTH - 1;
 constexpr int PLAYER_PADDLE_X = 2;
 constexpr int OPPONENT_PADDLE_X = FIELD_WIDTH - 3;
 
+struct PongState
+{
+    int ballPosX;
+    int ballPosY;
+    int ballVelX;
+    int ballVelY;
+    int playerPaddleY;
+    int opponentPaddleY;
+    int playerScore;
+    int opponentScore;
+    int winningScore;
+};
+
+
 
 PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManager
     : themeManager(themeManager), render(themeManager)
@@ -173,80 +187,88 @@ void PONG::HandleInput()// Processes player keyboard input.
     }
 
     runtime.SetStateValue("player_paddle_y", playerPaddle);
-    runtime.SetStateValue("player_paddle_y", playerPaddle);
 }
+
+PongState LoadGameState(WonkleRuntime& runtime)
+{
+    PongState state{};
+
+    runtime.GetStateValue("ball_position_x", state.ballPosX);
+    runtime.GetStateValue("ball_position_y", state.ballPosY);
+    runtime.GetStateValue("ball_velocity_x", state.ballVelX);
+    runtime.GetStateValue("ball_velocity_y", state.ballVelY);
+    runtime.GetStateValue("player_paddle_y", state.playerPaddleY);
+    runtime.GetStateValue("opponent_paddle_y", state.opponentPaddleY);
+    runtime.GetStateValue("player_score", state.playerScore);
+    runtime.GetStateValue("opponent_score", state.opponentScore);
+    runtime.GetStateValue("winning_score", state.winningScore);
+
+    return state;
+}
+
 
 void PONG::UpdateGame()// Advances the game state.
 
 {
-    int ballPosX = 0;
-    int ballPosY = 0;
-    int ballVelocityX = 0;
-    int ballVelocityY = 0;
-    int opponentPaddle = 0;
-    int playerPaddle = 0;
+   
 
     // Retrieve current game state.
-    runtime.GetStateValue("ball_position_x", ballPosX);
-    runtime.GetStateValue("ball_position_y", ballPosY);
-    runtime.GetStateValue("ball_velocity_x", ballVelocityX);
-    runtime.GetStateValue("ball_velocity_y", ballVelocityY);
-    runtime.GetStateValue("opponent_paddle_y", opponentPaddle);
-    runtime.GetStateValue("player_paddle_y", playerPaddle);
+    PongState state = LoadGameState(runtime);
+
 
     // Move the ball using its current velocity.
-    ballPosX += ballVelocityX;
-    ballPosY += ballVelocityY;
+    state.ballPosX += state.ballVelX;
+    state.ballPosY += state.ballVelY;
 
     // Check for boundary collisions.
     Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_BOTTOM);
 
-    BoundarySide collision = Collision::CheckBoundary(Position(ballPosX, ballPosY), boundary);
+    BoundarySide collision = Collision::CheckBoundary(Position(state.ballPosX, state.ballPosY), boundary);
 
     if (collision == BoundarySide::Top || collision == BoundarySide::Bottom)
     {
-        ballVelocityY *= -1;
+        state.ballVelY *= -1;
     }
 
     // Player paddle collision.
-    bool playerPaddleCollision = Collision::CheckRectangle(Position(ballPosX, ballPosY), Position(0, playerPaddle), PADDLE_WIDTH, PADDLE_HEIGHT);
+    bool playerPaddleCollision = Collision::CheckRectangle(Position(state.ballPosX, state.ballPosY), Position(0, state.playerPaddleY), PADDLE_WIDTH, PADDLE_HEIGHT);
 
-    if (ballVelocityX < 0 && playerPaddleCollision)
+    if (state.ballVelX < 0 && playerPaddleCollision)
     {
-        ballVelocityX = 1;
+        state.ballVelX = 1;
 
         // Calculate where the ball hits the paddle.
-        int hitPosition = ballPosY - playerPaddle;
+        int hitPosition = state.ballPosY - state.playerPaddleY;
 
         // Determine vertical ball direction.
         if (hitPosition < PADDLE_HEIGHT / 2)
         {
-            ballVelocityY = -1;
+            state.ballVelY = -1;
         }
         else if (hitPosition > PADDLE_HEIGHT / 2)
         {
-            ballVelocityY = 1;
+            state.ballVelY = 1;
         }
     }
 
     // Opponent paddle collision.
-    bool opponentPaddleCollision = Collision::CheckRectangle(Position(ballPosX, ballPosY), Position(FIELD_WIDTH - PADDLE_WIDTH, opponentPaddle), PADDLE_WIDTH, PADDLE_HEIGHT);
+    bool opponentPaddleCollision = Collision::CheckRectangle(Position(state.ballPosX, state.ballPosY), Position(FIELD_WIDTH - PADDLE_WIDTH, state.opponentPaddleY), PADDLE_WIDTH, PADDLE_HEIGHT);
 
-    if (ballVelocityX > 0 && opponentPaddleCollision)
+    if (state.ballVelX > 0 && opponentPaddleCollision)
     {
-        ballVelocityX = -1;
+        state.ballVelX = -1;
 
         // Calculate where the ball hits the paddle.
-        int hitPosition = ballPosY - opponentPaddle;
+        int hitPosition = state.ballPosY - state.opponentPaddleY;
 
         // Determine vertical ball direction.
         if (hitPosition < PADDLE_HEIGHT / 2)
         {
-            ballVelocityY = -1;
+            state.ballVelY = -1;
         }
         else if (hitPosition > PADDLE_HEIGHT / 2)
         {
-            ballVelocityY = 1;
+            state.ballVelY = 1;
         }
     }
 
@@ -254,74 +276,64 @@ void PONG::UpdateGame()// Advances the game state.
     if (rand() % OPPONENT_MISS_CHANCE != 0)
     {
         // Move the opponent paddle toward the ball.
-        if (opponentPaddle + PADDLE_HEIGHT / 2 < ballPosY)
+        if (state.opponentPaddleY + PADDLE_HEIGHT / 2 < state.ballPosY)
         {
-            opponentPaddle++;
+            state.opponentPaddleY++;
         }
-        else if (opponentPaddle + PADDLE_HEIGHT / 2 > ballPosY)
+        else if (state.opponentPaddleY + PADDLE_HEIGHT / 2 > state.ballPosY)
         {
-            opponentPaddle--;
+            state.opponentPaddleY--;
         }
     }
 
     // Keep the opponent paddle inside the field.
-    if (opponentPaddle < PADDLE_TOP_LIMIT)
+    if (state.opponentPaddleY < PADDLE_TOP_LIMIT)
     {
-        opponentPaddle = PADDLE_TOP_LIMIT;
+        state.opponentPaddleY = PADDLE_TOP_LIMIT;
     }
-    else if (opponentPaddle > PADDLE_BOTTOM_LIMIT)
+    else if (state.opponentPaddleY > PADDLE_BOTTOM_LIMIT)
     {
-        opponentPaddle = PADDLE_BOTTOM_LIMIT;
+        state.opponentPaddleY = PADDLE_BOTTOM_LIMIT;
     }
 
     // Store updated ball velocity.
-    runtime.SetStateValue("ball_velocity_x", ballVelocityX);
-    runtime.SetStateValue("ball_velocity_y", ballVelocityY);
+    runtime.SetStateValue("ball_velocity_x", state.ballVelX);
+    runtime.SetStateValue("ball_velocity_y", state.ballVelY);
 
     // Store updated game values.
-    runtime.SetStateValue("ball_position_x", ballPosX);
-    runtime.SetStateValue("ball_position_y", ballPosY);
-    runtime.SetStateValue("opponent_paddle_y", opponentPaddle);
+    runtime.SetStateValue("ball_position_x", state.ballPosX);
+    runtime.SetStateValue("ball_position_y", state.ballPosY);
+    runtime.SetStateValue("opponent_paddle_y", state.opponentPaddleY);
 
     // Evaluate registered gameplay rules.
     runtime.Update();
 
     // Retrieve values after runtime rules have been applied.
-    runtime.GetStateValue("ball_position_x", ballPosX);
-    runtime.GetStateValue("ball_position_y", ballPosY);
-    runtime.GetStateValue("ball_velocity_x", ballVelocityX);
-    runtime.GetStateValue("ball_velocity_y", ballVelocityY);
+    runtime.GetStateValue("ball_position_x", state.ballPosX);
+    runtime.GetStateValue("ball_position_y", state.ballPosY);
+    runtime.GetStateValue("ball_velocity_x", state.ballVelX);
+    runtime.GetStateValue("ball_velocity_y", state.ballVelY);
 
     // Keep ball inside the vertical boundaries.
-    if (ballPosY < PLAYFIELD_TOP)
+    if (state.ballPosY < PLAYFIELD_TOP)
     {
-        ballPosY = PLAYFIELD_TOP;
+        state.ballPosY = PLAYFIELD_TOP;
     }
-    else if (ballPosY > PLAYFIELD_BOTTOM)
+    else if (state.ballPosY > PLAYFIELD_BOTTOM)
     {
-        ballPosY = PLAYFIELD_BOTTOM;
+        state.ballPosY = PLAYFIELD_BOTTOM;
     }
 
-    runtime.SetStateValue("ball_position_y", ballPosY);
+    runtime.SetStateValue("ball_position_y", state.ballPosY);
 }
 
 
 void PONG::RenderGame()
 {
-    int ballPosX = 0;
-    int ballPosY = 0;
-    int playerPaddle = 0;
-    int opponentPaddle = 0;
-    int playerScore = 0;
-    int opponentScore = 0;
+    
 
     // Retrieve current game state.
-    runtime.GetStateValue("ball_position_x", ballPosX);
-    runtime.GetStateValue("ball_position_y", ballPosY);
-    runtime.GetStateValue("player_paddle_y", playerPaddle);
-    runtime.GetStateValue("opponent_paddle_y", opponentPaddle);
-    runtime.GetStateValue("player_score", playerScore);
-    runtime.GetStateValue("opponent_score", opponentScore);
+    PongState state = LoadGameState(runtime);
 
     render.SetBackground();
 
@@ -332,7 +344,7 @@ void PONG::RenderGame()
     render.BeginFrame(FIELD_WIDTH, FIELD_HEIGHT + RENDER_EXTRA_HEIGHT, ThemeRoles::Background, WORLD_VERTICAL_OFFSET);
 
     // Draw scoreboard.
-    render.DrawText( 0, FIELD_HEIGHT + CONTROLS_ROW_OFFSET, "PLAYER: " + std::to_string(playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(opponentScore), ThemeRoles::UI);
+    render.DrawText( 0, 0, "PLAYER: " + std::to_string(state.playerScore) + "  \t\t\t\tOPPONENT: " + std::to_string(state.opponentScore), ThemeRoles::UI);
 
     Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_TOP);
 
@@ -341,17 +353,17 @@ void PONG::RenderGame()
     // Player paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({ Position(PLAYER_PADDLE_X, playerPaddle + i), '|', ThemeRoles::Paddle });
+        objects.push_back({ Position(PLAYER_PADDLE_X, state.playerPaddleY + i), '|', ThemeRoles::Paddle });
     }
 
     // Opponent paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)
     {
-        objects.push_back({ Position(OPPONENT_PADDLE_X, opponentPaddle + i), '|', ThemeRoles::Paddle });
+        objects.push_back({ Position(OPPONENT_PADDLE_X, state.opponentPaddleY + i), '|', ThemeRoles::Paddle });
     }
 
     // Ball.
-    objects.push_back({ Position(ballPosX, ballPosY), 'O', ThemeRoles::Ball });
+    objects.push_back({ Position(state.ballPosX, state.ballPosY), 'O', ThemeRoles::Ball });
 
     // Submit objects to the renderer.
     render.DrawObjects(objects);
