@@ -125,3 +125,28 @@ bool FileBoss::ReadJSON(const std::string& filePath, nlohmann::json& jsonData)
 
     return true;
 }
+
+////MAGIC json reader test to find where i made a syntax error in the json
+//bool FileBoss::ReadJSON(const std::string& filePath, nlohmann::json& jsonData)
+//{
+//    std::ifstream file(filePath);
+//
+//    if (!file.is_open())
+//    {
+//        std::cerr << "FAILED TO OPEN: " << filePath << '\n';
+//        std::cerr << "Working directory: "
+//            << std::filesystem::current_path() << '\n';
+//        return false;
+//    }
+//
+//    try
+//    {
+//        file >> jsonData;
+//        return true;
+//    }
+//    catch (const nlohmann::json::parse_error& error)
+//    {
+//        std::cerr << "JSON PARSE ERROR: " << error.what() << '\n';
+//        return false;
+//    }
+//}

@@ -36,6 +36,11 @@ void Render::SetBackground()
     Colors::SetBackground(background.background);
 }
 
+void Render::SetConfiguration(const nlohmann::json& config)
+{
+    configuration = config;
+}
+
 // Starts a new frame.
 void Render::BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY, const Position& framePosition)
 {

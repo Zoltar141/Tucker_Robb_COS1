@@ -55,6 +55,7 @@ PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManag
     {
         throw std::runtime_error("Failed to load pong.json");
     }
+    render.SetConfiguration(pongConfig["game"]["rendering"]);
 }
 
 void PONG::Run()//controls the game loop
@@ -337,7 +338,12 @@ void PONG::RenderGame()
 
     Boundary boundary(FIELD_WIDTH, FIELD_HEIGHT, 0, PLAYFIELD_TOP, FIELD_RIGHT_EDGE, PLAYFIELD_TOP);
 
-    boundary.Draw(render, objects);
+    const auto& ascii = pongConfig["game"]["rendering"]["ascii"];
+
+    boundary.Draw(render, objects, ascii["top_border"].get<std::string>()[0],
+        ascii["bottom_border"].get<std::string>()[0], ascii["vertical_border"].get<std::string>()[0],
+        pongConfig["game"]["rendering"]["border_role"].get<std::string>()
+    );
 
     // Player paddle.
     for (int i = 0; i < PADDLE_HEIGHT; i++)

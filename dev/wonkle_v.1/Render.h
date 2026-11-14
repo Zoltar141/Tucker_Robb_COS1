@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Position.h"
+#include <nlohmann/json.hpp>
 
 struct RenderObject
 {
@@ -31,6 +32,8 @@ public:
 
     void DrawObjects(const std::vector<RenderObject>& objects);
 
+    void SetConfiguration(const nlohmann::json& config);
+
 
 private:
     ThemeManager& themeManager;
@@ -52,4 +55,5 @@ private:
     int worldOffsetY = 0;
 
     ThemeColor GetThemeColor(const std::string& role);
+    nlohmann::json configuration;
 };

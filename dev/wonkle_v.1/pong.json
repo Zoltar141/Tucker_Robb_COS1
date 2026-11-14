@@ -28,103 +28,113 @@
     "rendering": {
       "extra_height": 4,
       "controls_row_offset": 3,
-      "world_vertical_offset": 2
-    },
-    "initial_state": {
-      "ball": {
-        "position": {
-          "x": 40,
-          "y": 12
+      "world_vertical_offset": 2,
+      "border_role": "Border",
+      "ascii": {
+        "ball": "O",
+        "paddle": "|",
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|",
+        "corner": "+"
+      }
+      },
+      "initial_state": {
+        "ball": {
+          "position": {
+            "x": 40,
+            "y": 12
+          },
+          "velocity": {
+            "x": 1,
+            "y": 1
+          }
         },
-        "velocity": {
-          "x": 1,
-          "y": 1
+        "paddles": {
+          "player_y": 10,
+          "opponent_y": 10
+        },
+        "score": {
+          "player": 0,
+          "opponent": 0
         }
       },
-      "paddles": {
-        "player_y": 10,
-        "opponent_y": 10
-      },
-      "score": {
-        "player": 0,
-        "opponent": 0
-      }
-    },
-    "rules": [
-      {
-        "name": "opponent_scores",
-        "conditions": [
-          {
-            "key": "ball_position_x",
-            "comparison": "LessEqual",
-            "value": 1
-          }
-        ],
-        "transformations": [
-          {
-            "key": "opponent_score",
-            "operation": "Add",
-            "value": 1
-          },
-          {
-            "key": "ball_position_x",
-            "operation": "Assign",
-            "value": 40
-          },
-          {
-            "key": "ball_position_y",
-            "operation": "Assign",
-            "value": 12
-          },
-          {
-            "key": "ball_velocity_x",
-            "operation": "Assign",
-            "value": 1
-          },
-          {
-            "key": "ball_velocity_y",
-            "operation": "Assign",
-            "value": 1
-          }
-        ]
-      },
-      {
-        "name": "player_scores",
-        "conditions": [
-          {
-            "key": "ball_position_x",
-            "comparison": "GreaterEqual",
-            "value": 78
-          }
-        ],
-        "transformations": [
-          {
-            "key": "player_score",
-            "operation": "Add",
-            "value": 1
-          },
-          {
-            "key": "ball_position_x",
-            "operation": "Assign",
-            "value": 40
-          },
-          {
-            "key": "ball_position_y",
-            "operation": "Assign",
-            "value": 12
-          },
-          {
-            "key": "ball_velocity_x",
-            "operation": "Assign",
-            "value": -1
-          },
-          {
-            "key": "ball_velocity_y",
-            "operation": "Assign",
-            "value": 1
-          }
-        ]
-      }
-    ]
+      "rules": [
+        {
+          "name": "opponent_scores",
+          "conditions": [
+            {
+              "key": "ball_position_x",
+              "comparison": "LessEqual",
+              "value": 1
+            }
+          ],
+          "transformations": [
+            {
+              "key": "opponent_score",
+              "operation": "Add",
+              "value": 1
+            },
+            {
+              "key": "ball_position_x",
+              "operation": "Assign",
+              "value": 40
+            },
+            {
+              "key": "ball_position_y",
+              "operation": "Assign",
+              "value": 12
+            },
+            {
+              "key": "ball_velocity_x",
+              "operation": "Assign",
+              "value": 1
+            },
+            {
+              "key": "ball_velocity_y",
+              "operation": "Assign",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "player_scores",
+          "conditions": [
+            {
+              "key": "ball_position_x",
+              "comparison": "GreaterEqual",
+              "value": 78
+            }
+          ],
+          "transformations": [
+            {
+              "key": "player_score",
+              "operation": "Add",
+              "value": 1
+            },
+            {
+              "key": "ball_position_x",
+              "operation": "Assign",
+              "value": 40
+            },
+            {
+              "key": "ball_position_y",
+              "operation": "Assign",
+              "value": 12
+            },
+            {
+              "key": "ball_velocity_x",
+              "operation": "Assign",
+              "value": -1
+            },
+            {
+              "key": "ball_velocity_y",
+              "operation": "Assign",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
   }
 }

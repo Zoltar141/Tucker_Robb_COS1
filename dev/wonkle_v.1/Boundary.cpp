@@ -7,31 +7,24 @@ Boundary::Boundary(int width, int height, int left, int top, int right, int bott
 {
 }
 
-void Boundary::Draw(Render& render, std::vector<RenderObject>& objects)
+void Boundary::Draw(Render& render, std::vector<RenderObject>& objects, char topCharacter,
+    char bottomCharacter, char verticalCharacter, const std::string& role)
 {
     // Top boundary.
     for (int i = 0; i < width; i++)
-    {
-        objects.push_back({ Position(i, TOP_BOUNDARY_OFFSET), '_', ThemeRoles::Border });
-    }
+        objects.push_back({ Position(i, TOP_BOUNDARY_OFFSET), topCharacter, role });
 
     // Bottom boundary.
     for (int i = 0; i < width; i++)
-    {
-        objects.push_back({ Position(i, height), '-', ThemeRoles::Border });
-    }
+        objects.push_back({ Position(i, height), bottomCharacter, role });
 
     // Left boundary.
     for (int j = 0; j < height; j++)
-    {
-        objects.push_back({ Position(0, j), '|', ThemeRoles::Border });
-    }
+        objects.push_back({ Position(0, j), verticalCharacter, role });
 
     // Right boundary.
     for (int j = 0; j < height; j++)
-    {
-        objects.push_back({ Position(width - 1, j), '|', ThemeRoles::Border });
-    }
+        objects.push_back({ Position(width - 1, j), verticalCharacter, role });
 }
 
 int Boundary::GetWidth() const

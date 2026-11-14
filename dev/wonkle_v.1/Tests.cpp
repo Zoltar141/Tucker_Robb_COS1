@@ -1143,7 +1143,12 @@ void RunBoundaryTests()
     Render render(themes);
     std::vector<RenderObject> objects;
 
-    boundary.Draw(render, objects);
+    boundary.Draw(render, objects,
+        '_',   // top border
+        '-',   // bottom border
+        '|',   // vertical border
+        "Border"
+    );
 
     int expectedCount = (80 * 2) + (25 * 2);
 
