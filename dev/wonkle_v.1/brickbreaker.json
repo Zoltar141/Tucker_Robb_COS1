@@ -68,7 +68,12 @@
         "paddle": "Paddle",
         "ball": "Ball",
         "brick": "Brick",
-        "ui": "UI"
+        "ui": "UI",
+        "brick_1": "Brick1",
+        "brick_2": "Brick2",
+        "brick_3": "Brick3",
+        "brick_4": "Brick4",
+        "brick_5": "Brick5"
       },
       "scoreboard": {
         "score_label": "SCORE:",

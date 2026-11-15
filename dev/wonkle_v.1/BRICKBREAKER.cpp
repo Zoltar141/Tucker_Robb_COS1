@@ -403,10 +403,15 @@ void BRICKBREAKER::RenderGame()
         {
             if (brickRows[row][i] > EMPTY_BRICK)
             {
+                int hitsRemaining = brickRows[row][i] - EMPTY_BRICK;
+
+                std::string brickRole = brickBreakerConfig["game"]["rendering"]["roles"]
+                    ["brick_" + std::to_string(hitsRemaining)].get<std::string>();
+
                 render.DrawCharacter(bricks["origin_x"].get<int>() + i,
                     bricks["origin_y"].get<int>() + row + brickBreakerConfig["game"]["rendering"]["world_vertical_offset"].get<int>(),
                     static_cast<char>(ascii["brick"].get<int>()),
-                    brickBreakerConfig["game"]["rendering"]["roles"]["brick"].get<std::string>());
+                    brickRole);
             }
         }
     }
