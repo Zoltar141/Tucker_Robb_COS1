@@ -307,6 +307,12 @@ void BRICKBREAKER::UpdateGame()// Advances the game state.
         brickHits = brickRows[brickRow][brickColumn] - EMPTY_BRICK;
     }
 
+    // Move the ball back outside the brick after a collision.
+    if (brickAreaCollision && brickHits > 0)
+    {
+        state.ballPosY -= state.ballVelY;
+    }
+
     // Store updated ball velocity.
     runtime.SetStateValue("ball_velocity_x", state.ballVelX);
     runtime.SetStateValue("ball_velocity_y", state.ballVelY);
