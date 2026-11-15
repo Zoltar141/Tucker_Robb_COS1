@@ -70,15 +70,18 @@
       }
     },
     "initial_state": {
-      "head": {
-        "x": 10,
-        "y": 10
-      },
-      "direction": {
-        "x": 1,
-        "y": 0
-      },
+      "head_x": 10,
+      "head_y": 10,
+      "direction_x": 1,
+      "direction_y": 0,
+      "requested_direction_x": 1,
+      "requested_direction_y": 0,
+      "snake_length": 4,
       "score": 0,
+      "winning_score": 300,
+      "food_x": -1,
+      "food_y": -1,
+      "body_under_head": 0,
       "game_won": 0,
       "game_lost": 0
     },

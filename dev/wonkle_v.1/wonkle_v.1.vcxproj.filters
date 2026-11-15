@@ -66,6 +66,9 @@
     <ClCompile Include="SNAKE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WonkleRuntime.h">
@@ -114,6 +117,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SNAKE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

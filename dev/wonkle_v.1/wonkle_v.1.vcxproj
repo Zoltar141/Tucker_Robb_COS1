@@ -144,6 +144,7 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Colors.cpp" />
     <ClCompile Include="FileBoss.cpp" />
+    <ClCompile Include="GameController.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="InputHelper.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="FileBoss.h" />
+    <ClInclude Include="GameController.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InputHelper.h" />
     <ClInclude Include="Menu.h" />

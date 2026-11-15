@@ -96,20 +96,14 @@
       }
     },
     "initial_state": {
-      "ball": {
-        "position": {
-          "x": 40,
-          "y": 20
-        },
-        "velocity": {
-          "x": 1,
-          "y": -1
-        }
-      },
-      "paddle": {
-        "player_x": 36
-      },
+      "ball_position_x": 40,
+      "ball_position_y": 20,
+      "ball_velocity_x": 1,
+      "ball_velocity_y": -1,
+      "player_paddle_x": 36,
       "score": 0,
+      "bricks_remaining": 0,
+      "brick_hits": 0,
       "game_won": 0,
       "game_lost": 0
     },
