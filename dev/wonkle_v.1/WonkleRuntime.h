@@ -7,13 +7,13 @@
 
 struct Operand
 {
-    int literal = 0;
+    double literal = 0.0;
     std::string stateKey;
     bool isStateReference = false;
 
     Operand() = default;
 
-    Operand(int value)
+    Operand(double value)
         : literal(value)
     {
     }
@@ -72,8 +72,10 @@ public:
 
     WonkleRuntime();//defaut for now
 
-    void SetStateValue(const std::string& key, int value);//example WonkleRuntime.SetStateValue("score", 0);       
-    bool GetStateValue(const std::string& key, int& value) const;//a missing key won't automatically create a new state entry.
+    void SetStateValue(const std::string& key, int value);
+    void SetStateValue(const std::string& key, double value);//example WonkleRuntime.SetStateValue("score", 0); 
+    bool GetStateValue(const std::string& key, int& value) const;
+    bool GetStateValue(const std::string& key, double& value) const;//a missing key won't automatically create a new state entry.
 
     void AddRule(const Rule& rule);//Register a rule for the runtime to evaluate during its update cycle.
     void LoadRules(const nlohmann::json& ruleData);

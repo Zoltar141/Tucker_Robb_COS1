@@ -33,14 +33,32 @@ WonkleRuntime::WonkleRuntime()//blank game state
 {
 }
 
-void WonkleRuntime::SetStateValue(const std::string& key, int value)//works as before but now pulls from current state
+void WonkleRuntime::SetStateValue(const std::string& key, int value)
 {
     currentState.SetValue(key, value);
 }
 
-bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const//works as before but now pulls from current state
+void WonkleRuntime::SetStateValue(const std::string& key, double value)//works as before but now pulls from current state
+{
+    currentState.SetValue(key, value);
+}
+
+bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const
 {
     return currentState.GetValue(key, value);
+}
+
+bool WonkleRuntime::GetStateValue(const std::string& key, double& value) const
+{
+    int storedValue = 0;
+
+    if (currentState.GetValue(key, storedValue))
+    {
+        value = storedValue;
+        return true;
+    }
+
+    return false;
 }
 
 void WonkleRuntime::LoadRules(const nlohmann::json& ruleData)
@@ -53,19 +71,42 @@ void WonkleRuntime::LoadRules(const nlohmann::json& ruleData)
 
         for (const auto& conditionData : ruleDataEntry.at("conditions"))
         {
+            Operand value;
+
+            if (conditionData.at("value").is_object())
+            {
+                value = Operand::State(conditionData.at("value").at("state").get<std::string>());
+            }
+            else
+            {
+                value = Operand(conditionData.at("value").get<double>());
+            }
+
             rule.conditions.push_back({
                 conditionData.at("key").get<std::string>(),
                 GetComparison(conditionData.at("comparison").get<std::string>()),
-                Operand(conditionData.at("value").get<int>())
+                value
                 });
         }
 
         for (const auto& transformationData : ruleDataEntry.at("transformations"))
         {
+            Operand value;
+
+            if (transformationData.at("value").is_object())
+            {
+                value = Operand::State(
+                    transformationData.at("value").at("state").get<std::string>());
+            }
+            else
+            {
+                value = Operand(transformationData.at("value").get<double>());
+            }
+
             rule.transformations.push_back({
                 transformationData.at("key").get<std::string>(),
                 GetOperation(transformationData.at("operation").get<std::string>()),
-                Operand(transformationData.at("value").get<int>())
+                value
                 });
         }
 
@@ -88,8 +129,8 @@ const GameState& WonkleRuntime::GetState() const//read only access
 
 bool WonkleRuntime::EvaluateCondition(const Condition& condition) const
 {
-    int value = 0;
-    int comparisonValue = condition.value.literal;
+    double value = 0.0;
+    double comparisonValue = condition.value.literal;
 
     // Retrieve the state value being evaluated.
     if (!GetStateValue(condition.key, value))
@@ -133,7 +174,7 @@ bool WonkleRuntime::EvaluateCondition(const Condition& condition) const
 
 void WonkleRuntime::ApplyTransformation(const Transformation& transformation)
 {
-    int operandValue = transformation.value.literal;
+    double operandValue = transformation.value.literal;
 
     // Resolve the operand.
     if (transformation.value.isStateReference)
@@ -151,7 +192,7 @@ void WonkleRuntime::ApplyTransformation(const Transformation& transformation)
         return;
     }
 
-    int value = 0;
+    double value = 0;
 
     if (!GetStateValue(transformation.key, value))
     {

@@ -107,19 +107,23 @@ void PONG::InitializeGame()
 {
     const auto& initialState = pongConfig["game"]["initial_state"];
 
-    runtime.SetStateValue("ball_position_x", initialState["ball"]["position"]["x"]);
-    runtime.SetStateValue("ball_position_y", initialState["ball"]["position"]["y"]);
+    runtime.SetStateValue("ball_position_x", initialState["ball"]["position"]["x"].get<int>());
+    runtime.SetStateValue("ball_position_y", initialState["ball"]["position"]["y"].get<int>());
 
-    runtime.SetStateValue("ball_velocity_x", initialState["ball"]["velocity"]["x"]);
-    runtime.SetStateValue("ball_velocity_y", initialState["ball"]["velocity"]["y"]);
+    runtime.SetStateValue("ball_velocity_x", initialState["ball"]["velocity"]["x"].get<int>());
+    runtime.SetStateValue("ball_velocity_y", initialState["ball"]["velocity"]["y"].get<int>());
 
-    runtime.SetStateValue("player_paddle_y", initialState["paddles"]["player_y"]);
-    runtime.SetStateValue("opponent_paddle_y", initialState["paddles"]["opponent_y"]);
+    runtime.SetStateValue("player_paddle_y", initialState["paddles"]["player_y"].get<int>());
+    runtime.SetStateValue("opponent_paddle_y", initialState["paddles"]["opponent_y"].get<int>());
 
-    runtime.SetStateValue("player_score", initialState["score"]["player"]);
-    runtime.SetStateValue("opponent_score", initialState["score"]["opponent"]);
+    runtime.SetStateValue("player_score", initialState["score"]["player"].get<int>());
+    runtime.SetStateValue("opponent_score", initialState["score"]["opponent"].get<int>());
 
-    runtime.SetStateValue("winning_score", pongConfig["game"]["scoring"]["winning_score"]);
+    runtime.SetStateValue("winning_score", pongConfig["game"]["scoring"]["winning_score"].get<int>());
+
+    runtime.SetStateValue("opponent_reaction_timer", 0);
+    runtime.SetStateValue("opponent_reaction_delay",
+        pongConfig["game"]["opponent"]["reaction_delay_frames"].get<double>());
 }
 
 
@@ -130,7 +134,7 @@ void PONG::SetupRules()
 
 void PONG::HandleInput()// Processes player keyboard input.
 {
-    int playerPaddle= 0;
+    double playerPaddle= 0;
 
     runtime.GetStateValue("player_paddle_y", playerPaddle);//find position
 
@@ -257,21 +261,6 @@ void PONG::UpdateGame()// Advances the game state.
         else if (hitPosition > pongConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
             state.ballVelY = pongConfig["game"]["collision"]["lower_bounce_velocity_y"].get<int>();
-        }
-    }
-
-    // Give the opponent a chance to miss its movement.
-    if (pongConfig["game"]["opponent"]["follow_ball"].get<bool>() &&
-        rand() % pongConfig["game"]["opponent"]["miss_chance"].get<int>() != 0)
-    {
-        // Move the opponent paddle toward the ball.
-        if (state.opponentPaddleY + pongConfig["game"]["paddle"]["height"].get<int>() / 2 < state.ballPosY)
-        {
-            state.opponentPaddleY++;
-        }
-        else if (state.opponentPaddleY + pongConfig["game"]["paddle"]["height"].get<int>() / 2 > state.ballPosY)
-        {
-            state.opponentPaddleY--;
         }
     }
 
