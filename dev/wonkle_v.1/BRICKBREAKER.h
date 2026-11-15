@@ -1,41 +1,22 @@
 #pragma once
-#include "WonkleRuntime.h"
-#include "ThemeManager.h"
-#include "Render.h"
-#include "FileBoss.h"
+#include "GameController.h"
 #include <string>
 #include <vector>
 
-//so this is basically a copy of PONG.h but for brickbreaker
-// i will have to refactor and possibly make a game controller class 
-// for things that are duplicated
-
-class BRICKBREAKER
+class BRICKBREAKER : public GameController
 {
 public:
-    void Run();//controls gameloop
     BRICKBREAKER(ThemeManager& themeManager);
 
 private:
-    ThemeManager& themeManager;// theme addition
-    Render render;
-
-    WonkleRuntime runtime;//creates gamestate
-
-    bool running = false;
-
     // Game setup
-    void InitializeGame();//sets initial positions score bricks and velocities
-    void SetupRules();//regisers gameplay rules
+    void InitializeGame() override;//sets initial positions score bricks and velocities
 
     // Game systems
-    void HandleInput();//proccesses input
-    void UpdateGame();//advances the gamestate
-    void RenderGame();///shows it in console
-    void CheckGameOver();//win/loss check and restart
-
-    FileBoss fileBoss;
-    nlohmann::json brickBreakerConfig;
+    void HandleInput() override;//proccesses input
+    void UpdateGame() override;//advances the gamestate
+    void RenderGame() override;///shows it in console
+    void CheckGameOver() override;//win/loss check and restart
 
     std::vector<std::string> brickRows;//the bricks, each character is how many hits that brick has left
 };
