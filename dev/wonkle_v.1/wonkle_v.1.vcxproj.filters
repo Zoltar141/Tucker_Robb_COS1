@@ -60,6 +60,9 @@
     <ClCompile Include="FileBoss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BRICKBREAKER.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WonkleRuntime.h">
@@ -104,8 +107,14 @@
     <ClInclude Include="FileBoss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRICKBREAKER.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="brickbreaker.json" />
+    <None Include="pong.json" />
+    <None Include="themes.json" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include "Menu.h"
 #include <iostream>
 #include "PONG.h"
+#include "BRICKBREAKER.h"
 #include "InputHelper.h"
 #include "Theme.h"
 #include "ThemeManager.h"
@@ -52,13 +53,19 @@ void Menu::HandleSelection(int choice)
 
         PrintTheme(themeManager, "\n=== CHOOSE GAME ===\n", ThemeRoles::Border);
         PrintTheme(themeManager, "1. Pong\n", ThemeRoles::MenuText);
-        PrintTheme(themeManager, "2. Back\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "2. Brick Beaker\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "3. Back\n", ThemeRoles::MenuText);
 
-        gameChoice = InputHelper::GetInt("Selection: ", 1, 2);
+        gameChoice = InputHelper::GetInt("Selection: ", 1, 3);
 
         if (gameChoice == 1)
         {
             PONG game(themeManager);
+            game.Run();
+        }
+        else if (gameChoice == 2)
+        {
+            BRICKBREAKER game(themeManager);
             game.Run();
         }
 
