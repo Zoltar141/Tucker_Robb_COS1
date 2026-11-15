@@ -63,6 +63,9 @@
     <ClCompile Include="BRICKBREAKER.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SNAKE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WonkleRuntime.h">
@@ -110,11 +113,15 @@
     <ClInclude Include="BRICKBREAKER.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SNAKE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="brickbreaker.json" />
     <None Include="pong.json" />
     <None Include="themes.json" />
+    <None Include="snake.json" />
   </ItemGroup>
 </Project>

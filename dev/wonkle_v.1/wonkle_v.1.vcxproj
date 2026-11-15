@@ -151,6 +151,7 @@
     <ClCompile Include="PONG.cpp" />
     <ClCompile Include="Position.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="SNAKE.cpp" />
     <ClCompile Include="Tests.cpp" />
     <ClCompile Include="Theme.cpp" />
     <ClCompile Include="ThemeManager.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="PONG.h" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="Render.h" />
+    <ClInclude Include="SNAKE.h" />
     <ClInclude Include="Tests.h" />
     <ClInclude Include="Theme.h" />
     <ClInclude Include="ThemeManager.h" />
@@ -177,6 +179,7 @@
     <None Include="brickbreaker.json" />
     <None Include="packages.config" />
     <None Include="pong.json" />
+    <None Include="snake.json" />
     <None Include="themes.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,0 +1,233 @@
+{
+  "game": {
+    "name": "Snake",
+    "field": {
+      "width": 80,
+      "height": 20,
+      "top": 0,
+      "bottom": 19,
+      "right_edge": 79,
+      "left_edge": 0
+    },
+    "grid": {
+      "columns": 39,
+      "rows": 20,
+      "cell_width": 2,
+      "origin_x": 1
+    },
+    "snake": {
+      "starting_length": 4
+    },
+    "scoring": {
+      "winning_score": 300
+    },
+    "timing": {
+      "frame_delay_ms": 20,
+      "movement_interval_ms": 120
+    },
+    "controls": {
+      "up": 87,
+      "down": 83,
+      "left": 65,
+      "right": 68,
+      "exit": 27,
+      "restart": 82,
+      "display_text": "W/A/S/D: Move Snake    ESC: Exit"
+    },
+    "rendering": {
+      "extra_height": 4,
+      "scoreboard_column": 0,
+      "controls_row_offset": 3,
+      "controls_column": 0,
+      "world_vertical_offset": 2,
+      "scoreboard_row": 0,
+      "roles": {
+        "background": "Background",
+        "border": "Border",
+        "snake_head": "MenuHighlight",
+        "snake_body": "SnakeBody",
+        "food": "SnakeFood",
+        "ui": "UI"
+      },
+      "scoreboard": {
+        "score_label": "SCORE:",
+        "length_label": "LENGTH:",
+        "separator": "  \t\t\t\t"
+      },
+      "messages": {
+        "player_wins": "YOU WIN!!!",
+        "player_loses": "GAME OVER!!!",
+        "final_score": "  Final Score: ",
+        "restart_prompt": "    R: Restart    ESC: Menu"
+      },
+      "ascii": {
+        "snake_head": 219,
+        "snake_body": 219,
+        "food": 219,
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|"
+      }
+    },
+    "initial_state": {
+      "head": {
+        "x": 10,
+        "y": 10
+      },
+      "direction": {
+        "x": 1,
+        "y": 0
+      },
+      "score": 0,
+      "game_won": 0,
+      "game_lost": 0
+    },
+    "rules": [
+      {
+        "name": "hits_left_wall",
+        "conditions": [
+          {
+            "key": "head_x",
+            "comparison": "Less",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_right_wall",
+        "conditions": [
+          {
+            "key": "head_x",
+            "comparison": "Greater",
+            "value": 38
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_top_wall",
+        "conditions": [
+          {
+            "key": "head_y",
+            "comparison": "Less",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_bottom_wall",
+        "conditions": [
+          {
+            "key": "head_y",
+            "comparison": "Greater",
+            "value": 19
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_body",
+        "conditions": [
+          {
+            "key": "body_under_head",
+            "comparison": "Greater",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "eats_food",
+        "conditions": [
+          {
+            "key": "head_x",
+            "comparison": "Equal",
+            "value": {
+              "state": "food_x"
+            }
+          },
+          {
+            "key": "head_y",
+            "comparison": "Equal",
+            "value": {
+              "state": "food_y"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "snake_length",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "score",
+            "operation": "Add",
+            "value": 10
+          },
+          {
+            "key": "food_x",
+            "operation": "Assign",
+            "value": -1
+          },
+          {
+            "key": "food_y",
+            "operation": "Assign",
+            "value": -1
+          }
+        ]
+      },
+      {
+        "name": "player_wins",
+        "conditions": [
+          {
+            "key": "score",
+            "comparison": "GreaterEqual",
+            "value": {
+              "state": "winning_score"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_won",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  }
+}
