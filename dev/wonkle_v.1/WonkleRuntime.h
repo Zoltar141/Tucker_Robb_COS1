@@ -2,8 +2,30 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <nlohmann/json.hpp>
 #include "GameState.h"
 
+struct Operand
+{
+    double literal = 0.0;
+    std::string stateKey;
+    bool isStateReference = false;
+
+    Operand() = default;
+
+    Operand(double value)
+        : literal(value)
+    {
+    }
+
+    static Operand State(const std::string& key)
+    {
+        Operand operand;
+        operand.stateKey = key;
+        operand.isStateReference = true;
+        return operand;
+    }
+};
 
 enum class Comparison
 {
@@ -32,14 +54,14 @@ public:
     {
         std::string key;      //which value to inspect
         Comparison operation; //how to compare it 
-        int value;              //value to compare it against
+        Operand value;              //value to compare it against
     };
 
     struct Transformation  //how it should change the state
     {
         std::string key;    //which target to change 
         Operation operation;//how to change it 
-        int value;            //by how much
+        Operand value;            //by how much
     };
 
     struct Rule  //combines the condition and transformation 
@@ -50,10 +72,13 @@ public:
 
     WonkleRuntime();//defaut for now
 
-    void SetStateValue(const std::string& key, int value);//example WonkleRuntime.SetStateValue("score", 0);       
-    bool GetStateValue(const std::string& key, int& value) const;//a missing key won't automatically create a new state entry.
+    void SetStateValue(const std::string& key, int value);
+    void SetStateValue(const std::string& key, double value);//example WonkleRuntime.SetStateValue("score", 0); 
+    bool GetStateValue(const std::string& key, int& value) const;
+    bool GetStateValue(const std::string& key, double& value) const;//a missing key won't automatically create a new state entry.
 
     void AddRule(const Rule& rule);//Register a rule for the runtime to evaluate during its update cycle.
+    void LoadRules(const nlohmann::json& ruleData);
 
     void Update();//Evaluates the conditions for registered rules.
                   //Determines which rules apply.
@@ -64,7 +89,7 @@ public:
 
 private:
 
-    GameState current; //the current runState
+    GameState currentState; //the current runState
     std::vector<Rule> rules; //rules storage
 
     bool EvaluateCondition(const Condition& condition) const;//checks condtition for true

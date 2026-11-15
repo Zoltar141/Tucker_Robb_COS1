@@ -1,393 +1,227 @@
 #include "PONG.h"
 #include "InputHelper.h"
+#include "ThemeManager.h"
+#include "Colors.h"
+#include "Boundary.h"
+#include "Collision.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <Windows.h>
+#include <vector>
+#include <stdexcept>
+#include <filesystem>
+#include <string>
 
-const int FIELD_WIDTH = 80;
-const int FIELD_HEIGHT = 25;
-const int PADDLE_HEIGHT = 5;
-const int WINNING_SCORE = 10;
-
-void PONG::Run()//controls the game loop
+PONG::PONG(ThemeManager& themeManager)//constructor, connects PONG to ThemeManager
+    : GameController(themeManager, "pong.json")
 {
-    InitializeGame();
-    SetupRules();
-
-    running = true;
-
-    while (running)
-    {
-        HandleInput();
-        UpdateGame();
-        RenderGame();
-        CheckGameOver();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));//This prevents the game from running as fast as the processor allows.
-    }
 }
 
-void PONG::InitializeGame()//sets initial state values
+void PONG::InitializeGame()
 {
-    runtime.SetStateValue("ball_position_x", 40);
-    runtime.SetStateValue("ball_position_y", 12);
-
-    runtime.SetStateValue("ball_velocity_x", 1);
-    runtime.SetStateValue("ball_velocity_y", 1);
-
-    runtime.SetStateValue("player_paddle_y", 10);
-    runtime.SetStateValue("opponent_paddle_y", 10);
-
-    runtime.SetStateValue("player_score", 0);
-    runtime.SetStateValue("opponent_score", 0);
-
-    runtime.SetStateValue("winning_score", WINNING_SCORE);
+    // Every starting value comes from initial_state in pong.json.
+    SetInitialState();
 }
-
-
-void PONG::SetupRules()//egisters the gameplay rules
-{
-    // Rule 1: reverse ball direction when hitting the top wall
-    WonkleRuntime::Rule topWall;
-
-    topWall.conditions.push_back({
-    "ball_position_y",
-    Comparison::LessEqual,
-    1
-        });
-
-    topWall.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Multiply,
-        -1
-        });
-
-    runtime.AddRule(topWall);
-
-
-    // Rule 2: reverse ball direction when hitting the bottom wall
-    WonkleRuntime::Rule bottomWall;
-
-    bottomWall.conditions.push_back({
-        "ball_position_y",
-        Comparison::GreaterEqual,
-        FIELD_HEIGHT - 2
-        });
-
-    bottomWall.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Multiply,
-        -1
-        });
-
-    runtime.AddRule(bottomWall);
-
-
-    // Rule 3: award opponent a point when ball leaves the player side
-    WonkleRuntime::Rule leftScore;
-
-    leftScore.conditions.push_back({
-        "ball_position_x",
-        Comparison::LessEqual,
-        1
-        });
-
-    leftScore.transformations.push_back({
-        "opponent_score",
-        Operation::Add,
-        1
-        });
-
-    leftScore.transformations.push_back({
-        "ball_position_x",
-        Operation::Assign,
-        FIELD_WIDTH / 2
-        });
-
-    leftScore.transformations.push_back({
-        "ball_position_y",
-        Operation::Assign,
-        FIELD_HEIGHT / 2
-        });
-
-    leftScore.transformations.push_back({
-        "ball_velocity_x",
-        Operation::Assign,
-        1
-        });
-    leftScore.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Assign,
-        1
-        });
-
-    runtime.AddRule(leftScore);
-
-
-    // Rule 4: award player a point when ball leaves the opponet side
-    WonkleRuntime::Rule rightScore;
-
-    rightScore.conditions.push_back({
-        "ball_position_x",
-        Comparison::GreaterEqual,
-        FIELD_WIDTH - 2
-        });
-
-    rightScore.transformations.push_back({
-        "player_score",
-        Operation::Add,
-        1
-        });
-
-    rightScore.transformations.push_back({
-        "ball_position_x",
-        Operation::Assign,
-        FIELD_WIDTH / 2
-        });
-
-    rightScore.transformations.push_back({
-        "ball_position_y",
-        Operation::Assign,
-        FIELD_HEIGHT / 2
-        });
-
-    rightScore.transformations.push_back({
-        "ball_velocity_x",
-        Operation::Assign,
-        -1
-        });
-    rightScore.transformations.push_back({
-        "ball_velocity_y",
-        Operation::Assign,
-        1
-        });
-
-    runtime.AddRule(rightScore);
-}
-
 
 void PONG::HandleInput()// Processes player keyboard input.
 {
-    int playerY= 0;
+    double playerPaddle= 0;
 
-    runtime.GetStateValue("player_paddle_y", playerY);//find position
+    runtime.GetStateValue("player_paddle_y", playerPaddle);//find position
 
-    if (InputHelper::IsKeyPressed())
+    // Move paddle continuously while W or S is held.
+    if (InputHelper::IsKeyDown(gameConfig["game"]["controls"]["up"].get<int>()))
     {
-        char key = InputHelper::GetKey();
-
-        switch (key)
+        if (playerPaddle > gameConfig["game"]["paddle"]["top_limit"].get<int>())
         {
-        case 'w':
-        case 'W':
-            if (playerY > 0)// Move player paddle up.
-            {
-                playerY--;
-            }
-            break;
-        case 's':
-        case 'S':
-            if (playerY < FIELD_HEIGHT - PADDLE_HEIGHT)// Move player paddle down.
-            {
-                playerY++;
-            }
-            break;
-        case 27://esc key
-            // Exit the current game.
-            running = false;//can add save state here
-            break;
+            playerPaddle -= gameConfig["game"]["paddle"]["movement_step"].get<int>();
         }
     }
-    runtime.SetStateValue("player_paddle_y", playerY);
+
+    if (InputHelper::IsKeyDown(gameConfig["game"]["controls"]["down"].get<int>()))
+    {
+        if (playerPaddle < gameConfig["game"]["paddle"]["bottom_limit"].get<int>())
+        {
+            playerPaddle += gameConfig["game"]["paddle"]["movement_step"].get<int>();
+        }
+    }
+
+    // Exit the current game.
+    if (InputHelper::IsKeyDown(gameConfig["game"]["controls"]["exit"].get<int>()))
+    {
+        running = false;
+    }
+
+    runtime.SetStateValue("player_paddle_y", playerPaddle);
 }
 
 void PONG::UpdateGame()// Advances the game state.
-
 {
-    int ballX = 0;
-    int ballY = 0;
-    int ballVelocityX = 0;
-    int ballVelocityY = 0;
-    int opponentY = 0;
-    int playerY = 0;
-
     // Retrieve current game state.
-    runtime.GetStateValue("ball_position_x", ballX);
-    runtime.GetStateValue("ball_position_y", ballY);
-    runtime.GetStateValue("ball_velocity_x", ballVelocityX);
-    runtime.GetStateValue("ball_velocity_y", ballVelocityY);
-    runtime.GetStateValue("opponent_paddle_y", opponentY);
-    runtime.GetStateValue("player_paddle_y", playerY);
+    std::map<std::string, int> state = LoadGameState();
 
     // Move the ball using its current velocity.
-    ballX += ballVelocityX;
-    ballY += ballVelocityY;
+    state["ball_position_x"] += state["ball_velocity_x"];
+    state["ball_position_y"] += state["ball_velocity_y"];
+
+    Boundary boundary = GetBoundary();
+
+    BoundarySide collision = Collision::CheckBoundary(Position(state["ball_position_x"], state["ball_position_y"]), boundary);
+
+    if (collision == BoundarySide::Top || collision == BoundarySide::Bottom)
+    {
+        state["ball_velocity_y"] *= gameConfig["game"]["collision"]["vertical_boundary_bounce_multiplier"].get<int>();
+    }
 
     // Player paddle collision.
-    if (ballVelocityX < 0 &&
-        ballX <= 3 &&
-        ballY >= playerY &&
-        ballY < playerY + PADDLE_HEIGHT)
+    bool playerPaddleCollision = Collision::CheckRectangle(
+        Position(state["ball_position_x"], state["ball_position_y"]),
+        Position(gameConfig["game"]["paddle"]["player_x"].get<int>(), state["player_paddle_y"]),
+        gameConfig["game"]["paddle"]["width"].get<int>(),
+        gameConfig["game"]["paddle"]["height"].get<int>()
+    );
+
+    if (state["ball_velocity_x"] < 0 && playerPaddleCollision)
     {
-        ballVelocityX = 1;
+        state["ball_velocity_x"] = gameConfig["game"]["collision"]["player_bounce_velocity_x"].get<int>();
 
         // Calculate where the ball hits the paddle.
-        int hitPosition = ballY - playerY;
+        int hitPosition = state["ball_position_y"] - state["player_paddle_y"];
 
         // Determine vertical ball direction.
-        if (hitPosition < PADDLE_HEIGHT / 2)
+        if (hitPosition < gameConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            ballVelocityY = -1;
+            state["ball_velocity_y"] = gameConfig["game"]["collision"]["upper_bounce_velocity_y"].get<int>();
         }
-        else if (hitPosition > PADDLE_HEIGHT / 2)
+        else if (hitPosition > gameConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            ballVelocityY = 1;
+            state["ball_velocity_y"] = gameConfig["game"]["collision"]["lower_bounce_velocity_y"].get<int>();
         }
     }
 
     // Opponent paddle collision.
-    if (ballVelocityX > 0 &&
-        ballX >= FIELD_WIDTH - 4 &&
-        ballY >= opponentY &&
-        ballY < opponentY + PADDLE_HEIGHT)
+    bool opponentPaddleCollision = Collision::CheckRectangle(
+        Position(state["ball_position_x"], state["ball_position_y"]),
+        Position(gameConfig["game"]["paddle"]["opponent_x"].get<int>(), state["opponent_paddle_y"]),
+        gameConfig["game"]["paddle"]["width"].get<int>(),
+        gameConfig["game"]["paddle"]["height"].get<int>()
+    );
+
+    if (state["ball_velocity_x"] > 0 && opponentPaddleCollision)
     {
-        ballVelocityX = -1;
+        state["ball_velocity_x"] = gameConfig["game"]["collision"]["opponent_bounce_velocity_x"].get<int>();
 
         // Calculate where the ball hits the paddle.
-        int hitPosition = ballY - opponentY;
+        int hitPosition = state["ball_position_y"] - state["opponent_paddle_y"];
 
         // Determine vertical ball direction.
-        if (hitPosition < PADDLE_HEIGHT / 2)
+        if (hitPosition < gameConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            ballVelocityY = -1;
+            state["ball_velocity_y"] = gameConfig["game"]["collision"]["upper_bounce_velocity_y"].get<int>();
         }
-        else if (hitPosition > PADDLE_HEIGHT / 2)
+        else if (hitPosition > gameConfig["game"]["collision"]["paddle_hit_vertical_threshold"].get<int>())
         {
-            ballVelocityY = 1;
+            state["ball_velocity_y"] = gameConfig["game"]["collision"]["lower_bounce_velocity_y"].get<int>();
         }
-    }
-
-    // Move the opponent paddle toward the ball.
-    if (opponentY + PADDLE_HEIGHT / 2 < ballY)
-    {
-        opponentY++;
-    }
-    else if (opponentY + PADDLE_HEIGHT / 2 > ballY)
-    {
-        opponentY--;
     }
 
     // Keep the opponent paddle inside the field.
-    if (opponentY < 0)
+    if (state["opponent_paddle_y"] < gameConfig["game"]["paddle"]["top_limit"].get<int>())
     {
-        opponentY = 0;
+        state["opponent_paddle_y"] = gameConfig["game"]["paddle"]["top_limit"].get<int>();
     }
-    else if (opponentY > FIELD_HEIGHT - PADDLE_HEIGHT)
+    else if (state["opponent_paddle_y"] > gameConfig["game"]["paddle"]["bottom_limit"].get<int>())
     {
-        opponentY = FIELD_HEIGHT - PADDLE_HEIGHT;
+        state["opponent_paddle_y"] = gameConfig["game"]["paddle"]["bottom_limit"].get<int>();
     }
 
     // Store updated ball velocity.
-    runtime.SetStateValue("ball_velocity_x", ballVelocityX);
-    runtime.SetStateValue("ball_velocity_y", ballVelocityY);
+    runtime.SetStateValue("ball_velocity_x", state["ball_velocity_x"]);
+    runtime.SetStateValue("ball_velocity_y", state["ball_velocity_y"]);
 
     // Store updated game values.
-    runtime.SetStateValue("ball_position_x", ballX);
-    runtime.SetStateValue("ball_position_y", ballY);
-    runtime.SetStateValue("opponent_paddle_y", opponentY);
+    runtime.SetStateValue("ball_position_x", state["ball_position_x"]);
+    runtime.SetStateValue("ball_position_y", state["ball_position_y"]);
+    runtime.SetStateValue("opponent_paddle_y", state["opponent_paddle_y"]);
 
     // Evaluate registered gameplay rules.
     runtime.Update();
 
     // Retrieve values after runtime rules have been applied.
-    runtime.GetStateValue("ball_position_x", ballX);
-    runtime.GetStateValue("ball_position_y", ballY);
-    runtime.GetStateValue("ball_velocity_x", ballVelocityX);
-    runtime.GetStateValue("ball_velocity_y", ballVelocityY);
+    runtime.GetStateValue("ball_position_x", state["ball_position_x"]);
+    runtime.GetStateValue("ball_position_y", state["ball_position_y"]);
+    runtime.GetStateValue("ball_velocity_x", state["ball_velocity_x"]);
+    runtime.GetStateValue("ball_velocity_y", state["ball_velocity_y"]);
 
     // Keep ball inside the vertical boundaries.
-    if (ballY < 1)
+    if (state["ball_position_y"] < gameConfig["game"]["field"]["top"].get<int>())
     {
-        ballY = 1;
+        state["ball_position_y"] = gameConfig["game"]["field"]["top"].get<int>();
     }
-    else if (ballY > FIELD_HEIGHT - 2)
+    else if (state["ball_position_y"] > gameConfig["game"]["field"]["bottom"].get<int>())
     {
-        ballY = FIELD_HEIGHT - 2;
+        state["ball_position_y"] = gameConfig["game"]["field"]["bottom"].get<int>();
     }
 
-    runtime.SetStateValue("ball_position_y", ballY);
+    runtime.SetStateValue("ball_position_y", state["ball_position_y"]);
 }
 
 
-void PONG::RenderGame()//Displays the game in the console.
+void PONG::RenderGame()
 {
-    int ballX = 0;
-    int ballY = 0;
-    int playerY = 0;
-    int opponentY = 0;
-    int playerScore = 0;
-    int opponentScore = 0;
-
     // Retrieve current game state.
-    runtime.GetStateValue("ball_position_x", ballX);
-    runtime.GetStateValue("ball_position_y", ballY);
-    runtime.GetStateValue("player_paddle_y", playerY);
-    runtime.GetStateValue("opponent_paddle_y", opponentY);
-    runtime.GetStateValue("player_score", playerScore);
-    runtime.GetStateValue("opponent_score", opponentScore);
+    std::map<std::string, int> state = LoadGameState();
 
-    // Clear the console.
-    system("cls");
+    // Define game objects.
+    std::vector<RenderObject> objects;
 
-    // Display the scoreboard.
-    std::cout << "PLAYER: " << playerScore;
-    std::cout << "                 OPPONENT: " << opponentScore << "\n";
+    // Begin a new frame.
+    BeginFrame();
 
-    // Draw the top boundary.
-    for (int x = 0; x < FIELD_WIDTH; x++)
+    // Draw scoreboard.
+    DrawScoreboard(
+        gameConfig["game"]["rendering"]["scoreboard"]["player_label"].get<std::string>() + " " + std::to_string(state["player_score"]) +
+        gameConfig["game"]["rendering"]["scoreboard"]["separator"].get<std::string>() +
+        gameConfig["game"]["rendering"]["scoreboard"]["opponent_label"].get<std::string>() + " " + std::to_string(state["opponent_score"]));
+
+    const auto& ascii = gameConfig["game"]["rendering"]["ascii"];
+
+    DrawBoundary(objects);
+
+    // Player paddle.
+    for (int i = 0; i < gameConfig["game"]["paddle"]["height"].get<int>(); i++)
     {
-        std::cout << "-";
+        objects.push_back({
+            Position(gameConfig["game"]["paddle"]["player_x"].get<int>(), state["player_paddle_y"] + i),
+            ascii["paddle"].get<std::string>()[0],
+            gameConfig["game"]["rendering"]["roles"]["paddle"].get<std::string>()
+            });
     }
 
-    std::cout << "\n";
-
-    // Draw the playing field.
-    for (int y = 0; y < FIELD_HEIGHT; y++)
+    // Opponent paddle.
+    for (int i = 0; i < gameConfig["game"]["paddle"]["height"].get<int>(); i++)
     {
-        for (int x = 0; x < FIELD_WIDTH; x++)
-        {
-            if (x == 0 || x == FIELD_WIDTH - 1)
-            {
-                std::cout << "|";
-            }
-            else if (x == 2 && y >= playerY && y < playerY + PADDLE_HEIGHT)
-            {
-                std::cout << "|";
-            }
-            else if (x == FIELD_WIDTH - 3 && y >= opponentY && y < opponentY + PADDLE_HEIGHT)
-            {
-                std::cout << "|";
-            }
-            else if (x == ballX && y == ballY)
-            {
-                std::cout << "O";
-            }
-            else
-            {
-                std::cout << " ";
-            }
-        }
-
-        std::cout << "\n";
+        objects.push_back({
+            Position(gameConfig["game"]["paddle"]["opponent_x"].get<int>(), state["opponent_paddle_y"] + i),
+            ascii["paddle"].get<std::string>()[0],
+            gameConfig["game"]["rendering"]["roles"]["paddle"].get<std::string>()
+            });
     }
 
-    // Draw the bottom boundary.
-    for (int x = 0; x < FIELD_WIDTH; x++)
-    {
-        std::cout << "-";
-    }
+    // Ball.
+    objects.push_back({Position(state["ball_position_x"], state["ball_position_y"]), 
+        ascii["ball"].get<std::string>()[0],  
+        gameConfig["game"]["rendering"]["roles"]["ball"].get<std::string>()});
 
-    std::cout << "\n";
-    std::cout << "W/S: Move Paddle     ESC: Exit\n";
+    // Submit objects to the renderer.
+    render.DrawObjects(objects);
+
+    // Draw controls.
+    DrawBottomText(gameConfig["game"]["controls"]["display_text"].get<std::string>());
+
+    // Present completed frame.
+    render.PresentFrame();
 }
 
 
@@ -402,26 +236,48 @@ void PONG::CheckGameOver()//checks whether the game has ended
     runtime.GetStateValue("opponent_score", opponentScore);
     runtime.GetStateValue("winning_score", winningScore);
 
+    Theme* activeTheme = themeManager.GetActiveTheme();
+    ThemeColor ui = activeTheme->GetColor(ThemeRoles::UI);
+
     // Check whether the player has won.
     if (playerScore >= winningScore)
     {
-        std::cout << "\nYOU WIN!\n";
+        Colors::Print(gameConfig["game"]["rendering"]["messages"]["player_wins"].get<std::string>(), ui.foreground);
         running = false;
     }
 
     // Check whether the opponent has won.
     else if (opponentScore >= winningScore)
     {
-        std::cout << "\nYOU LOSE!\n";
+        Colors::Print(gameConfig["game"]["rendering"]["messages"]["opponent_wins"].get<std::string>(), ui.foreground);
         running = false;
     }
 
     if (!running)
     {
-        std::cout << "Final Score: "
-            << playerScore << " - " << opponentScore << "\n";
+        Colors::SetBackground(Colors::Color::Black);
 
-        std::cout << "Press any key to return to the menu.\n";
+        render.SetCursorPosition(
+            gameConfig["game"]["rendering"]["game_over_column"].get<int>(),
+            gameConfig["game"]["field"]["height"].get<int>() +
+            gameConfig["game"]["rendering"]["extra_height"].get<int>()
+        );
+
+        Colors::Print(
+            gameConfig["game"]["rendering"]["messages"]["final_score"].get<std::string>() +
+            std::to_string(playerScore) + 
+            gameConfig["game"]["rendering"]["messages"]["score_separator"].get<std::string>() +
+            std::to_string(opponentScore) + "\n",
+            ui.foreground
+        );
+
+        Colors::Print(
+            gameConfig["game"]["rendering"]["messages"]["return_prompt"].get<std::string>(),
+            ui.foreground
+        );
+
         InputHelper::GetKey();
+
+        system("cls");
     }
 }

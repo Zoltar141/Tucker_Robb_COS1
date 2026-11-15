@@ -1,0 +1,199 @@
+{
+  "game": {
+    "name": "Pong",
+
+    "field": {
+      "width": 80,
+      "height": 25,
+      "top": 1,
+      "bottom": 23,
+      "right_edge": 79
+    },
+
+    "paddle": {
+      "width": 4,
+      "height": 5,
+      "player_x": 2,
+      "opponent_x": 77,
+      "initial_y": 10,
+      "top_limit": 0,
+      "bottom_limit": 20,
+      "glyph": "|"
+    },
+
+    "ball": {
+      "glyph": "O",
+      "initial_position": {
+        "x": 40,
+        "y": 12
+      },
+      "initial_velocity": {
+        "x": 1,
+        "y": 1
+      }
+    },
+
+    "scoring": {
+      "winning_score": 10,
+      "left_boundary": 1,
+      "right_boundary": 78,
+      "initial_player_score": 0,
+      "initial_opponent_score": 0
+    },
+
+    "timing": {
+      "frame_delay_ms": 50
+    },
+
+    "opponent": {
+      "miss_chance": 4,
+      "follow_ball": true
+    },
+
+    "controls": {
+      "up": "W",
+      "down": "S",
+      "exit": "ESC"
+    },
+
+    "initial_state": {
+      "ball": {
+        "position": {
+          "x": 40,
+          "y": 12
+        },
+        "velocity": {
+          "x": 1,
+          "y": 1
+        }
+      },
+      "paddles": {
+        "player_y": 10,
+        "opponent_y": 10
+      },
+      "score": {
+        "player": 0,
+        "opponent": 0
+      }
+    },
+
+    "rules": [
+      {
+        "name": "opponent_scores",
+        "conditions": [
+          {
+            "key": "ball_position_x",
+            "comparison": "LessEqual",
+            "value": 1
+          }
+        ],
+        "transformations": [
+          {
+            "key": "opponent_score",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "ball_position_x",
+            "operation": "Assign",
+            "value": 40
+          },
+          {
+            "key": "ball_position_y",
+            "operation": "Assign",
+            "value": 12
+          },
+          {
+            "key": "ball_velocity_x",
+            "operation": "Assign",
+            "value": 1
+          },
+          {
+            "key": "ball_velocity_y",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "player_scores",
+        "conditions": [
+          {
+            "key": "ball_position_x",
+            "comparison": "GreaterEqual",
+            "value": 78
+          }
+        ],
+        "transformations": [
+          {
+            "key": "player_score",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "ball_position_x",
+            "operation": "Assign",
+            "value": 40
+          },
+          {
+            "key": "ball_position_y",
+            "operation": "Assign",
+            "value": 12
+          },
+          {
+            "key": "ball_velocity_x",
+            "operation": "Assign",
+            "value": -1
+          },
+          {
+            "key": "ball_velocity_y",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      }
+    ],
+
+    "collision": {
+      "paddle_hit_vertical_threshold": 2,
+      "player_bounce_velocity_x": 1,
+      "opponent_bounce_velocity_x": -1,
+      "upper_bounce_velocity_y": -1,
+      "lower_bounce_velocity_y": 1
+    },
+
+    "rendering": {
+      "extra_height": 4,
+      "world_vertical_offset": 2,
+      "controls_row_offset": 3,
+      "scoreboard_row": 0,
+      "background_role": "Background",
+      "paddle_role": "Paddle",
+      "ball_role": "Ball",
+      "ui_role": "UI",
+
+      "scoreboard": {
+        "player_label": "PLAYER:",
+        "opponent_label": "OPPONENT:",
+        "separator": "  \t\t\t\t"
+      },
+
+      "controls_text": "W/S: Move Paddle    ESC: Exit",
+
+      "messages": {
+        "player_wins": "\nYOU WIN!!!\n",
+        "opponent_wins": "\nYOU LOSE!!!\n",
+        "final_score": "Final Score: ",
+        "return_prompt": "Press any key to return to the menu.\n"
+      },
+
+      "ascii": {
+        "ball": "O",
+        "paddle": "|",
+        "horizontal_border": "=",
+        "vertical_border": "|",
+        "corner": "+"
+      }
+    }
+  }
+}

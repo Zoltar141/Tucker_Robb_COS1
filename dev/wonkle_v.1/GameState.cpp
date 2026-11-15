@@ -14,11 +14,29 @@ bool GameState::GetValue(const std::string& key, int& value) const//true means s
     return true;//retrieved value
 }
 
+bool GameState::GetValue(const std::string& key, double& value) const
+{
+    auto it = values_.find(key);
+
+    if (it == values_.end())
+    {
+        return false;
+    }
+
+    value = it->second;
+    return true;
+}
+
+
 void GameState::SetValue(const std::string& key, int value)
 {
     values_[key] = value;//if no key it creates one otherwise overwrites
 }
 
+void GameState::SetValue(const std::string& key, double value)
+{
+    values_[key] = value;
+}
 bool GameState::HasValue(const std::string& key) const
 {
     return values_.find(key) != values_.end();//if key is found return true if not found return false

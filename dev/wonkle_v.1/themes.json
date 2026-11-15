@@ -1,0 +1,422 @@
+{
+    "themes": [
+        {
+            "name": "Default",
+          "colors": {
+            "Background": {
+              "foreground": "Black",
+              "background": "Black"
+            },
+            "Foreground": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "MenuText": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "MenuHighlight": {
+              "foreground": "Yellow",
+              "background": "Black"
+            },
+            "Ball": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "Border": {
+              "foreground": "Gray",
+              "background": "Black"
+            },
+            "GameBoundary": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "Paddle": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "SnakeBody": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "SnakeFood": {
+              "foreground": "Red",
+              "background": "Black"
+            },
+            "UI": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "Brick1": {
+              "foreground": "Blue",
+              "background": "Black"
+            },
+            "Brick2": {
+              "foreground": "Red",
+              "background": "Black"
+            },
+            "Brick3": {
+              "foreground": "Yellow",
+              "background": "Black"
+            },
+            "Brick4": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "Brick5": {
+              "foreground": "Purple",
+              "background": "Black"
+            }
+          }
+        },
+        {
+            "name": "Forest",
+          "colors": {
+            "Background": {
+              "foreground": "DarkGreen",
+              "background": "DarkGreen"
+            },
+            "Foreground": {
+              "foreground": "Tan",
+              "background": "DarkGreen"
+            },
+            "MenuText": {
+              "foreground": "Tan",
+              "background": "DarkGreen"
+            },
+            "MenuHighlight": {
+              "foreground": "Yellow",
+              "background": "DarkGreen"
+            },
+            "Ball": {
+              "foreground": "Black",
+              "background": "DarkGreen"
+            },
+            "Border": {
+              "foreground": "Brown",
+              "background": "DarkGreen"
+            },
+            "GameBoundary": {
+              "foreground": "Brown",
+              "background": "DarkGreen"
+            },
+            "Paddle": {
+              "foreground": "Tan",
+              "background": "DarkGreen"
+            },
+            "SnakeBody": {
+              "foreground": "Brown",
+              "background": "DarkGreen"
+            },
+            "SnakeFood": {
+              "foreground": "Red",
+              "background": "DarkGreen"
+            },
+            "UI": {
+              "foreground": "Yellow",
+              "background": "DarkGreen"
+            },
+            "Brick1": {
+              "foreground": "Brown",
+              "background": "Black"
+            },
+            "Brick2": {
+              "foreground": "Tan",
+              "background": "Black"
+            },
+            "Brick3": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "Brick4": {
+              "foreground": "Black",
+              "background": "Black"
+            },
+            "Brick5": {
+              "foreground": "Red",
+              "background": "Black"
+            }
+          }
+        },
+        {
+            "name": "Ice",
+          "colors": {
+            "Background": {
+              "foreground": "DarkBlue",
+              "background": "DarkBlue"
+            },
+            "Foreground": {
+              "foreground": "White",
+              "background": "DarkBlue"
+            },
+            "MenuText": {
+              "foreground": "Cyan",
+              "background": "DarkBlue"
+            },
+            "MenuHighlight": {
+              "foreground": "White",
+              "background": "Blue"
+            },
+            "Border": {
+              "foreground": "Blue",
+              "background": "DarkBlue"
+            },
+            "GameBoundary": {
+              "foreground": "Cyan",
+              "background": "DarkBlue"
+            },
+            "Paddle": {
+              "foreground": "White",
+              "background": "DarkBlue"
+            },
+            "Ball": {
+              "foreground": "Cyan",
+              "background": "DarkBlue"
+            },
+            "SnakeBody": {
+              "foreground": "Cyan",
+              "background": "DarkBlue"
+            },
+            "SnakeFood": {
+              "foreground": "Red",
+              "background": "DarkBlue"
+            },
+            "UI": {
+              "foreground": "White",
+              "background": "DarkBlue"
+            },
+            "Brick1": {
+              "foreground": "Cyan",
+              "background": "Black"
+            },
+            "Brick2": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "Brick3": {
+              "foreground": "Cyan",
+              "background": "Black"
+            },
+            "Brick4": {
+              "foreground": "White",
+              "background": "Black"
+            },
+            "Brick5": {
+              "foreground": "Cyan",
+              "background": "Black"
+            }
+          }
+        },
+        {
+            "name": "Dark",
+          "colors": {
+            "Background": {
+              "foreground": "Black",
+              "background": "Black"
+            },
+            "Foreground": {
+              "foreground": "Gray",
+              "background": "Black"
+            },
+            "MenuText": {
+              "foreground": "DarkPurple",
+              "background": "Black"
+            },
+            "MenuHighlight": {
+              "foreground": "DarkPurple",
+              "background": "Black"
+            },
+            "Border": {
+              "foreground": "Purple",
+              "background": "Black"
+            },
+            "GameBoundary": {
+              "foreground": "Purple",
+              "background": "Black"
+            },
+            "Paddle": {
+              "foreground": "Purple",
+              "background": "Black"
+            },
+            "Ball": {
+              "foreground": "DarkRed",
+              "background": "Black"
+            },
+            "SnakeBody": {
+              "foreground": "Purple",
+              "background": "Black"
+            },
+            "SnakeFood": {
+              "foreground": "Red",
+              "background": "Black"
+            },
+            "UI": {
+              "foreground": "Purple",
+              "background": "Black"
+            },
+            "Brick1": {
+              "foreground": "Purple",
+              "background": "Black"
+            },
+            "Brick2": {
+              "foreground": "DarkGray",
+              "background": "Black"
+            },
+            "Brick3": {
+              "foreground": "Brown",
+              "background": "Black"
+            },
+            "Brick4": {
+              "foreground": "DarkGray",
+              "background": "Black"
+            },
+            "Brick5": {
+              "foreground": "Purple",
+              "background": "Black"
+            }
+          }
+        },
+        {
+            "name": "Light",
+          "colors": {
+            "Background": {
+              "foreground": "White",
+              "background": "White"
+            },
+            "Foreground": {
+              "foreground": "Black",
+              "background": "White"
+            },
+            "MenuText": {
+              "foreground": "White",
+              "background": "White"
+            },
+            "MenuHighlight": {
+              "foreground": "White",
+              "background": "Blue"
+            },
+            "Border": {
+              "foreground": "DarkGray",
+              "background": "White"
+            },
+            "GameBoundary": {
+              "foreground": "Black",
+              "background": "White"
+            },
+            "Paddle": {
+              "foreground": "Black",
+              "background": "White"
+            },
+            "Ball": {
+              "foreground": "Black",
+              "background": "White"
+            },
+            "SnakeBody": {
+              "foreground": "DarkGray",
+              "background": "White"
+            },
+            "SnakeFood": {
+              "foreground": "Red",
+              "background": "White"
+            },
+            "UI": {
+              "foreground": "Black",
+              "background": "White"
+            },
+            "Brick1": {
+              "foreground": "Black",
+              "background": "Black"
+            },
+            "Brick2": {
+              "foreground": "DarkGray",
+              "background": "Black"
+            },
+            "Brick3": {
+              "foreground": "Black",
+              "background": "Black"
+            },
+            "Brick4": {
+              "foreground": "DarkGray",
+              "background": "Black"
+            },
+            "Brick5": {
+              "foreground": "Black",
+              "background": "Black"
+            }
+          }
+        },
+        {
+            "name": "Classic",
+          "colors": {
+            "Background": {
+              "foreground": "Black",
+              "background": "Black"
+            },
+            "Foreground": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "MenuText": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "MenuHighlight": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "Border": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "GameBoundary": {
+              "foreground": "DarkGreen",
+              "background": "Black"
+            },
+            "Paddle": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "Ball": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "Brick": {
+              "foreground": "Cyan",
+              "background": "Black"
+            },
+            "SnakeBody": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "SnakeFood": {
+              "foreground": "Red",
+              "background": "Black"
+            },
+            "UI": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "Brick1": {
+              "foreground": "Red",
+              "background": "Black"
+            },
+            "Brick2": {
+              "foreground": "Yellow",
+              "background": "Black"
+            },
+            "Brick3": {
+              "foreground": "Green",
+              "background": "Black"
+            },
+            "Brick4": {
+              "foreground": "Blue",
+              "background": "Black"
+            },
+            "Brick5": {
+              "foreground": "Purple",
+              "background": "Black"
+            }
+          }
+        }
+    ]
+}

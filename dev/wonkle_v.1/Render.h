@@ -1,0 +1,59 @@
+#pragma once
+#include "ThemeManager.h"
+#include "Colors.h"
+#include <string>
+#include <vector>
+#include "Position.h"
+#include <nlohmann/json.hpp>
+
+struct RenderObject
+{
+    Position position;
+    char character;
+    std::string role;
+};
+
+class Render
+{
+public:
+    Render(ThemeManager& themeManager);
+
+    void SetCursorPosition(int x, int y);
+    void SetBackground();
+
+    // Frame management.
+    void BeginFrame(int width, int height, const std::string& backgroundRole, int worldOffsetY = 0, const Position& framePosition = Position(0,0));
+    void PresentFrame();
+
+    void DrawCharacter(int x, int y, char character, const std::string& role);
+    void DrawText(int x, int y, const std::string& text, const std::string& role);
+    void DrawHorizontalLine(int x, int y, int length, char character, const std::string& role);
+    void DrawVerticalLine(int x, int y, int length, char character, const std::string& role);
+
+    void DrawObjects(const std::vector<RenderObject>& objects);
+
+    void SetConfiguration(const nlohmann::json& config);
+
+
+private:
+    ThemeManager& themeManager;
+
+    struct Cell
+    {
+        char character;
+        std::string role;
+    };
+
+    std::vector<Cell> currentFrame;
+    std::vector<Cell> previousFrame;
+    Position framePosition{ 0, 0 };
+
+    int frameWidth = 0;
+    int frameHeight = 0;
+    bool frameActive = false;
+
+    int worldOffsetY = 0;
+
+    ThemeColor GetThemeColor(const std::string& role);
+    nlohmann::json configuration;
+};
