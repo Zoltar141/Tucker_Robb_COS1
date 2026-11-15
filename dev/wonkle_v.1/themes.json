@@ -174,7 +174,7 @@
               "background": "DarkBlue"
             },
             "SnakeBody": {
-              "foreground": "Blue",
+              "foreground": "Cyan",
               "background": "DarkBlue"
             },
             "SnakeFood": {
@@ -312,7 +312,7 @@
               "background": "White"
             },
             "SnakeBody": {
-              "foreground": "Black",
+              "foreground": "DarkGray",
               "background": "White"
             },
             "SnakeFood": {
