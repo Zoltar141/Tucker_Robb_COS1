@@ -1,41 +1,25 @@
 #pragma once
-#include "WonkleRuntime.h"
-#include "ThemeManager.h"
-#include "Render.h"
-#include "FileBoss.h"
+#include "GameController.h"
 #include <chrono>
 #include <random>
 #include <string>
 #include <vector>
 
-class SNAKE
+class SNAKE : public GameController
 {
 public:
-    void Run();//controls gameloop
     SNAKE(ThemeManager& themeManager);
 
 private:
-    ThemeManager& themeManager;//theme addition
-    Render render;
-
-    WonkleRuntime runtime;//creates gamestate
-
-    bool running = false;
-
     // Game setup
-    void InitializeGame();//sets initial snake positions direction and score
-    void SetupRules();//regisers gameplay rules
-
+    void InitializeGame() override;//sets initial snake positions direction and score
     // Game systems
-    void HandleInput();//proccesses input
-    void UpdateGame();//advances the gamestate
+    void HandleInput() override;//proccesses input
+    void UpdateGame() override;//advances the gamestate
     void MoveSnake();//one move of the snake
-    void RenderGame();///shows it in console
+    void RenderGame() override;///shows it in console
     void DrawCell(int cellX, int cellY, char character, const std::string& role);//draws one grid space
-    void CheckGameOver();//win/loss check and restart
-
-    FileBoss fileBoss;
-    nlohmann::json snakeConfig;
+    void CheckGameOver() override;//win/loss check and restart
 
     // Movement timing
     std::chrono::steady_clock::time_point lastFrameTime;//when the previous frame was measured
