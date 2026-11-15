@@ -60,22 +60,17 @@ void BRICKBREAKER::HandleInput()// Processes player keyboard input.
     // Move paddle continuously while A or D is held.
     if (InputHelper::IsKeyDown(gameConfig["game"]["controls"]["left"].get<int>()))
     {
-        playerPaddle -= gameConfig["game"]["paddle"]["movement_step"].get<int>();
+        if (playerPaddle < gameConfig["game"]["paddle"]["left_limit"].get<int>())
+        {
+            playerPaddle -= gameConfig["game"]["paddle"]["movement_step"].get<int>();
+        }
     }
-
     if (InputHelper::IsKeyDown(gameConfig["game"]["controls"]["right"].get<int>()))
     {
-        playerPaddle += gameConfig["game"]["paddle"]["movement_step"].get<int>();
-    }
-
-    // Keep the paddle inside the field, the movement step can be larger than one.
-    if (playerPaddle < gameConfig["game"]["paddle"]["left_limit"].get<int>())
-    {
-        playerPaddle = gameConfig["game"]["paddle"]["left_limit"].get<int>();
-    }
-    else if (playerPaddle > gameConfig["game"]["paddle"]["right_limit"].get<int>())
-    {
-        playerPaddle = gameConfig["game"]["paddle"]["right_limit"].get<int>();
+        if (playerPaddle > gameConfig["game"]["paddle"]["right_limit"].get<int>())
+        {
+            playerPaddle += gameConfig["game"]["paddle"]["movement_step"].get<int>();
+        }
     }
 
     // Exit the current game.
