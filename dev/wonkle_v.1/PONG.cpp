@@ -121,9 +121,9 @@ void PONG::InitializeGame()
 
     runtime.SetStateValue("winning_score", pongConfig["game"]["scoring"]["winning_score"].get<int>());
 
-    runtime.SetStateValue("opponent_reaction_timer", 0);
-    runtime.SetStateValue("opponent_reaction_delay",
-        pongConfig["game"]["opponent"]["reaction_delay_frames"].get<double>());
+    runtime.SetStateValue("opponent_reaction_timer", initialState["opponent_reaction_timer"].get<int>());
+
+    runtime.SetStateValue("opponent_reaction_delay", pongConfig["game"]["opponent"]["reaction_delay_frames"].get<double>());
 }
 
 
@@ -143,7 +143,7 @@ void PONG::HandleInput()// Processes player keyboard input.
     {
         if (playerPaddle > pongConfig["game"]["paddle"]["top_limit"].get<int>())
         {
-            playerPaddle--;
+            playerPaddle -= pongConfig["game"]["paddle"]["movement_step"].get<int>();
         }
     }
 
@@ -151,7 +151,7 @@ void PONG::HandleInput()// Processes player keyboard input.
     {
         if (playerPaddle < pongConfig["game"]["paddle"]["bottom_limit"].get<int>())
         {
-            playerPaddle++;
+            playerPaddle += pongConfig["game"]["paddle"]["movement_step"].get<int>();
         }
     }
 
@@ -183,13 +183,9 @@ PongState LoadGameState(WonkleRuntime& runtime)
 
 
 void PONG::UpdateGame()// Advances the game state.
-
 {
-   
-
     // Retrieve current game state.
     PongState state = LoadGameState(runtime);
-
 
     // Move the ball using its current velocity.
     state.ballPosX += state.ballVelX;
@@ -199,7 +195,7 @@ void PONG::UpdateGame()// Advances the game state.
     Boundary boundary(
         pongConfig["game"]["field"]["width"].get<int>(),
         pongConfig["game"]["field"]["height"].get<int>(),
-        0,
+        pongConfig["game"]["field"]["left_edge"].get<int>(),
         pongConfig["game"]["field"]["top"].get<int>(),
         pongConfig["game"]["field"]["right_edge"].get<int>(),
         pongConfig["game"]["field"]["bottom"].get<int>()
@@ -209,7 +205,7 @@ void PONG::UpdateGame()// Advances the game state.
 
     if (collision == BoundarySide::Top || collision == BoundarySide::Bottom)
     {
-        state.ballVelY *= -1;
+        state.ballVelY *= pongConfig["game"]["collision"]["vertical_boundary_bounce_multiplier"].get<int>();
     }
 
     // Player paddle collision.
@@ -308,8 +304,6 @@ void PONG::UpdateGame()// Advances the game state.
 
 void PONG::RenderGame()
 {
-    
-
     // Retrieve current game state.
     PongState state = LoadGameState(runtime);
 
@@ -325,7 +319,8 @@ void PONG::RenderGame()
         pongConfig["game"]["rendering"]["world_vertical_offset"].get<int>());
 
     // Draw scoreboard.
-    render.DrawText(0, pongConfig["game"]["rendering"]["scoreboard_row"].get<int>(), 
+    render.DrawText(pongConfig["game"]["rendering"]["scoreboard_column"].get<int>(), 
+        pongConfig["game"]["rendering"]["scoreboard_row"].get<int>(),
         pongConfig["game"]["rendering"]["scoreboard"]["player_label"].get<std::string>() + " " + std::to_string(state.playerScore) + 
         pongConfig["game"]["rendering"]["scoreboard"]["separator"].get<std::string>() + 
         pongConfig["game"]["rendering"]["scoreboard"]["opponent_label"].get<std::string>() + " " + std::to_string(state.opponentScore), 
@@ -334,7 +329,7 @@ void PONG::RenderGame()
     Boundary boundary(
         pongConfig["game"]["field"]["width"].get<int>(),
         pongConfig["game"]["field"]["height"].get<int>(),
-        0,
+        pongConfig["game"]["field"]["left_edge"].get<int>(),
         pongConfig["game"]["field"]["top"].get<int>(),
         pongConfig["game"]["field"]["right_edge"].get<int>(),
         pongConfig["game"]["field"]["bottom"].get<int>());
@@ -379,9 +374,10 @@ void PONG::RenderGame()
     render.DrawObjects(objects);
 
     // Draw controls.
-    render.DrawText(0, 
+    render.DrawText(pongConfig["game"]["rendering"]["controls_column"].get<int>(),
         pongConfig["game"]["field"]["height"].get<int>() + pongConfig["game"]["rendering"]["controls_row_offset"].get<int>(),
-        pongConfig["game"]["controls"]["display_text"].get<std::string>(), ThemeRoles::UI);
+        pongConfig["game"]["controls"]["display_text"].get<std::string>(), 
+        pongConfig["game"]["rendering"]["roles"]["ui"].get<std::string>());
 
     // Present completed frame.
     render.PresentFrame();
@@ -421,14 +417,15 @@ void PONG::CheckGameOver()//checks whether the game has ended
         Colors::SetBackground(Colors::Color::Black);
 
         render.SetCursorPosition(
-            0,
+            pongConfig["game"]["rendering"]["game_over_column"].get<int>(),
             pongConfig["game"]["field"]["height"].get<int>() +
             pongConfig["game"]["rendering"]["extra_height"].get<int>()
         );
 
         Colors::Print(
             pongConfig["game"]["rendering"]["messages"]["final_score"].get<std::string>() +
-            std::to_string(playerScore) + " - " +
+            std::to_string(playerScore) + 
+            pongConfig["game"]["rendering"]["messages"]["score_separator"].get<std::string>() +
             std::to_string(opponentScore) + "\n",
             ui.foreground
         );

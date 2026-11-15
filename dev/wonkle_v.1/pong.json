@@ -6,11 +6,13 @@
       "height": 25,
       "top": 1,
       "bottom": 23,
-      "right_edge": 79
+      "right_edge": 79,
+      "left_edge": 0
     },
     "paddle": {
       "width": 4,
       "height": 5,
+      "movement_step": 1,
       "player_x": 2,
       "opponent_x": 77,
       "initial_y": 10,
@@ -50,6 +52,7 @@
     },
     "collision": {
       "paddle_hit_vertical_threshold": 2,
+      "vertical_boundary_bounce_multiplier": -1,
       "player_bounce_velocity_x": 1,
       "opponent_bounce_velocity_x": -1,
       "upper_bounce_velocity_y": -1,
@@ -57,9 +60,12 @@
     },
     "rendering": {
       "extra_height": 4,
+      "scoreboard_column": 0,
       "controls_row_offset": 3,
+      "controls_column": 0,
       "world_vertical_offset": 2,
       "scoreboard_row": 0,
+      "game_over_column": 0,
       "roles": {
         "background": "Background",
         "border": "Border",
@@ -76,6 +82,7 @@
         "player_wins": "\nYOU WIN!!!\n",
         "opponent_wins": "\nYOU LOSE!!!\n",
         "final_score": "Final Score: ",
+        "score_separator": " - ",
         "return_prompt": "Press any key to return to the menu.\n"
       },
       "ascii": {
@@ -88,6 +95,7 @@
       }
     },
     "initial_state": {
+      "opponent_reaction_timer": 0,
       "ball": {
         "position": {
           "x": 40,
