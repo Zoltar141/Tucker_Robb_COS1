@@ -16,7 +16,7 @@ private:
     void HandleInput() override;//proccesses input
     void UpdateGame() override;//advances the gamestate
     void RenderGame() override;///shows it in console
-    void CheckGameOver() override;//win/loss check and restart
+    void CheckGameOver() override;//win/loss check and restartadaadawdsdadad
 
     std::vector<std::string> brickRows;//the bricks, each character is how many hits that brick has left
 };
