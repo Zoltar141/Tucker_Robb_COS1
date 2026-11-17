@@ -9,27 +9,23 @@
       "right_edge": 79,
       "left_edge": 0
     },
-    "grid": {
+    "snake": {
       "columns": 39,
       "rows": 20,
       "cell_width": 2,
-      "origin_x": 1
-    },
-    "snake": {
-      "starting_length": 4
-    },
-    "scoring": {
-      "winning_score": 300
+      "origin_x": 1,
+      "keys": {
+        "up": 87,
+        "down": 83,
+        "left": 65,
+        "right": 68
+      }
     },
     "timing": {
       "frame_delay_ms": 20,
       "movement_interval_ms": 120
     },
     "controls": {
-      "up": 87,
-      "down": 83,
-      "left": 65,
-      "right": 68,
       "exit": 27,
       "restart": 82,
       "display_text": "W/A/S/D: Move Snake    ESC: Exit"
@@ -50,9 +46,17 @@
         "ui": "UI"
       },
       "scoreboard": {
-        "score_label": "SCORE:",
-        "length_label": "LENGTH:",
-        "separator": "  \t\t\t\t"
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "SCORE:",
+            "value": "score"
+          },
+          {
+            "label": "LENGTH:",
+            "value": "snake_length"
+          }
+        ]
       },
       "messages": {
         "player_wins": "YOU WIN!!!",

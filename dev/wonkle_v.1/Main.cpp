@@ -8,30 +8,7 @@
 
 int main()
 {
-    // Run tests before starting Wonkle.
-   /* std::cout << "===== WonkLE TESTS =====\n\n";
-    RunGameStateTests();
-    RunWonkleRuntimeTest();
-    RunWonkleRuntimeComparisonTests();
-    RunWonkleRuntimeOperationTests();
-    RunWonkleRuntimeConditionTests();
-    RunWonkleRuntimeTransformationTests();
-    RunWonkleRuntimeMultipleRuleTests();
-    RunWonkleRuntimeMissingValueTests();
-    RunWonkleRuntimeOperandTests();
-
-    RunPositionTests();
-    RunCollisionTests();
-    RunBoundaryTests();
-    RunThemeTests();
-    RunThemeManagerTests();
-    RunColorsTests();
-    RunFileBossTests();
-    RunRenderTests();
-    RunMenuTests();
-    RunPONGTests();
-    std::cout << "\n===== TESTS COMPLETE =====\n\n";*/
-
+   
     Menu menu;
     menu.Run();
 

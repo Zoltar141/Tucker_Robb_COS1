@@ -1,8 +1,7 @@
 #include "Menu.h"
 #include <iostream>
-#include "PONG.h"
-#include "BRICKBREAKER.h"
-#include "SNAKE.h"
+#include "GameObjects.h"
+#include "GameController.h"
 #include "InputHelper.h"
 #include "Theme.h"
 #include "ThemeManager.h"
@@ -54,7 +53,7 @@ void Menu::HandleSelection(int choice)
 
         PrintTheme(themeManager, "\n=== CHOOSE GAME ===\n", ThemeRoles::Border);
         PrintTheme(themeManager, "1. Pong\n", ThemeRoles::MenuText);
-        PrintTheme(themeManager, "2. Brick Beaker\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "2. Brick Breaker\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "3. Snake\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "4. Back\n", ThemeRoles::MenuText);
 
@@ -62,17 +61,17 @@ void Menu::HandleSelection(int choice)
 
         if (gameChoice == 1)
         {
-            PONG game(themeManager);
+            GameObjects game(themeManager, "pong.json");
             game.Run();
         }
         else if (gameChoice == 2)
         {
-            BRICKBREAKER game(themeManager);
+            GameObjects game(themeManager, "brickbreaker.json");
             game.Run();
         }
         else if (gameChoice == 3)
         {
-            SNAKE game(themeManager);
+            GameObjects game(themeManager, "snake.json");
             game.Run();
         }
 

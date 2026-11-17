@@ -47,6 +47,13 @@ std::map<std::string, int> GameController::LoadGameState()
     return state;
 }
 
+void GameController::SaveGameState(const std::map<std::string, int>& state)
+{
+    for (const auto& value : state)
+    {
+        runtime.SetStateValue(value.first, value.second);
+    }
+}
 
 //Loop
 void GameController::Run()//controls the game loop
@@ -61,6 +68,11 @@ void GameController::Run()//controls the game loop
     while (running)
     {
         HandleInput();
+        // Exit the current game.
+        if (InputHelper::IsKeyDown(gameConfig["game"]["controls"]["exit"].get<int>()))
+        {
+            running = false;
+        }
         UpdateGame();
         RenderGame();
         CheckGameOver();
@@ -168,6 +180,17 @@ void GameController::BeginFrame()
         field["height"].get<int>() + rendering["extra_height"].get<int>(),
         rendering["roles"]["background"].get<std::string>(),
         rendering["world_vertical_offset"].get<int>());
+    // Start the frame's objects over with the boundary.
+    objects.clear();
+
+    Boundary boundary = GetBoundary();
+
+    boundary.Draw(render, objects,
+        rendering["ascii"]["top_border"].get<std::string>()[0],
+        rendering["ascii"]["bottom_border"].get<std::string>()[0],
+        rendering["ascii"]["vertical_border"].get<std::string>()[0],
+        rendering["roles"]["border"].get<std::string>()
+    );
 }
 
 void GameController::DrawScoreboard(const std::string& text)
@@ -180,52 +203,111 @@ void GameController::DrawScoreboard(const std::string& text)
         rendering["roles"]["ui"].get<std::string>());
 }
 
-void GameController::DrawBoundary(std::vector<RenderObject>& objects)
+void GameController::AddRectangle(const std::string& name, int x, int y, int width, int height)
 {
     const auto& rendering = gameConfig["game"]["rendering"];
-    const auto& ascii = rendering["ascii"];
 
-    Boundary boundary = GetBoundary();
-
-    boundary.Draw(render, objects,
-        ascii["top_border"].get<std::string>()[0],
-        ascii["bottom_border"].get<std::string>()[0],
-        ascii["vertical_border"].get<std::string>()[0],
-        rendering["roles"]["border"].get<std::string>()
-    );
+    // The name picks the character and the color role out of the json, "paddle" or "ball" for example.
+    for (int j = 0; j < height; j++)
+    {
+        for (int i = 0; i < width; i++)
+        {
+            objects.push_back({
+                Position(x + i, y + j),
+                rendering["ascii"][name].get<std::string>()[0],
+                rendering["roles"][name].get<std::string>()
+                });
+        }
+    }
 }
 
-void GameController::DrawBottomText(const std::string& text)
+void GameController::AddText(int x, int y, const std::string& text, const std::string& role)
 {
     const auto& rendering = gameConfig["game"]["rendering"];
+
+    // Text goes in with the frame's objects one character at a time, so it is drawn in the order it was added.
+    for (int i = 0; i < text.size(); i++)
+    {
+        objects.push_back({
+            Position(x + i, y),
+            text[i],
+            rendering["roles"][role].get<std::string>()
+            });
+    }
+}
+
+void GameController::EndFrame()
+{
+    const auto& rendering = gameConfig["game"]["rendering"];
+
+    // Submit objects to the renderer.
+    render.DrawObjects(objects);
+
+    // Draw controls, or the result once the game has ended.
+    int gameWon = 0;
+    int gameLost = 0;
+    int score = 0;
+
+    runtime.GetStateValue("game_won", gameWon);
+    runtime.GetStateValue("game_lost", gameLost);
+    runtime.GetStateValue("score", score);
+
+    std::string bottomText = gameConfig["game"]["controls"]["display_text"].get<std::string>();
+
+    if (gameWon != 0)
+    {
+        bottomText = rendering["messages"]["player_wins"].get<std::string>();
+    }
+    else if (gameLost != 0)
+    {
+        bottomText = rendering["messages"]["player_loses"].get<std::string>();
+    }
+
+    if (gameWon != 0 || gameLost != 0)
+    {
+        // A game that keeps one score can show it with the result.
+        if (rendering["messages"].contains("final_score"))
+        {
+            bottomText += rendering["messages"]["final_score"].get<std::string>() + std::to_string(score);
+        }
+
+        bottomText += rendering["messages"]["restart_prompt"].get<std::string>();
+    }
 
     render.DrawText(rendering["controls_column"].get<int>(),
         gameConfig["game"]["field"]["height"].get<int>() + rendering["controls_row_offset"].get<int>(),
-        text,
+        bottomText,
         rendering["roles"]["ui"].get<std::string>());
+
+    // Present completed frame.
+    render.PresentFrame();
 }
 
 
 //gameover stuff
-std::string GameController::GetGameOverText(bool gameWon, int score)
+void GameController::CheckGameOver()
 {
-    const auto& messages = gameConfig["game"]["rendering"]["messages"];
+    int gameWon = 0;
+    int gameLost = 0;
 
-    std::string text;
+    // The rules decide when the game is won or lost.
+    runtime.GetStateValue("game_won", gameWon);
+    runtime.GetStateValue("game_lost", gameLost);
 
-    if (gameWon)
+    if (gameWon == 0 && gameLost == 0)
     {
-        text = messages["player_wins"].get<std::string>();
+        return;
+    }
+    // RenderGame has already drawn the result and the prompt.
+    if (AskToRestart())
+    {
+        // Restart, the rules stay the same so only the state is reset.
+        InitializeGame();
     }
     else
     {
-        text = messages["player_loses"].get<std::string>();
+        running = false;
     }
-
-    text += messages["final_score"].get<std::string>() + std::to_string(score) +
-        messages["restart_prompt"].get<std::string>();
-
-    return text;
 }
 
 void GameController::ClearKeys()
@@ -241,7 +323,7 @@ bool GameController::AskToRestart()
     const auto& controls = gameConfig["game"]["controls"];
 
     // Throw away the movement keys typed during play so they do not answer the prompt.
-    GameController::ClearKeys();
+    ClearKeys();
 
     // Only the restart and exit keys answer the prompt, a movement key still held down
     // when the game ended is ignored.

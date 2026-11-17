@@ -12,7 +12,7 @@
 #include "Render.h"
 #include "InputHelper.h"
 #include "Menu.h"
-#include "PONG.h"
+#include "GameObjects.h"
 
 #include <filesystem>
 #include <fstream>
@@ -1659,7 +1659,7 @@ void RunPONGTests()
     ThemeManager themes;
 
     // Test 1: Construct PONG
-    PONG game(themes);
+    GameObjects game(themes, "pong.json");
 
     std::cout << "PASS: PONG object can be constructed with a ThemeManager.\n";
 }
