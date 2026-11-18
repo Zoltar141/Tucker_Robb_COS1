@@ -17,7 +17,14 @@ int InputHelper::GetInt(const std::string& prompt, int min, int max)
 
         try
         {
-            int value = std::stoi(input);
+            size_t used = 0;
+            int value = std::stoi(input, &used);
+
+            if (used != input.size())
+            {
+                std::cout << "Please enter only a number.\n";
+                continue;
+            }
 
             if (value >= min && value <= max)
             {
