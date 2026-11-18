@@ -118,5 +118,6 @@
     <None Include="themes.json" />
     <None Include="snake.json" />
     <None Include="maze.json" />
+    <None Include="calculator.json" />
   </ItemGroup>
 </Project>

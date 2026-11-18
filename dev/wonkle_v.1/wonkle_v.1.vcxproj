@@ -175,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="brickbreaker.json" />
+    <None Include="calculator.json" />
     <None Include="maze.json" />
     <None Include="packages.config" />
     <None Include="pong.json" />

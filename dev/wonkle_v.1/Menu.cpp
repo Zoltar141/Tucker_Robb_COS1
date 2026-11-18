@@ -67,7 +67,8 @@ void Menu::HandleSelection(int choice)
         PrintTheme(themeManager, "2. Brick Breaker\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "3. Snake\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "4. Maze\n", ThemeRoles::MenuText);
-        PrintTheme(themeManager, "5. Back\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "5. Wonk-ulator\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "6. Back\n", ThemeRoles::MenuText);
 
         gameChoice = InputHelper::GetInt("Selection: ", 1, 5);
 
@@ -86,6 +87,10 @@ void Menu::HandleSelection(int choice)
         else if (gameChoice == 4)
         {
             fileName = "maze.json";
+        }
+        else if (gameChoice == 5)
+        {
+            fileName = "calculator.json";
         }
 
         if (!fileName.empty())
