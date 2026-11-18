@@ -9,6 +9,19 @@
       "right_edge": 79,
       "left_edge": 0
     },
+    "menu": {
+      "art": [
+        " :::::::::   ::::::::  ::::    :::  ::::::::",
+        " :+:    :+: :+:    :+: :+:+:   :+: :+:    :+:",
+        " +:+    +:+ +:+    +:+ :+:+:+  +:+ +:+",
+        " +#++:++#+  +#+    +:+ +#+ +:+ +#+ :#:",
+        " +#+        +#+    +#+ +#+  +#+#+# +#+   +#+#",
+        " #+#        #+#    #+# #+#   #+#+# #+#    #+#",
+        " ###         ########  ###    ####  ########"
+      ],
+      "discription": "First to 10 points wins. \nDon't let the ball past your paddle!",
+      "controls": "W/S: Move Paddle\nESC: Exit to main menu\nR: Restart after game over"
+    },
     "ball": {
       "bounces_off": [
         "top",

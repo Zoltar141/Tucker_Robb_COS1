@@ -9,6 +9,16 @@
       "right_edge": 79,
       "left_edge": 0
     },
+    "menu": {
+      "art": [
+        " __  __     _    _____   _____",
+        "|  \\/  |   / \\  |__  /  | ____|",
+        "| |\\/| |  / _ \\   / /_  |  _|_",
+        "|_|  |_| /_/ \\_\\ /____| |_____|"
+      ],
+      "discription": "Race to the finish line(XX) \nbefore time runs out!",
+      "controls": "W/S/A/D: Move\nESC: Exit to main menu\nR: Restart after game over"
+    },
     "paddles": [
       {
         "position": "finish_x",

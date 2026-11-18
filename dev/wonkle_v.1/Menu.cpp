@@ -5,6 +5,9 @@
 #include "InputHelper.h"
 #include "Theme.h"
 #include "ThemeManager.h"
+#include "FileBoss.h"
+#include <algorithm>
+#include <conio.h>
 
 constexpr int MAIN_MENU_EXIT = 3;
 
@@ -32,15 +35,22 @@ void Menu::Run()//main loop open ended right now while settings and game dont ex
 
 void Menu::DisplayMainMenu()
 {
-    PrintTheme(themeManager, "\n========================\n", ThemeRoles::Border);
-    PrintTheme(themeManager, "       WONKLE\n", ThemeRoles::MenuHighlight);
-    PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
+    PrintTheme(themeManager, "\n============================================================\n", ThemeRoles::Border);
+    PrintTheme(themeManager, 
+        " _   _     _____     _____     _____     __        _____\n"
+        "| |_| |   |     |   |   | |   |  |  |   |  |      |   __|\n"
+        "| | | |   |  |  |   |   | |   |  |  |   |  |      |  |__\n"
+        "| | | |   |  |  |   | | | |   |    <    |  |      |   __|\n"
+        "|     | _ |  |  | _ | |   | _ |  |  | _ |  |__  _ |  |__  _\n"
+        "|_____||_||_____||_||_|___||_||__^__||_||_____||_||_____||_|\n",
+        ThemeRoles::MenuHighlight);
+    PrintTheme(themeManager, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n", ThemeRoles::Border);
 
-    PrintTheme(themeManager, "1. Choose Game\n", ThemeRoles::MenuText);
-    PrintTheme(themeManager, "2. Settings\n", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "\t1. Choose Game\t", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "2. Settings\t", ThemeRoles::MenuText);
     PrintTheme(themeManager, "3. Exit\n", ThemeRoles::MenuText);
 
-    PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
+    PrintTheme(themeManager, "============================================================\n", ThemeRoles::Border);
 }
 
 void Menu::HandleSelection(int choice)
@@ -80,8 +90,7 @@ void Menu::HandleSelection(int choice)
 
         if (!fileName.empty())
         {
-            GameObjects game(themeManager, fileName);
-            game.Run();
+            RunGameMenu(fileName);
         }
 
         break;
@@ -137,6 +146,62 @@ void Menu::RunSettings()
             PrintTheme(themeManager, "\nTheme changed to: ", ThemeRoles::MenuHighlight);
             PrintTheme(themeManager, selectedName + "\n", ThemeRoles::MenuText);
             break;
+        }
+    }
+}
+
+void Menu::RunGameMenu(const std::string& fileName)
+{
+    system("cls");
+
+    FileBoss fileBoss;
+    nlohmann::json config;
+
+    if (!fileBoss.ReadJSON(fileName, config))
+    {
+        PrintTheme(themeManager, "\nCould not load " + fileName + "\n", ThemeRoles::MenuHighlight);
+        return;
+    }
+
+    const auto& game = config["game"];
+    int choice = 0;
+
+    while (choice != 3)
+    {
+        for (const auto& line : game["menu"]["art"])
+        {
+            PrintTheme(themeManager, line.get<std::string>() + "\n", ThemeRoles::MenuHighlight);
+        }
+        PrintTheme(themeManager, game["menu"]["discription"].get<std::string>() + "\n\n", ThemeRoles::MenuHighlight);
+        PrintTheme(themeManager, "1. Play\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "2. Controls\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "3. Back\n", ThemeRoles::MenuText);
+
+        choice = InputHelper::GetInt("Selection:", 1, 3);
+
+        if (choice == 1)
+        {
+            GameObjects play(themeManager, fileName);
+            play.Run();
+        }
+        else if (choice == 2)
+        {
+            system("cls");
+
+            PrintTheme(themeManager, "\n" + 
+                game["menu"]["controls"].get<std::string>() + 
+                "\n", ThemeRoles::MenuText);
+
+            PrintTheme(themeManager, "Press any key to go Back\n", ThemeRoles::MenuText);
+            
+            _getch();
+
+            system("cls");
+        }
+        else if (choice == 3)
+        {
+            system("cls");
+            Menu::HandleSelection(1);
         }
     }
 }

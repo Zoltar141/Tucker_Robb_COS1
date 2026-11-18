@@ -11,6 +11,7 @@ private:
 
     void DisplayMainMenu();
     void HandleSelection(int choice);//I have a nested menu
+    void RunGameMenu(const std::string& fileName);//inbetween menu where save function will live 
     void RunSettings();
 };
 

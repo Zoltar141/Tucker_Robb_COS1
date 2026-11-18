@@ -9,6 +9,18 @@
       "right_edge": 79,
       "left_edge": 0
     },
+    "menu": {
+      "art": [
+        "   _____    _     _    _____    _    _   ______",
+        "  ( ____)  ( )   ( )  ()---()  ( )  ( ) ( _____)",
+        " (  )___   (  )  ( ) ( )___( ) ( )_( )  ( )__",
+        "  (____ )  ( )( )( ) ( _____ ) ( __ )   ( ___)",
+        "   ___(  ) ( )  (  ) ( )   ( ) ( ) ( )  ( )____",
+        "  (_____)  (_)   (_) (_)   (_) (_)  (_) (______)"
+      ],
+      "discription": "Eat the food to grow. \nReach 300 Points without \nhitting a wall or youself to win.",
+      "controls": "W/S/A/D: Turn the snake\nESC: Exit to main menu\nR: Restart after game over"
+    },
     "snake": {
       "columns": 39,
       "rows": 20,
@@ -57,7 +69,8 @@
             "value": "snake_length"
           }
         ]
-      },o
+      },
+      "o": null,
       "messages": {
         "player_wins": "YOU WIN!!!",
         "player_loses": "GAME OVER!!!",

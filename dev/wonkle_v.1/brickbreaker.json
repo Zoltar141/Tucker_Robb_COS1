@@ -9,6 +9,15 @@
       "right_edge": 78,
       "left_edge": 1
     },
+    "menu": {
+      "art": [
+        " ___   ___  _____  ____ |  /     ___   ___   ____   _   |  /   ____  ___ ",
+        "|___) |___)   |   |     |-<     |___) |___) |____  /_\\  |-<   |____ |___)",
+        "|___) |   \\ __|__ |____ |  \\    |___) |   \\ |____ /   \\ |  \\  |____ |   \\"
+      ],
+      "discription": "Break every brick before the ball gets past you.",
+      "controls": "A/D: Move Paddle\nESC: Exit to main menu\nR: Restart after game over"
+    },
     "ball": {
       "bounces_off": [
         "left",
