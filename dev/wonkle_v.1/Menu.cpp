@@ -8,6 +8,7 @@
 #include "FileBoss.h"
 #include <algorithm>
 #include <conio.h>
+#include <stdexcept>
 
 constexpr int MAIN_MENU_EXIT = 3;
 
@@ -61,9 +62,11 @@ void Menu::HandleSelection(int choice)
     {
     case 1:
     {
+        system("cls");
+
         int gameChoice = 0;
 
-        PrintTheme(themeManager, "\n.'.'. CHOOSE GAME .'.'.\n", ThemeRoles::Border);
+        PrintTheme(themeManager, "\n.'.'. CHOOSE PROGRAM .'.'.\n", ThemeRoles::Border);
         PrintTheme(themeManager, "1. Pong\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "2. Brick Breaker\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "3. Snake\n", ThemeRoles::MenuText);
@@ -178,7 +181,7 @@ void Menu::RunGameMenu(const std::string& fileName)
         {
             PrintTheme(themeManager, line.get<std::string>() + "\n", ThemeRoles::MenuHighlight);
         }
-        PrintTheme(themeManager, game["menu"]["discription"].get<std::string>() + "\n\n", ThemeRoles::MenuHighlight);
+        PrintTheme(themeManager, game["menu"]["description"].get<std::string>() + "\n\n", ThemeRoles::MenuHighlight);
         PrintTheme(themeManager, "1. Play\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "2. Controls\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "3. Back\n", ThemeRoles::MenuText);
@@ -187,8 +190,17 @@ void Menu::RunGameMenu(const std::string& fileName)
 
         if (choice == 1)
         {
-            GameObjects play(themeManager, fileName);
-            play.Run();
+            try
+            {
+                GameObjects play(themeManager, fileName);
+                play.Run();
+            }
+            catch (const std::exception& error)
+            {
+                PrintTheme(themeManager, "W.O.N.K.L.E. Cannot load this game: " +
+                    std::string(error.what()) + "\n", ThemeRoles::MenuHighlight);
+            }
+           
         }
         else if (choice == 2)
         {

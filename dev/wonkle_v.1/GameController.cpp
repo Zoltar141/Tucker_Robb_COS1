@@ -6,6 +6,9 @@
 #include <Windows.h>
 #include <stdexcept>
 #include <cctype>
+#include <sstream>
+#include <iomanip>
+#include <cmath>
 
 //setup
 GameController::GameController(ThemeManager& themeManager, const std::string& fileName)//constructor, connects the game to ThemeManager and loads its json
@@ -51,8 +54,36 @@ void GameController::SaveGameState(const std::map<std::string, int>& state)
 {
     for (const auto& value : state)
     {
-        runtime.SetStateValue(value.first, value.second);
+        int current = 0;
+        runtime.GetStateValue(value.first, current);
+        
+        //keep decimals written in json
+        if (current != value.second)
+        {
+            runtime.SetStateValue(value.first, value.second);
+        }
     }
+}
+
+std::string GameController::FormatValue(const std::string& key)
+{
+    double value = 0;
+    runtime.GetStateValue(key, value);
+
+    if (value == std::floor(value))
+    {
+        return std::to_string(static_cast<long long>(value));
+    }
+
+    std::ostringstream text;
+
+    text << std::fixed << std::setprecision(2) << value;
+    
+    std::string result = text.str();
+    
+    result.erase(result.find_last_not_of('0') + 1);
+
+    return result;
 }
 
 //Loop
@@ -254,14 +285,6 @@ void GameController::EndFrame()
 
     std::string bottomText = gameConfig["game"]["controls"]["display_text"].get<std::string>();
 
-    if (gameWon != 0)
-    {
-        bottomText = rendering["messages"]["player_wins"].get<std::string>();
-    }
-    else if (gameLost != 0)
-    {
-        bottomText = rendering["messages"]["player_loses"].get<std::string>();
-    }
 
     if (gameWon != 0 || gameLost != 0)
     {
@@ -279,6 +302,13 @@ void GameController::EndFrame()
         bottomText,
         rendering["roles"]["ui"].get<std::string>());
 
+    if (gameWon != 0 || gameLost != 0)
+    {
+        std::string result = rendering["messages"][gameWon != 0 ? "player_wins" : "player_loses"].get<std::string>();
+        int x = (gameConfig["game"]["field"]["height"].get<int>() - static_cast<int>(result.size())) / 2;
+        int y = rendering["world_vertical_offset"].get<int>() + gameConfig["game"]["field"]["height"].get<int>() / 2;
+        render.DrawText(x, y, result, rendering["roles"]["ui"].get<std::string>());
+    }
     // Present completed frame.
     render.PresentFrame();
 }

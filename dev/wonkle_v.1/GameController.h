@@ -28,7 +28,8 @@ protected:
     nlohmann::json gameConfig;//the game's json
 
     bool running = false;
-
+    //state value as text to show decimals
+    std::string FormatValue(const std::string& key);
     // Every game provides its own version of these.
     virtual void InitializeGame() = 0;//sets the starting state
     virtual void HandleInput() = 0;//proccesses input

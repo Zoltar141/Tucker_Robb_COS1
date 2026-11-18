@@ -19,7 +19,7 @@
         " #+#        #+#    #+# #+#   #+#+# #+#    #+#",
         " ###         ########  ###    ####  ########"
       ],
-      "discription": "First to 10 points wins. \nDon't let the ball past your paddle!",
+      "description": "First to 10 points wins. \nDon't let the ball past your paddle!",
       "controls": "W/S: Move Paddle\nESC: Exit to main menu\nR: Restart after game over"
     },
     "ball": {
@@ -123,9 +123,9 @@
         ]
       },
       "messages": {
-        "player_wins": "\nYOU WIN!!!\n",
-        "opponent_wins": "\nYOU LOSE!!!\n",
-        "return_prompt": "Press any key to return to the menu.\n"
+        "player_wins": "\t\t\t\tYOU WIN!!!",
+        "player_loses": "YOU LOSE!!!",
+        "restart_prompt": "\tPress any key to return to the menu."
       },
       "ascii": {
         "ball": "O",
@@ -146,6 +146,8 @@
       "player_score": 0,
       "opponent_score": 0,
       "winning_score": 10,
+      "game_won": 0,
+      "game_lost": 0,
       "opponent_reaction_timer": 0,
       "opponent_reaction_delay": 2
     },

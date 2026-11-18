@@ -18,7 +18,7 @@
         "   ___(  ) ( )  (  ) ( )   ( ) ( ) ( )  ( )____",
         "  (_____)  (_)   (_) (_)   (_) (_)  (_) (______)"
       ],
-      "discription": "Eat the food to grow. \nReach 300 Points without \nhitting a wall or youself to win.",
+      "description": "Eat the food to grow. \nReach 300 Points without \nhitting a wall or youself to win.",
       "controls": "W/S/A/D: Turn the snake\nESC: Exit to main menu\nR: Restart after game over"
     },
     "snake": {

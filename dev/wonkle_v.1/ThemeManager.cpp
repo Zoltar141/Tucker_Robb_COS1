@@ -5,6 +5,10 @@
 ThemeManager::ThemeManager()//constructor
 {
     LoadThemes();
+    if (themes.empty())
+    {
+        RegisterTheme(Theme("Default"));
+    }
 }
 
 bool ThemeManager::RegisterTheme(const Theme& theme)//make a new one

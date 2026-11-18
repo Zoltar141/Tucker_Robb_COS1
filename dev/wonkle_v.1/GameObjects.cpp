@@ -177,7 +177,7 @@ void GameObjects::RenderGame()
             scoreboardText += scoreboard["separator"].get<std::string>();
         }
 
-        scoreboardText += entry["label"].get<std::string>() + " " + std::to_string(state[entry["value"].get<std::string>()]);
+        scoreboardText += entry["label"].get<std::string>() + " " + FormatValue(entry["value"].get<std::string>());
     }
 
     DrawScoreboard(scoreboardText);
@@ -651,7 +651,7 @@ void GameObjects::DrawFieldText(std::map<std::string, int>& state)
 
         if(entry.contains("value"))
         {
-            text = std::to_string(state[entry["value"].get<std::string>()]);
+            text = FormatValue(entry["value"].get<std::string>());
         }
         else
         {

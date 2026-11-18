@@ -20,7 +20,7 @@
         "/**/   ///**//******  ***  /**/**//**      //****** ***//********  //** //****** /***",
         "//       //  //////  ///   // //  //        ////// ///  ////////    //   //////  ///"
       ],
-      "discription": "Slide the lines to pick two nnumbers from 0 to 12, \nchoose +, -, *, or /, \nand the answer appears where the lines cross. \nWarning Devide by 0 at your own peril.",
+      "description": "Slide the lines to pick two nnumbers from 0 to 12, \nchoose +, -, *, or /, \nand the answer appears where the lines cross. \nWarning Devide by 0 at your own peril.",
       "controls": "A/D: Slide the first number along the bottom\nW/S: Slide the second number up and down along the side.\nJ/K: Cycle through operators(+ - * /)\nESC: Back to the main menu\nR: Restart the Wonk-ulator."
     },
     "paddles": [

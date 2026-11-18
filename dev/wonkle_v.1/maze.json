@@ -16,7 +16,7 @@
         "| |\\/| |  / _ \\   / /_  |  _|_",
         "|_|  |_| /_/ \\_\\ /____| |_____|"
       ],
-      "discription": "Race to the finish line(XX) \nbefore time runs out!",
+      "description": "Race to the finish line(XX) \nbefore time runs out!",
       "controls": "W/S/A/D: Move\nESC: Exit to main menu\nR: Restart after game over"
     },
     "paddles": [
