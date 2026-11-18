@@ -45,6 +45,7 @@ void Menu::DisplayMainMenu()
 
 void Menu::HandleSelection(int choice)
 {
+    std::string fileName;
     switch (choice)
     {
     case 1:
@@ -62,27 +63,30 @@ void Menu::HandleSelection(int choice)
 
         if (gameChoice == 1)
         {
-            GameObjects game(themeManager, "pong.json");
-            game.Run();
+            fileName = "pong.json";
         }
         else if (gameChoice == 2)
         {
-            GameObjects game(themeManager, "brickbreaker.json");
-            game.Run();
+            fileName = "brickbreaker.json";
         }
         else if (gameChoice == 3)
         {
-            GameObjects game(themeManager, "snake.json");
-            game.Run();
+            fileName = "snake.json";
         }
         else if (gameChoice == 4)
         {
-            GameObjects game(themeManager, "maze.json");
+            fileName = "maze.json";
+        }
+
+        if (!fileName.empty())
+        {
+            GameObjects game(themeManager, fileName);
             game.Run();
         }
 
         break;
     }
+
     case 2:
         RunSettings();
         break;
