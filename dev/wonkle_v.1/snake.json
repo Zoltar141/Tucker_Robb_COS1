@@ -57,7 +57,7 @@
             "value": "snake_length"
           }
         ]
-      },
+      },o
       "messages": {
         "player_wins": "YOU WIN!!!",
         "player_loses": "GAME OVER!!!",
