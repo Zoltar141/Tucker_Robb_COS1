@@ -37,16 +37,17 @@ void Menu::DisplayMainMenu()
 {
     PrintTheme(themeManager, "\n============================================================\n", ThemeRoles::Border);
     PrintTheme(themeManager, 
-        " _   _     _____     _____     _____     __        _____\n"
-        "| |_| |   |     |   |   | |   |  |  |   |  |      |   __|\n"
-        "| | | |   |  |  |   |   | |   |  |  |   |  |      |  |__\n"
-        "| | | |   |  |  |   | | | |   |    <    |  |      |   __|\n"
-        "|     | _ |  |  | _ | |   | _ |  |  | _ |  |__  _ |  |__  _\n"
-        "|_____||_||_____||_||_|___||_||__^__||_||_____||_||_____||_|\n",
+        " _         _____         _     __        _         ______\n"
+        "| |  _    |     |    ___| |   |  |__    | |       |   ___|\n"
+        "| |_| |   |  |  |   |   | |   |  |  |   | |       |  |__\n"
+        "| | | |   |  |  |   |   | |   |    <    | |___    |   __|\n"
+        "| | | | _ |  |  | _ | |   | _ |  |  | _ |     | _ |  |____  _\n"
+        "|_____||_||_____||_|| |___||_||__^__||_||_____||_||_______||_|\n"
+        "                    |_|\n",
         ThemeRoles::MenuHighlight);
     PrintTheme(themeManager, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n", ThemeRoles::Border);
 
-    PrintTheme(themeManager, "\t1. Choose Game\t", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "\t1. Choose Program\t", ThemeRoles::MenuText);
     PrintTheme(themeManager, "2. Settings\t", ThemeRoles::MenuText);
     PrintTheme(themeManager, "3. Exit\n", ThemeRoles::MenuText);
 
@@ -62,7 +63,7 @@ void Menu::HandleSelection(int choice)
     {
         int gameChoice = 0;
 
-        PrintTheme(themeManager, "\n=== CHOOSE GAME ===\n", ThemeRoles::Border);
+        PrintTheme(themeManager, "\n.'.'. CHOOSE GAME .'.'.\n", ThemeRoles::Border);
         PrintTheme(themeManager, "1. Pong\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "2. Brick Breaker\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "3. Snake\n", ThemeRoles::MenuText);
