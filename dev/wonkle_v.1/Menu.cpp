@@ -55,9 +55,10 @@ void Menu::HandleSelection(int choice)
         PrintTheme(themeManager, "1. Pong\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "2. Brick Breaker\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "3. Snake\n", ThemeRoles::MenuText);
-        PrintTheme(themeManager, "4. Back\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "4. Maze\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "5. Back\n", ThemeRoles::MenuText);
 
-        gameChoice = InputHelper::GetInt("Selection: ", 1, 4);
+        gameChoice = InputHelper::GetInt("Selection: ", 1, 5);
 
         if (gameChoice == 1)
         {
@@ -72,6 +73,11 @@ void Menu::HandleSelection(int choice)
         else if (gameChoice == 3)
         {
             GameObjects game(themeManager, "snake.json");
+            game.Run();
+        }
+        else if (gameChoice == 4)
+        {
+            GameObjects game(themeManager, "maze.json");
             game.Run();
         }
 
