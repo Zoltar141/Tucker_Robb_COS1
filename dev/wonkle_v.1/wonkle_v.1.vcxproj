@@ -183,6 +183,15 @@
     <None Include="themes.json" />
     <None Include="wonkle_save.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="Bink.wav" />
+    <Media Include="Bonk.wav" />
+    <Media Include="boop.wav" />
+    <Media Include="eating.wav" />
+    <Media Include="loser.wav" />
+    <Media Include="tshhhh.wav" />
+    <Media Include="winner.wav" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets" Condition="Exists('packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets')" />

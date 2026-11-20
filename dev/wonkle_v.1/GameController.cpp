@@ -372,6 +372,8 @@ void GameController::PlayStateSounds()
 
 void GameController::PlaySoundFile(const std::string& file)
 {
+    if (muted) return;
+
     // A sound file that is not there is skipped, the game plays fine without it.
     if (!fileBoss.FileExists(file))
     {
@@ -701,6 +703,7 @@ void GameController::CheckGameOver()
     {
         // Restart, the rules stay the same so only the state is reset.
         InitializeGame();
+        TakeSoundSnapshot();//the reset doesnt make noise
     }
     else
     {

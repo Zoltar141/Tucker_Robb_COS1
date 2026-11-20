@@ -12,7 +12,7 @@
 
 constexpr int MAIN_MENU_EXIT = 4;
 
-void PrintTheme(ThemeManager& themeManager, const std::string& text, const std::string& role)
+static void PrintTheme(ThemeManager& themeManager, const std::string& text, const std::string& role)
 {
     Theme* activeTheme = themeManager.GetActiveTheme();
     ThemeColor color = activeTheme->GetColor(role);
@@ -132,8 +132,10 @@ void Menu::RunSettings()
 {
     int choice = 0;
 
-    while (choice != 3)
+    while (choice != 4)
     {
+        system("cls");
+
         PrintTheme(themeManager, "\n======= SETTINGS =======\n", ThemeRoles::Border);
 
         PrintTheme(themeManager, "Active Theme: ", ThemeRoles::MenuHighlight);
@@ -141,10 +143,11 @@ void Menu::RunSettings()
 
         PrintTheme(themeManager, "1. Change Theme\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "2. Reset All Saves\n", ThemeRoles::MenuText);
-        PrintTheme(themeManager, "3. Back\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, GameController::muted ? "3. Unmute Sound\n": "3. Mute Sound\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "4. Back\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
 
-        choice = InputHelper::GetInt("Select a theme: ", 1, 3);
+        choice = InputHelper::GetInt("Select a option: ", 1, 4);
         if (choice == 1)
         {
             RunThemeMenu();
@@ -184,7 +187,12 @@ void Menu::RunSettings()
                     ThemeRoles::MenuText);
             }
         }
+        else if (choice == 3)
+        {
+            GameController::muted = !GameController::muted;
+        }
     }
+    system("cls");
 }
 
 void Menu::RunGameMenu(const std::string& fileName)
@@ -240,7 +248,7 @@ void Menu::RunGameMenu(const std::string& fileName)
 
             PrintTheme(themeManager, "Press any key to go Back\n", ThemeRoles::MenuText);
             
-            _getch();
+            (void)_getch();
 
             system("cls");
         }
@@ -277,7 +285,7 @@ void Menu::RunThemeMenu()
         return;
     }
 
-    const std::string& selectedName = themes[choice - 1].GetName();
+    const std::string& selectedName = themes[static_cast<size_t>(choice) - 1].GetName();
 
     themeManager.SetActiveTheme(selectedName);
 
@@ -300,13 +308,22 @@ void Menu::RunLoadMenu()
 
     for (const auto& game : games)
     {
-        GameObjects check(themeManager, game.second);
-
-        if (check.HasSave())
+        try
         {
-            savedGames.push_back(game);
+            GameObjects check(themeManager, game.second);
+
+            if (check.HasSave())
+            {
+                savedGames.push_back(game);
+            }
+        }
+        catch (const std::exception& error)
+        {
+            //a game whose jason wont load just doesnt get added
+            PrintTheme(themeManager, "W.O.N.K.L.E. cannont load " + game.first + ": " + std::string(error.what()) + "\n", ThemeRoles::MenuHighlight);
         }
     }
+
 
     if (savedGames.empty())
     {
@@ -338,6 +355,13 @@ void Menu::RunLoadMenu()
         return;
     }
 
-    GameObjects game(themeManager, savedGames[choice - 1].second);
-    game.Run(true);//true starts the game from its save
+    try
+    {
+        GameObjects game(themeManager, savedGames[choice - 1].second);
+        game.Run(true);//true starts the game from its save
+    }
+    catch (const std::exception& error)
+    {
+        PrintTheme(themeManager, "W.O.N.K.L.E. cannont load this game: " + std::string(error.what()) + "\n", ThemeRoles::MenuHighlight);
+    }
 }

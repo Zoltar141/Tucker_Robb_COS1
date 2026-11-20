@@ -102,6 +102,20 @@
       "game_won": 0,
       "game_lost": 0
     },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "score",
+        "file": "eating.wav"
+      }
+    ],
     "rules": [
       {
         "name": "hits_left_wall",

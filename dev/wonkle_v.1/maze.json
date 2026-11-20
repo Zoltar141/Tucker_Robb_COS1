@@ -155,136 +155,146 @@
       "game_won": 0,
       "game_lost": 0
     },
-    "rules": [
+    "sounds": [
       {
-        "name": "wall_stops_player",
-        "conditions": [
-          {
-            "key": "brick_hits",
-            "comparison": "Greater",
-            "value": 0
-          }
-        ],
-        "transformations": [
-          {
-            "key": "player_x",
-            "operation": "Assign",
-            "value": {
-              "state": "last_x"
-            }
-          },
-          {
-            "key": "player_y",
-            "operation": "Assign",
-            "value": {
-              "state": "last_y"
-            }
-          }
-        ]
+        "key": "game_won",
+        "file": "winner.wav"
       },
       {
-        "name": "remember_position",
-        "conditions": [],
-        "transformations": [
-          {
-            "key": "last_x",
-            "operation": "Assign",
-            "value": {
-              "state": "player_x"
-            }
-          },
-          {
-            "key": "last_y",
-            "operation": "Assign",
-            "value": {
-              "state": "player_y"
-            }
-          }
-        ]
-      },
-      {
-        "name": "player_wins",
-        "conditions": [
-          {
-            "key": "player_x",
-            "comparison": "Equal",
-            "value": {
-              "state": "finish_x"
-            }
-          },
-          {
-            "key": "player_y",
-            "comparison": "Equal",
-            "value": {
-              "state": "finish_y"
-            }
-          }
-        ],
-        "transformations": [
-          {
-            "key": "game_won",
-            "operation": "Assign",
-            "value": 1
-          }
-        ]
-      },
-      {
-        "name": "timer_tick",
-        "conditions": [],
-        "transformations": [
-          {
-            "key": "ticks",
-            "operation": "Add",
-            "value": 1
-          }
-        ]
-      },
-      {
-        "name": "second_passes",
-        "conditions": [
-          {
-            "key": "ticks",
-            "comparison": "GreaterEqual",
-            "value": {
-              "state": "ticks_per_second"
-            }
-          }
-        ],
-        "transformations": [
-          {
-            "key": "time_left",
-            "operation": "Subtract",
-            "value": 1
-          },
-          {
-            "key": "ticks",
-            "operation": "Assign",
-            "value": 0
-          }
-        ]
-      },
-      {
-        "name": "player_loses",
-        "conditions": [
-          {
-            "key": "time_left",
-            "comparison": "LessEqual",
-            "value": 0
-          },
-          {
-            "key": "game_won",
-            "comparison": "Equal",
-            "value": 0
-          }
-        ],
-        "transformations": [
-          {
-            "key": "game_lost",
-            "operation": "Assign",
-            "value": 1
-          }
-        ]
+        "key": "game_lost",
+        "file": "loser.wav"
       }
-    ]
+    ],
+      "rules": [
+        {
+          "name": "wall_stops_player",
+          "conditions": [
+            {
+              "key": "brick_hits",
+              "comparison": "Greater",
+              "value": 0
+            }
+          ],
+          "transformations": [
+            {
+              "key": "player_x",
+              "operation": "Assign",
+              "value": {
+                "state": "last_x"
+              }
+            },
+            {
+              "key": "player_y",
+              "operation": "Assign",
+              "value": {
+                "state": "last_y"
+              }
+            }
+          ]
+        },
+        {
+          "name": "remember_position",
+          "conditions": [],
+          "transformations": [
+            {
+              "key": "last_x",
+              "operation": "Assign",
+              "value": {
+                "state": "player_x"
+              }
+            },
+            {
+              "key": "last_y",
+              "operation": "Assign",
+              "value": {
+                "state": "player_y"
+              }
+            }
+          ]
+        },
+        {
+          "name": "player_wins",
+          "conditions": [
+            {
+              "key": "player_x",
+              "comparison": "Equal",
+              "value": {
+                "state": "finish_x"
+              }
+            },
+            {
+              "key": "player_y",
+              "comparison": "Equal",
+              "value": {
+                "state": "finish_y"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "key": "game_won",
+              "operation": "Assign",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "timer_tick",
+          "conditions": [],
+          "transformations": [
+            {
+              "key": "ticks",
+              "operation": "Add",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "second_passes",
+          "conditions": [
+            {
+              "key": "ticks",
+              "comparison": "GreaterEqual",
+              "value": {
+                "state": "ticks_per_second"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "key": "time_left",
+              "operation": "Subtract",
+              "value": 1
+            },
+            {
+              "key": "ticks",
+              "operation": "Assign",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "name": "player_loses",
+          "conditions": [
+            {
+              "key": "time_left",
+              "comparison": "LessEqual",
+              "value": 0
+            },
+            {
+              "key": "game_won",
+              "comparison": "Equal",
+              "value": 0
+            }
+          ],
+          "transformations": [
+            {
+              "key": "game_lost",
+              "operation": "Assign",
+              "value": 1
+            }
+          ]
+        }
+      ]
   }
 }

@@ -151,6 +151,32 @@
       "opponent_reaction_timer": 0,
       "opponent_reaction_delay": 2
     },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "player_score",
+        "file": "boop.wav"
+      },
+      {
+        "key": "opponent_score",
+        "file": "boop.wav"
+      },
+      {
+        "key": "ball_velocity_x",
+        "file": "Bink.wav"
+      },
+      {
+        "key": "ball_velocity_y",
+        "file": "Bonk.wav"
+      }
+    ],
     "rules": [
       {
         "name": "opponent_scores",

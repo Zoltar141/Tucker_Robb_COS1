@@ -24,6 +24,7 @@ public:
 
     bool HasSave() const;//true when this game has a save to load, the game menu uses it
     static bool ResetAllSaveData();//wipes every save and high score, for the settings menu
+    static inline bool muted = false; //to just turn sound off 
 
 protected:
     ThemeManager& themeManager;//colored theme addition
@@ -106,7 +107,6 @@ private:
     void RecordHighScore();//keeps the score when it beats the best one
 
     // Game over
-    std::string GetGameOverText(bool gameWon, int score);//result, final score and restart prompt
     void ClearKeys();//throws away keys typed during play
     bool AskToRestart();//waits for the restart or exit key, true means restart
 };

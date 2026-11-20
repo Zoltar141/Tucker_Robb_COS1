@@ -159,6 +159,28 @@
       "game_won": 0,
       "game_lost": 0
     },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "score",
+        "file": "tshhhh.wav"
+      },
+      {
+        "key": "ball_velocity_x",
+        "file": "Bonk.wav"
+      },
+      {
+        "key": "ball_velocity_y",
+        "file": "Bink.wav"
+      }
+    ],
     "rules": [
       {
         "name": "brick_destroyed",
