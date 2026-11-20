@@ -119,5 +119,6 @@
     <None Include="snake.json" />
     <None Include="maze.json" />
     <None Include="calculator.json" />
+    <None Include="wonkle_save.json" />
   </ItemGroup>
 </Project>

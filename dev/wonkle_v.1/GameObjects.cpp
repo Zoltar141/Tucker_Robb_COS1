@@ -72,7 +72,7 @@ void GameObjects::UpdateGame()// Advances the game state.
     }
 
     // Retrieve current game state.
-    std::map<std::string, int> state = LoadGameState();
+    std::map<std::string, int> state = GetGameState();
 
     if(Uses("ball"))
     {
@@ -106,7 +106,7 @@ void GameObjects::UpdateGame()// Advances the game state.
     }
 
     // Store updated game values.
-    SaveGameState(state);
+    SetGameState(state);
 
     // Evaluate registered gameplay rules.
     runtime.Update();
@@ -160,7 +160,7 @@ bool GameObjects::UpdateIsDue()
 void GameObjects::RenderGame()
 {
     // Retrieve current game state.
-    std::map<std::string, int> state = LoadGameState();
+    std::map<std::string, int> state = GetGameState();
 
     const auto& scoreboard = gameConfig["game"]["rendering"]["scoreboard"];
 
@@ -472,7 +472,7 @@ void GameObjects::DrawBricks()
 //snake
 void GameObjects::SetupSnake()
 {
-    std::map<std::string, int> state = LoadGameState();
+    std::map<std::string, int> state = GetGameState();
 
     const auto& snake = gameConfig["game"]["snake"];
 
@@ -550,7 +550,7 @@ void GameObjects::GrowSnakeAndPlaceFood(std::map<std::string, int>& state)
     const auto& snake = gameConfig["game"]["snake"];
 
     // Retrieve values after runtime rules have been applied.
-    std::map<std::string, int> newState = LoadGameState();
+    std::map<std::string, int> newState = GetGameState();
 
     // if the rules made the snake longer, every counter lasts one more move.
     if(newState["snake_length"] > state["snake_length"])

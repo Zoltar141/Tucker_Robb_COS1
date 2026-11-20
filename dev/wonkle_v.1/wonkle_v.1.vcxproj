@@ -181,6 +181,7 @@
     <None Include="pong.json" />
     <None Include="snake.json" />
     <None Include="themes.json" />
+    <None Include="wonkle_save.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -74,7 +74,7 @@ void Menu::HandleSelection(int choice)
         PrintTheme(themeManager, "5. Wonk-ulator\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "6. Back\n", ThemeRoles::MenuText);
 
-        gameChoice = InputHelper::GetInt("Selection: ", 1, 5);
+        gameChoice = InputHelper::GetInt("Selection: ", 1, 6);
 
         if (gameChoice == 1)
         {
@@ -95,6 +95,11 @@ void Menu::HandleSelection(int choice)
         else if (gameChoice == 5)
         {
             fileName = "calculator.json";
+        }
+        else if (gameChoice == 6)
+        {
+            system("cls");
+            break;
         }
 
         if (!fileName.empty())
@@ -123,38 +128,57 @@ void Menu::RunSettings()
 {
     int choice = 0;
 
-    const std::vector<Theme>& themes = themeManager.GetThemes();
-
-    while (choice != static_cast<int>(themes.size()) + 1)
+    while (choice != 3)
     {
         PrintTheme(themeManager, "\n======= SETTINGS =======\n", ThemeRoles::Border);
 
         PrintTheme(themeManager, "Active Theme: ", ThemeRoles::MenuHighlight);
         PrintTheme(themeManager, themeManager.GetActiveTheme()->GetName() + "\n\n", ThemeRoles::MenuText);
 
-        int index = 1;
-
-        for (const Theme& theme : themes)                           //display available themes
-        {
-            PrintTheme(themeManager, std::to_string(index) + ". " + theme.GetName() + "\n", ThemeRoles::MenuText);
-            index++;
-        }
-
-        PrintTheme(themeManager, std::to_string(index) + ". Back\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "1. Change Theme\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "2. Reset All Saves\n", ThemeRoles::MenuText);
+        PrintTheme(themeManager, "3. Back\n", ThemeRoles::MenuText);
         PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
 
-        choice = InputHelper::GetInt("Select a theme: ", 1, index);
-
-        if (choice < index)                                          //change active theme if theme selected
+        choice = InputHelper::GetInt("Select a theme: ", 1, 3);
+        if (choice == 1)
         {
-            const std::string& selectedName =
-                themes[choice - 1].GetName();
+            RunThemeMenu();
+        }
+        else if(choice == 2)
+        {
+            system("cls");
 
-            themeManager.SetActiveTheme(selectedName);
+            PrintTheme(themeManager,
+                "\nWARNING: This will delete ALL game saves and high scores.\n",
+                ThemeRoles::MenuHighlight);
 
-            PrintTheme(themeManager, "\nTheme changed to: ", ThemeRoles::MenuHighlight);
-            PrintTheme(themeManager, selectedName + "\n", ThemeRoles::MenuText);
-            break;
+            PrintTheme(themeManager,
+                "1. Confirm Reset\n2. Cancel\n",
+                ThemeRoles::MenuText);
+
+            int confirm = InputHelper::GetInt("Selection: ", 1, 2);
+
+            if (confirm == 1)
+            {
+                if (GameController::ResetAllSaveData())
+                {
+                    PrintTheme(themeManager,
+                        "\nAll saves and high scores have been reset.\n",
+                        ThemeRoles::MenuHighlight);
+                }
+                else
+                {
+                    PrintTheme(themeManager,
+                        "\nFailed to reset save data.\n",
+                        ThemeRoles::MenuHighlight);
+                }
+            }
+            else
+            {
+                PrintTheme(themeManager, "\nReset cancelled.\n",
+                    ThemeRoles::MenuText);
+            }
         }
     }
 }
@@ -222,4 +246,38 @@ void Menu::RunGameMenu(const std::string& fileName)
             Menu::HandleSelection(1);
         }
     }
+}
+
+void Menu::RunThemeMenu()
+{
+    const std::vector<Theme>& themes = themeManager.GetThemes();
+    const int backChoice = static_cast<int>(themes.size()) + 1;
+
+    PrintTheme(themeManager, "\n===== CHANGE THEME =====\n", ThemeRoles::Border);
+
+    int index = 1;
+
+    for (const Theme& theme : themes)
+    {
+        PrintTheme(themeManager, std::to_string(index) + ". " + theme.GetName() + "\n", ThemeRoles::MenuText);
+        index++;
+    }
+
+    PrintTheme(themeManager, std::to_string(backChoice) + ". Back\n", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "===========================\n", ThemeRoles::Border);
+
+    int choice = InputHelper::GetInt("Select a theme: ", 1, backChoice);
+
+    if (choice == backChoice)
+    {
+        return;
+    }
+
+    const std::string& selectedName = themes[choice - 1].GetName();
+
+    themeManager.SetActiveTheme(selectedName);
+
+    PrintTheme(themeManager, "Theme changed to: \n", ThemeRoles::MenuHighlight);
+    PrintTheme(themeManager, selectedName + "\n", ThemeRoles::MenuText);
+
 }
