@@ -10,7 +10,7 @@ bool GameState::GetValue(const std::string& key, int& value) const//true means s
         return false;//no value retrieved
     }
 
-    value = it->second;//get value from key 
+    value = static_cast<int>(it->second);//get value from key 
     return true;//retrieved value
 }
 
