@@ -1,7 +1,9 @@
 #pragma once
 #include "Position.h"
 #include "Render.h"
+
 #include <string>
+#include <vector>
 
 class Boundary
 {

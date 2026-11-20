@@ -1,9 +1,10 @@
 #pragma once
 #include "ThemeManager.h"
 #include "Colors.h"
+#include "Position.h"
+
 #include <string>
 #include <vector>
-#include "Position.h"
 #include <nlohmann/json.hpp>
 
 struct RenderObject

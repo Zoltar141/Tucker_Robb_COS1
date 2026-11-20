@@ -1,5 +1,7 @@
 #include "Colors.h"
 
+#include <iostream>
+
 constexpr WORD BACKGROUND = 0x00F0;
 constexpr WORD FOREGROUND = 0X000F;
 

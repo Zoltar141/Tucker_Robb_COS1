@@ -1,7 +1,8 @@
 #include "InputHelper.h"
+
 #include <iostream>
 #include <conio.h>
-#include <limits>
+#include <stdexcept>
 #include <Windows.h>
 
 constexpr int KEY_PRESSED = 0x8000;

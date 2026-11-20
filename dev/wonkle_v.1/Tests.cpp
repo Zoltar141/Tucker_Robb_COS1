@@ -15,6 +15,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdexcept>
+#include <utility>
+
 // every game the Choose Program menu can start
 const std::vector<std::string> GAME_FILES =
 {

@@ -1,6 +1,5 @@
 #include "ThemeManager.h"
 #include "FileBoss.h"
-#include <unordered_map>
 
 ThemeManager::ThemeManager()//constructor
 {

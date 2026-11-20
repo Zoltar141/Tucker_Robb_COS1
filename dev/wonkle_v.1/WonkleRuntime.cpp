@@ -1,5 +1,7 @@
 #include "WonkleRuntime.h"
 
+#include <unordered_map>
+
 static Comparison GetComparison(const std::string& name)
 {
     static const std::unordered_map<std::string, Comparison> comparisons =

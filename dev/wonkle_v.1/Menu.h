@@ -1,6 +1,8 @@
 #pragma once
 #include "ThemeManager.h"
 
+#include <string>
+
 class Menu
 {
 public:

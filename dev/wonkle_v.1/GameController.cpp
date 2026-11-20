@@ -1,6 +1,7 @@
 #include "GameController.h"
 #include "InputHelper.h"
 #include "Colors.h"
+
 #include <thread>
 #include <chrono>
 #include <Windows.h>

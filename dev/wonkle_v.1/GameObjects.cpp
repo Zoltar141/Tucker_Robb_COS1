@@ -1,6 +1,7 @@
 #include "GameObjects.h"
 #include "InputHelper.h"
 #include "Collision.h"
+
 #include <algorithm>
 
 constexpr char EMPTY_BRICK = '0';  //a space in a brick row with no brick in it, the other digits are hits left

@@ -1,14 +1,15 @@
 #include "Menu.h"
-#include <iostream>
 #include "GameObjects.h"
 #include "GameController.h"
 #include "InputHelper.h"
-#include "Theme.h"
-#include "ThemeManager.h"
 #include "FileBoss.h"
-#include <algorithm>
+
 #include <conio.h>
 #include <stdexcept>
+#include <cstdlib>
+#include <utility>
+#include <vector>
+#include <string>
 
 constexpr int MAIN_MENU_EXIT = 4;
 
