@@ -10,7 +10,7 @@
 #include <conio.h>
 #include <stdexcept>
 
-constexpr int MAIN_MENU_EXIT = 3;
+constexpr int MAIN_MENU_EXIT = 4;
 
 void PrintTheme(ThemeManager& themeManager, const std::string& text, const std::string& role)
 {
@@ -36,7 +36,7 @@ void Menu::Run()//main loop open ended right now while settings and game dont ex
 
 void Menu::DisplayMainMenu()
 {
-    PrintTheme(themeManager, "\n============================================================\n", ThemeRoles::Border);
+    PrintTheme(themeManager, "\n===============================================================\n", ThemeRoles::Border);
     PrintTheme(themeManager, 
         " _         _____         _     __        _         ______\n"
         "| |  _    |     |    ___| |   |  |__    | |       |   ___|\n"
@@ -46,13 +46,14 @@ void Menu::DisplayMainMenu()
         "|_____||_||_____||_|| |___||_||__^__||_||_____||_||_______||_|\n"
         "                    |_|\n",
         ThemeRoles::MenuHighlight);
-    PrintTheme(themeManager, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n", ThemeRoles::Border);
+    PrintTheme(themeManager, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n", ThemeRoles::Border);
 
-    PrintTheme(themeManager, "\t1. Choose Program\t", ThemeRoles::MenuText);
-    PrintTheme(themeManager, "2. Settings\t", ThemeRoles::MenuText);
-    PrintTheme(themeManager, "3. Exit\n", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "1. Choose Program\t", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "2. Load Game\t", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "3. Settings\t", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "4. Exit\n", ThemeRoles::MenuText);
 
-    PrintTheme(themeManager, "============================================================\n", ThemeRoles::Border);
+    PrintTheme(themeManager, "===============================================================\n", ThemeRoles::Border);
 }
 
 void Menu::HandleSelection(int choice)
@@ -109,12 +110,15 @@ void Menu::HandleSelection(int choice)
 
         break;
     }
-
     case 2:
+        RunLoadMenu();
+        break;
+
+    case 3:
         RunSettings();
         break;
 
-    case MAIN_MENU_EXIT:
+    case 4:
         PrintTheme(themeManager, "\nExiting Wonkle.\n", ThemeRoles::MenuHighlight);
         break;
 
@@ -280,4 +284,60 @@ void Menu::RunThemeMenu()
     PrintTheme(themeManager, "Theme changed to: \n", ThemeRoles::MenuHighlight);
     PrintTheme(themeManager, selectedName + "\n", ThemeRoles::MenuText);
 
+}
+
+void Menu::RunLoadMenu()
+{
+    // name shown in the menu, json the game loads from
+    const std::vector<std::pair<std::string, std::string>> games =
+    {
+        { "Pong", "pong.json" },
+        { "Brick Breaker", "brickbreaker.json" },
+        { "Snake", "snake.json" }
+    };
+
+    std::vector<std::pair<std::string, std::string>> savedGames;//only the games that have a save
+
+    for (const auto& game : games)
+    {
+        GameObjects check(themeManager, game.second);
+
+        if (check.HasSave())
+        {
+            savedGames.push_back(game);
+        }
+    }
+
+    if (savedGames.empty())
+    {
+        system("cls");
+
+        PrintTheme(themeManager, "\nNo saved games.\n", ThemeRoles::MenuHighlight);
+        return;
+    }
+
+    PrintTheme(themeManager, "\n====== LOAD GAME ======\n", ThemeRoles::Border);
+
+    int index = 1;
+
+    for (const auto& game : savedGames)
+    {
+        PrintTheme(themeManager, std::to_string(index) + ". " + game.first + "\n", ThemeRoles::MenuText);
+        index++;
+    }
+
+    const int backChoice = static_cast<int>(savedGames.size()) + 1;
+
+    PrintTheme(themeManager, std::to_string(backChoice) + ". Back\n", ThemeRoles::MenuText);
+    PrintTheme(themeManager, "========================\n", ThemeRoles::Border);
+
+    int choice = InputHelper::GetInt("Selection: ", 1, backChoice);
+
+    if (choice == backChoice)
+    {
+        return;
+    }
+
+    GameObjects game(themeManager, savedGames[choice - 1].second);
+    game.Run(true);//true starts the game from its save
 }
