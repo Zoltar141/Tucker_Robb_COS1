@@ -54,6 +54,8 @@ GameController::GameController(ThemeManager& themeManager, const std::string& fi
         throw std::runtime_error("Failed to load " + fileName);
     }
     render.SetConfiguration(gameConfig["game"]["rendering"]);
+
+    gameName = std::filesystem::path(fileName).stem().string();
 }
 
 void GameController::SetupRules()
