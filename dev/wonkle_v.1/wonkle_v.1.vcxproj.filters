@@ -33,9 +33,6 @@
     <ClCompile Include="InputHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PONG.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Colors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,13 +57,10 @@
     <ClCompile Include="FileBoss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BRICKBREAKER.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SNAKE.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -84,9 +78,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PONG.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Colors.h">
@@ -113,13 +104,10 @@
     <ClInclude Include="FileBoss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BRICKBREAKER.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SNAKE.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -129,5 +117,31 @@
     <None Include="pong.json" />
     <None Include="themes.json" />
     <None Include="snake.json" />
+    <None Include="maze.json" />
+    <None Include="calculator.json" />
+    <None Include="wonkle_save.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Bink.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="Bonk.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="boop.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="eating.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="loser.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="tshhhh.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="winner.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

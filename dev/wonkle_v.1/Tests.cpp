@@ -1,1665 +1,612 @@
-#include <iostream>
 #include "Tests.h"
-#include "WonkleRuntime.h"
 #include "GameState.h"
-#include "Position.h"
+#include "WonkleRuntime.h"
 #include "Collision.h"
 #include "Boundary.h"
+#include "Position.h"
 #include "Theme.h"
 #include "ThemeManager.h"
 #include "Colors.h"
 #include "FileBoss.h"
-#include "Render.h"
-#include "InputHelper.h"
-#include "Menu.h"
-#include "PONG.h"
+#include "GameController.h"
+#include "GameObjects.h"
 
 #include <filesystem>
-#include <fstream>
+#include <iostream>
+#include <string>
 #include <vector>
+#include <stdexcept>
+#include <utility>
+
+// every game the Choose Program menu can start
+const std::vector<std::string> GAME_FILES =
+{
+    "pong.json", "brickbreaker.json", "snake.json", "maze.json", "calculator.json"
+};
+
+static int passed = 0;
+static int failed = 0;
+
+// prints one result and counts it
+static void Check(bool ok, const std::string& what)
+{
+    if (ok)
+    {
+        Colors::Print("PASS: ", Colors::Color::Green);
+        passed++;
+    }
+    else
+    {
+        Colors::Print("FAIL: ", Colors::Color::Red);
+        failed++;
+    }
+
+    std::cout << what << "\n";
+}
+
+static void Section(const std::string& name)
+{
+    std::cout << "\n--- " << name << " ---\n";
+}
+
+void RunAllTests()
+{
+    passed = 0;
+    failed = 0;
+
+    RunGameStateTests();
+    RunWonkleRuntimeTests();
+    RunRuleLoadingTests();
+    RunCollisionTests();
+    RunFileBossTests();
+    RunGameFileTests();
+    RunSaveTests();
+    RunThemeTests();
+
+    std::cout << "\n" << passed << " passed, " << failed << " failed\n";
+}
+
 
 // --------------------------------------------------
-// GAME STATE TESTS
+// GAME STATE
 // --------------------------------------------------
 
 void RunGameStateTests()
 {
+    Section("GameState");
+
     GameState state;
-    int value = 0;
+    int whole = 0;
+    double decimal = 0.0;
 
-    // Test 1: Store and retrieve a value
-    state.SetValue("ball_x", 10);
+    state.SetValue("score", 10);
+    Check(state.GetValue("score", whole) && whole == 10, "GetValue reads back a stored value");
 
-    if (state.GetValue("ball_x", value) && value == 10)
-        std::cout << "PASS: GetValue retrieves stored values.\n";
-    else
-        std::cout << "FAIL: GetValue could not retrieve the value.\n";
+    state.SetValue("score", 20);
+    Check(state.GetValue("score", whole) && whole == 20, "SetValue replaces an existing value");
 
-    // Test 2: Update an existing value
-    state.SetValue("ball_x", 20);
+    Check(!state.GetValue("missing", whole) && !state.HasValue("missing"), "a key that was never set is not found");
 
-    if (state.GetValue("ball_x", value) && value == 20)
-        std::cout << "PASS: SetValue updates existing values.\n";
-    else
-        std::cout << "FAIL: SetValue did not update the value.\n";
-
-    // Test 3: Detect an existing key
-    if (state.HasValue("ball_x"))
-        std::cout << "PASS: HasValue detects existing keys.\n";
-    else
-        std::cout << "FAIL: HasValue missed an existing key.\n";
-
-    // Test 4: Detect a missing key
-    if (!state.HasValue("missing_key"))
-        std::cout << "PASS: HasValue detects missing keys.\n";
-    else
-        std::cout << "FAIL: HasValue incorrectly found a missing key.\n";
-
-    // Test 5: Retrieve a missing key
-    if (!state.GetValue("missing_key", value))
-        std::cout << "PASS: GetValue handles missing keys.\n";
-    else
-        std::cout << "FAIL: GetValue incorrectly found a missing key.\n";
-
-    // Test 6: Store multiple independent values
-    state.SetValue("ball_y", 15);
-    state.SetValue("score", 100);
-
-    if (state.GetValue("ball_x", value) && value == 20 &&
-        state.GetValue("ball_y", value) && value == 15 &&
-        state.GetValue("score", value) && value == 100)
-        std::cout << "PASS: GameState stores multiple independent values.\n";
-    else
-        std::cout << "FAIL: GameState did not preserve multiple values.\n";
-
-    // Test 7: Store a negative value
-    state.SetValue("velocity", -5);
-
-    if (state.GetValue("velocity", value) && value == -5)
-        std::cout << "PASS: GameState stores negative values.\n";
-    else
-        std::cout << "FAIL: GameState could not store a negative value.\n";
-
-    // Test 8: Store zero
-    state.SetValue("velocity", 0);
-
-    if (state.GetValue("velocity", value) && value == 0)
-        std::cout << "PASS: GameState stores zero values.\n";
-    else
-        std::cout << "FAIL: GameState could not store zero.\n";
-
-    // Test 9: Store a value using an empty key
-    state.SetValue("", 25);
-
-    if (state.GetValue("", value) && value == 25)
-        std::cout << "PASS: GameState handles empty keys.\n";
-    else
-        std::cout << "FAIL: GameState could not retrieve an empty key.\n";
+    state.SetValue("speed", 2.75);
+    Check(state.GetValue("speed", decimal) && decimal == 2.75, "the double GetValue keeps decimals");
+    Check(state.GetValue("speed", whole) && whole == 2, "the int GetValue drops the decimals");
 }
 
 
 // --------------------------------------------------
-// WONKLE RUNTIME TESTS
+// WONKLE RUNTIME
 // --------------------------------------------------
 
-void RunWonkleRuntimeTest()
+// one rule with one condition, true when the rule ran
+static bool RuleFires(double value, Comparison comparison, const Operand& against)
 {
     WonkleRuntime runtime;
-    int score = 0;
-
-    runtime.SetStateValue("score", 0);
+    runtime.SetStateValue("value", value);
+    runtime.SetStateValue("ten", 10);
 
     WonkleRuntime::Rule rule;
-
-    rule.conditions.push_back({
-        "score",
-        Comparison::Equal,
-        0
-        });
-
-    rule.transformations.push_back({
-        "score",
-        Operation::Add,
-        10
-        });
+    rule.conditions.push_back({ "value", comparison, against });
+    rule.transformations.push_back({ "fired", Operation::Assign, 1 });
 
     runtime.AddRule(rule);
     runtime.Update();
 
-    if (runtime.GetStateValue("score", score) && score == 10)
-        std::cout << "PASS: WonkleRuntime evaluates rules and updates state.\n";
-    else
-        std::cout << "FAIL: WonkleRuntime did not update the score correctly.\n";
-
-    // Test Assign creates a missing value
-    WonkleRuntime::Rule assignRule;
-
-    assignRule.transformations.push_back({
-        "new_value",
-        Operation::Assign,
-        42
-        });
-
-    runtime.AddRule(assignRule);
-    runtime.Update();
-
-    int value = 0;
-
-    if (runtime.GetStateValue("new_value", value) && value == 42)
-        std::cout << "PASS: Assign creates missing state entries.\n";
-    else
-        std::cout << "FAIL: Assign did not create the state entry.\n";
+    return runtime.GetState().HasValue("fired");
 }
 
-
-// --------------------------------------------------
-// WONKLE RUNTIME COMPARISON TESTS
-// --------------------------------------------------
-
-void RunWonkleRuntimeComparisonTests()
-{
-    // Equal
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::Equal, 10 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: Equal comparison works.\n";
-        else
-            std::cout << "FAIL: Equal comparison failed.\n";
-    }
-
-    // Not Equal
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::NotEqual, 5 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: NotEqual comparison works.\n";
-        else
-            std::cout << "FAIL: NotEqual comparison failed.\n";
-    }
-
-    // Less
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 5);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::Less, 10 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: Less comparison works.\n";
-        else
-            std::cout << "FAIL: Less comparison failed.\n";
-    }
-
-    // Less Equal
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::LessEqual, 10 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: LessEqual comparison works.\n";
-        else
-            std::cout << "FAIL: LessEqual comparison failed.\n";
-    }
-
-    // Greater
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 15);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::Greater, 10 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: Greater comparison works.\n";
-        else
-            std::cout << "FAIL: Greater comparison failed.\n";
-    }
-
-    // Greater Equal
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::GreaterEqual, 10 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: GreaterEqual comparison works.\n";
-        else
-            std::cout << "FAIL: GreaterEqual comparison failed.\n";
-    }
-}
-
-
-// --------------------------------------------------
-// WONKLE RUNTIME OPERATION TESTS
-// --------------------------------------------------
-
-void RunWonkleRuntimeOperationTests()
-{
-    // Assign
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Assign, 25 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 25)
-            std::cout << "PASS: Assign operation works.\n";
-        else
-            std::cout << "FAIL: Assign operation failed.\n";
-    }
-
-    // Add
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Add, 5 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 15)
-            std::cout << "PASS: Add operation works.\n";
-        else
-            std::cout << "FAIL: Add operation failed.\n";
-    }
-
-    // Subtract
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Subtract, 5 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 5)
-            std::cout << "PASS: Subtract operation works.\n";
-        else
-            std::cout << "FAIL: Subtract operation failed.\n";
-    }
-
-    // Multiply
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Multiply, 5 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 50)
-            std::cout << "PASS: Multiply operation works.\n";
-        else
-            std::cout << "FAIL: Multiply operation failed.\n";
-    }
-
-    // Divide
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 20);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Divide, 5 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 4)
-            std::cout << "PASS: Divide operation works.\n";
-        else
-            std::cout << "FAIL: Divide operation failed.\n";
-    }
-}
-
-
-// --------------------------------------------------
-// WONKLE RUNTIME CONDITION TESTS
-// --------------------------------------------------
-
-void RunWonkleRuntimeConditionTests()
-{
-    // A false condition should prevent transformation
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 5);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({ "score", Comparison::Equal, 10 });
-        rule.transformations.push_back({ "score", Operation::Add, 5 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 5)
-            std::cout << "PASS: False conditions prevent transformations.\n";
-        else
-            std::cout << "FAIL: False condition allowed a transformation.\n";
-    }
-
-    // An empty condition list allows the rule to run
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Assign, 10 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 10)
-            std::cout << "PASS: Rules without conditions can execute.\n";
-        else
-            std::cout << "FAIL: Rule without conditions did not execute.\n";
-    }
-}
-
-
-// --------------------------------------------------
-// WONKLE RUNTIME TRANSFORMATION TESTS
-// --------------------------------------------------
-
-void RunWonkleRuntimeTransformationTests()
-{
-    // Multiple transformations in one rule
-    {
-        WonkleRuntime runtime;
-        int first = 0;
-        int second = 0;
-
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Add, 5 });
-        rule.transformations.push_back({ "lives", Operation::Assign, 3 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", first) && first == 15 &&
-            runtime.GetStateValue("lives", second) && second == 3)
-            std::cout << "PASS: Multiple transformations execute in one rule.\n";
-        else
-            std::cout << "FAIL: Multiple transformations did not execute correctly.\n";
-    }
-
-    // Transformation against a missing value
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "missing", Operation::Add, 5 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (!runtime.GetStateValue("missing", value))
-            std::cout << "PASS: Non-Assign transformations ignore missing values.\n";
-        else
-            std::cout << "FAIL: Transformation unexpectedly created a missing value.\n";
-    }
-
-    // Division by zero
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-        runtime.SetStateValue("score", 20);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({ "score", Operation::Divide, 0 });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 20)
-            std::cout << "PASS: Division by zero leaves the value unchanged.\n";
-        else
-            std::cout << "FAIL: Division by zero changed the value.\n";
-    }
-}
-
-
-// --------------------------------------------------
-// WONKLE RUNTIME MULTIPLE RULE TESTS
-// --------------------------------------------------
-
-void RunWonkleRuntimeMultipleRuleTests()
+// one rule with one transformation, the value it leaves behind
+static double ApplyOnce(double start, Operation operation, const Operand& operand)
 {
     WonkleRuntime runtime;
-    int value = 0;
+    runtime.SetStateValue("value", start);
+    runtime.SetStateValue("four", 4);
 
-    runtime.SetStateValue("score", 0);
+    WonkleRuntime::Rule rule;
+    rule.transformations.push_back({ "value", operation, operand });
 
-    WonkleRuntime::Rule firstRule;
-    firstRule.transformations.push_back({ "score", Operation::Add, 10 });
-
-    WonkleRuntime::Rule secondRule;
-    secondRule.transformations.push_back({ "score", Operation::Add, 5 });
-
-    runtime.AddRule(firstRule);
-    runtime.AddRule(secondRule);
+    runtime.AddRule(rule);
     runtime.Update();
 
-    if (runtime.GetStateValue("score", value) && value == 15)
-        std::cout << "PASS: Multiple rules execute in registration order.\n";
-    else
-        std::cout << "FAIL: Multiple rules did not execute correctly.\n";
+    double result = 0.0;
+    runtime.GetState().GetValue("value", result);
+    return result;
 }
 
-
-// --------------------------------------------------
-// WONKLE RUNTIME MISSING VALUE TESTS
-// --------------------------------------------------
-
-void RunWonkleRuntimeMissingValueTests()
+void RunWonkleRuntimeTests()
 {
-    WonkleRuntime runtime;
-    int value = 0;
+    Section("WonkleRuntime");
 
-    // Missing state value
-    if (!runtime.GetStateValue("missing", value))
-        std::cout << "PASS: Runtime handles missing state values.\n";
-    else
-        std::cout << "FAIL: Runtime returned a missing state value.\n";
+    // Each comparison fires when it should and stays quiet when it shouldn't.
+    Check(RuleFires(10, Comparison::Equal, 10) && !RuleFires(9, Comparison::Equal, 10), "Equal");
+    Check(RuleFires(9, Comparison::NotEqual, 10) && !RuleFires(10, Comparison::NotEqual, 10), "NotEqual");
+    Check(RuleFires(9, Comparison::Less, 10) && !RuleFires(10, Comparison::Less, 10), "Less");
+    Check(RuleFires(10, Comparison::LessEqual, 10) && !RuleFires(11, Comparison::LessEqual, 10), "LessEqual");
+    Check(RuleFires(11, Comparison::Greater, 10) && !RuleFires(10, Comparison::Greater, 10), "Greater");
+    Check(RuleFires(10, Comparison::GreaterEqual, 10) && !RuleFires(9, Comparison::GreaterEqual, 10), "GreaterEqual");
 
-    // Missing condition key
+    // Each operation.
+    Check(ApplyOnce(10, Operation::Assign, 25) == 25, "Assign");
+    Check(ApplyOnce(10, Operation::Add, 5) == 15, "Add");
+    Check(ApplyOnce(10, Operation::Subtract, 5) == 5, "Subtract");
+    Check(ApplyOnce(10, Operation::Multiply, 5) == 50, "Multiply");
+    Check(ApplyOnce(20, Operation::Divide, 5) == 4, "Divide");
+    Check(ApplyOnce(20, Operation::Divide, 0) == 20, "dividing by zero leaves the value alone");
+
+    // A value from the state instead of a number.
+    Check(RuleFires(10, Comparison::Equal, Operand::State("ten")), "a condition can compare against another state value");
+    Check(!RuleFires(10, Comparison::Equal, Operand::State("missing")), "comparing against a missing state value stops the rule");
+    Check(ApplyOnce(10, Operation::Add, Operand::State("four")) == 14, "a transformation can use another state value");
+    Check(ApplyOnce(10, Operation::Add, Operand::State("missing")) == 10, "using a missing state value leaves the value alone");
+
+    // Every condition has to pass.
     {
+        WonkleRuntime runtime;
+        runtime.SetStateValue("x", 5);
+        runtime.SetStateValue("y", 5);
+
+        WonkleRuntime::Rule rule;
+        rule.conditions.push_back({ "x", Comparison::Equal, 5 });
+        rule.conditions.push_back({ "y", Comparison::Equal, 6 });
+        rule.transformations.push_back({ "fired", Operation::Assign, 1 });
+
+        runtime.AddRule(rule);
+        runtime.Update();
+
+        Check(!runtime.GetState().HasValue("fired"), "one false condition stops the whole rule");
+    }
+
+    // A condition on a key that doesn't exist.
+    {
+        WonkleRuntime runtime;
+
         WonkleRuntime::Rule rule;
         rule.conditions.push_back({ "missing", Comparison::Equal, 0 });
-        rule.transformations.push_back({ "result", Operation::Assign, 1 });
+        rule.transformations.push_back({ "fired", Operation::Assign, 1 });
 
         runtime.AddRule(rule);
         runtime.Update();
 
-        if (!runtime.GetStateValue("result", value))
-            std::cout << "PASS: Missing condition keys prevent rule execution.\n";
-        else
-            std::cout << "FAIL: Missing condition key allowed rule execution.\n";
+        Check(!runtime.GetState().HasValue("fired"), "a condition on a missing key stops the rule");
     }
+
+    // Assign can make a new value, the other operations can't.
+    {
+        WonkleRuntime runtime;
+
+        WonkleRuntime::Rule rule;
+        rule.transformations.push_back({ "made", Operation::Assign, 1 });
+        rule.transformations.push_back({ "not_made", Operation::Add, 1 });
+
+        runtime.AddRule(rule);
+        runtime.Update();
+
+        Check(runtime.GetState().HasValue("made") && !runtime.GetState().HasValue("not_made"),
+            "Assign creates a missing value, Add does not");
+    }
+
+    // Rules run in the order they were added and see each other's changes.
+    {
+        WonkleRuntime runtime;
+        runtime.SetStateValue("score", 10);
+
+        WonkleRuntime::Rule first;
+        first.transformations.push_back({ "score", Operation::Add, 5 });
+
+        WonkleRuntime::Rule second;
+        second.conditions.push_back({ "score", Comparison::Equal, 15 });
+        second.transformations.push_back({ "fired", Operation::Assign, 1 });
+
+        runtime.AddRule(first);
+        runtime.AddRule(second);
+        runtime.Update();
+
+        Check(runtime.GetState().HasValue("fired"), "a later rule sees what an earlier rule changed");
+    }
+
+    // Decimals. These fail while WonkleRuntime's double GetStateValue reads through the int version.
+    {
+        WonkleRuntime runtime;
+        runtime.SetStateValue("total", 2.5);
+
+        double total = 0.0;
+        Check(runtime.GetStateValue("total", total) && total == 2.5, "GetStateValue keeps decimals");
+    }
+
+    Check(ApplyOnce(3.5, Operation::Add, 1) == 4.5, "a rule keeps the decimals of the value it changes");
+    Check(RuleFires(0.5, Comparison::Greater, 0), "a condition sees decimals (0.5 is Greater than 0)");
 }
 
+
 // --------------------------------------------------
-// WONKLE RUNTIME OPERAND TESTS
+// RULES FROM JSON
 // --------------------------------------------------
 
-void RunWonkleRuntimeOperandTests()
+void RunRuleLoadingTests()
 {
-    // Test 1: State-reference comparison - Equal
+    Section("Rules from json");
+
+    // the same layout the game jsons use
+    nlohmann::json rules = nlohmann::json::parse(R"([
+        {
+            "name": "player_scores",
+            "conditions": [ { "key": "ball_x", "comparison": "GreaterEqual", "value": { "state": "goal_x" } } ],
+            "transformations": [
+                { "key": "score", "operation": "Add", "value": 1 },
+                { "key": "ball_x", "operation": "Assign", "value": 40 }
+            ]
+        }
+    ])");
+
+    WonkleRuntime runtime;
+    runtime.SetStateValue("ball_x", 79);
+    runtime.SetStateValue("goal_x", 79);
+    runtime.SetStateValue("score", 0);
+
+    bool loaded = true;
+
+    try
     {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("ball_x", 10);
-        runtime.SetStateValue("target_x", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({
-            "ball_x",
-            Comparison::Equal,
-            Operand::State("target_x")
-            });
-
-        rule.transformations.push_back({
-            "result",
-            Operation::Assign,
-            1
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: State-reference Equal comparison works.\n";
-        else
-            std::cout << "FAIL: State-reference Equal comparison failed.\n";
+        runtime.LoadRules(rules);
+    }
+    catch (const std::exception&)
+    {
+        loaded = false;
     }
 
-    // Test 2: State-reference comparison - Greater
+    Check(loaded, "LoadRules reads a rule with a number and a state value");
+
+    runtime.Update();
+
+    int score = 0;
+    int ballX = 0;
+    Check(runtime.GetStateValue("score", score) && score == 1 &&
+        runtime.GetStateValue("ball_x", ballX) && ballX == 40,
+        "a rule loaded from json runs every transformation");
+
+    // A typo in a rule has to be caught, not quietly ignored.
+    nlohmann::json typo = nlohmann::json::parse(R"([
+        { "conditions": [ { "key": "x", "comparison": "Equals", "value": 1 } ], "transformations": [] }
+    ])");
+
+    bool threw = false;
+
+    try
     {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("ball_x", 15);
-        runtime.SetStateValue("paddle_x", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({
-            "ball_x",
-            Comparison::Greater,
-            Operand::State("paddle_x")
-            });
-
-        rule.transformations.push_back({
-            "result",
-            Operation::Assign,
-            1
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: State-reference Greater comparison works.\n";
-        else
-            std::cout << "FAIL: State-reference Greater comparison failed.\n";
+        WonkleRuntime other;
+        other.LoadRules(typo);
+    }
+    catch (const std::exception&)
+    {
+        threw = true;
     }
 
-    // Test 3: State-reference comparison - Less
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("ball_x", 5);
-        runtime.SetStateValue("paddle_x", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({
-            "ball_x",
-            Comparison::Less,
-            Operand::State("paddle_x")
-            });
-
-        rule.transformations.push_back({
-            "result",
-            Operation::Assign,
-            1
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: State-reference Less comparison works.\n";
-        else
-            std::cout << "FAIL: State-reference Less comparison failed.\n";
-    }
-
-    // Test 4: State-reference comparison - Not Equal
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("ball_x", 5);
-        runtime.SetStateValue("paddle_x", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({
-            "ball_x",
-            Comparison::NotEqual,
-            Operand::State("paddle_x")
-            });
-
-        rule.transformations.push_back({
-            "result",
-            Operation::Assign,
-            1
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 1)
-            std::cout << "PASS: State-reference NotEqual comparison works.\n";
-        else
-            std::cout << "FAIL: State-reference NotEqual comparison failed.\n";
-    }
-
-    // Test 5: State-reference assignment
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("source", 42);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "destination",
-            Operation::Assign,
-            Operand::State("source")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("destination", value) && value == 42)
-            std::cout << "PASS: State-reference Assign copies another state value.\n";
-        else
-            std::cout << "FAIL: State-reference Assign failed.\n";
-    }
-
-    // Test 6: State-reference addition
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("score", 10);
-        runtime.SetStateValue("bonus", 5);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "score",
-            Operation::Add,
-            Operand::State("bonus")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 15)
-            std::cout << "PASS: State-reference Add works.\n";
-        else
-            std::cout << "FAIL: State-reference Add failed.\n";
-    }
-
-    // Test 7: State-reference subtraction
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("health", 100);
-        runtime.SetStateValue("damage", 25);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "health",
-            Operation::Subtract,
-            Operand::State("damage")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("health", value) && value == 75)
-            std::cout << "PASS: State-reference Subtract works.\n";
-        else
-            std::cout << "FAIL: State-reference Subtract failed.\n";
-    }
-
-    // Test 8: State-reference multiplication
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("speed", 5);
-        runtime.SetStateValue("multiplier", 3);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "speed",
-            Operation::Multiply,
-            Operand::State("multiplier")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("speed", value) && value == 15)
-            std::cout << "PASS: State-reference Multiply works.\n";
-        else
-            std::cout << "FAIL: State-reference Multiply failed.\n";
-    }
-
-    // Test 9: State-reference division
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("damage", 100);
-        runtime.SetStateValue("resistance", 4);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "damage",
-            Operation::Divide,
-            Operand::State("resistance")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("damage", value) && value == 25)
-            std::cout << "PASS: State-reference Divide works.\n";
-        else
-            std::cout << "FAIL: State-reference Divide failed.\n";
-    }
-
-    // Test 10: Missing comparison reference
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.conditions.push_back({
-            "score",
-            Comparison::Equal,
-            Operand::State("missing")
-            });
-
-        rule.transformations.push_back({
-            "result",
-            Operation::Assign,
-            1
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (!runtime.GetStateValue("result", value))
-            std::cout << "PASS: Missing comparison references prevent rule execution.\n";
-        else
-            std::cout << "FAIL: Missing comparison reference allowed rule execution.\n";
-    }
-
-    // Test 11: Missing transformation reference
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "score",
-            Operation::Add,
-            Operand::State("missing")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 10)
-            std::cout << "PASS: Missing transformation references leave state unchanged.\n";
-        else
-            std::cout << "FAIL: Missing transformation reference changed state.\n";
-    }
-
-    // Test 12: Self-reference
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("score", 10);
-
-        WonkleRuntime::Rule rule;
-        rule.transformations.push_back({
-            "score",
-            Operation::Add,
-            Operand::State("score")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", value) && value == 20)
-            std::cout << "PASS: Self-reference transformation works.\n";
-        else
-            std::cout << "FAIL: Self-reference transformation failed.\n";
-    }
-
-    // Test 13: Multiple state-reference transformations
-    {
-        WonkleRuntime runtime;
-        int score = 0;
-        int health = 0;
-
-        runtime.SetStateValue("score", 10);
-        runtime.SetStateValue("bonus", 5);
-        runtime.SetStateValue("health", 100);
-        runtime.SetStateValue("damage", 20);
-
-        WonkleRuntime::Rule rule;
-
-        rule.transformations.push_back({
-            "score",
-            Operation::Add,
-            Operand::State("bonus")
-            });
-
-        rule.transformations.push_back({
-            "health",
-            Operation::Subtract,
-            Operand::State("damage")
-            });
-
-        runtime.AddRule(rule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("score", score) && score == 15 &&
-            runtime.GetStateValue("health", health) && health == 80)
-            std::cout << "PASS: Multiple state-reference transformations work.\n";
-        else
-            std::cout << "FAIL: Multiple state-reference transformations failed.\n";
-    }
-
-    // Test 14: Chained rule evaluation
-    {
-        WonkleRuntime runtime;
-        int value = 0;
-
-        runtime.SetStateValue("score", 10);
-        runtime.SetStateValue("bonus", 5);
-
-        WonkleRuntime::Rule firstRule;
-        firstRule.transformations.push_back({
-            "score",
-            Operation::Add,
-            Operand::State("bonus")
-            });
-
-        WonkleRuntime::Rule secondRule;
-        secondRule.conditions.push_back({
-            "score",
-            Comparison::Greater,
-            Operand::State("bonus")
-            });
-
-        secondRule.transformations.push_back({
-            "result",
-            Operation::Assign,
-            Operand::State("score")
-            });
-
-        runtime.AddRule(firstRule);
-        runtime.AddRule(secondRule);
-        runtime.Update();
-
-        if (runtime.GetStateValue("result", value) && value == 15)
-            std::cout << "PASS: Chained rules use updated state values.\n";
-        else
-            std::cout << "FAIL: Chained rules did not use updated state values.\n";
-    }
-}
-
-// --------------------------------------------------
-// POSITION TESTS
-// --------------------------------------------------
-
-void RunPositionTests()
-{
-    Position position(10, 20);
-
-    // Test 1: Constructor
-    if (position.GetX() == 10 && position.GetY() == 20)
-        std::cout << "PASS: Position constructor sets coordinates.\n";
-    else
-        std::cout << "FAIL: Position constructor set incorrect coordinates.\n";
-
-    // Test 2: SetX
-    position.SetX(30);
-
-    if (position.GetX() == 30)
-        std::cout << "PASS: SetX updates the X coordinate.\n";
-    else
-        std::cout << "FAIL: SetX did not update the X coordinate.\n";
-
-    // Test 3: SetY
-    position.SetY(40);
-
-    if (position.GetY() == 40)
-        std::cout << "PASS: SetY updates the Y coordinate.\n";
-    else
-        std::cout << "FAIL: SetY did not update the Y coordinate.\n";
-
-    // Test 4: Move
-    position.Move(5, 10);
-
-    if (position.GetX() == 35 && position.GetY() == 50)
-        std::cout << "PASS: Move adjusts both coordinates.\n";
-    else
-        std::cout << "FAIL: Move did not adjust both coordinates.\n";
-
-    // Test 5: Negative coordinates
-    position.SetX(-10);
-    position.SetY(-20);
-
-    if (position.GetX() == -10 && position.GetY() == -20)
-        std::cout << "PASS: Position supports negative coordinates.\n";
-    else
-        std::cout << "FAIL: Position did not preserve negative coordinates.\n";
-
-    // Test 6: Move with negative values
-    position.Move(-5, -5);
-
-    if (position.GetX() == -15 && position.GetY() == -25)
-        std::cout << "PASS: Move supports negative movement.\n";
-    else
-        std::cout << "FAIL: Move failed with negative movement.\n";
+    Check(threw, "LoadRules throws on a comparison name that doesn't exist");
 }
 
 
 // --------------------------------------------------
-// COLLISION TESTS
+// COLLISION
 // --------------------------------------------------
 
 void RunCollisionTests()
 {
-    // Test 1: Same position
-    Position first(5, 5);
-    Position second(5, 5);
+    Section("Collision");
 
-    if (Collision::CheckPosition(first, second))
-        std::cout << "PASS: CheckPosition detects matching coordinates.\n";
-    else
-        std::cout << "FAIL: CheckPosition missed matching coordinates.\n";
+    Check(Collision::CheckPosition(Position(5, 5), Position(5, 5)), "CheckPosition matches the same spot");
+    Check(!Collision::CheckPosition(Position(5, 5), Position(6, 5)), "CheckPosition misses a different spot");
 
-    // Test 2: Different positions
-    Position third(5, 5);
-    Position fourth(6, 5);
-
-    if (!Collision::CheckPosition(third, fourth))
-        std::cout << "PASS: CheckPosition detects different coordinates.\n";
-    else
-        std::cout << "FAIL: CheckPosition reported different coordinates as equal.\n";
-
-    // Test 3: Inside rectangle
-    Position inside(5, 5);
+    // a 5 by 5 rectangle starting at (2, 2) covers 2 to 6 on both sides
     Position rectangle(2, 2);
 
-    if (Collision::CheckRectangle(inside, rectangle, 5, 5))
-        std::cout << "PASS: CheckRectangle detects positions inside a rectangle.\n";
-    else
-        std::cout << "FAIL: CheckRectangle missed a position inside the rectangle.\n";
+    Check(Collision::CheckRectangle(Position(4, 4), rectangle, 5, 5), "CheckRectangle hits inside");
+    Check(!Collision::CheckRectangle(Position(10, 10), rectangle, 5, 5), "CheckRectangle misses outside");
+    Check(Collision::CheckRectangle(Position(2, 2), rectangle, 5, 5), "CheckRectangle includes the left and top edges");
+    Check(!Collision::CheckRectangle(Position(7, 4), rectangle, 5, 5) &&
+        !Collision::CheckRectangle(Position(4, 7), rectangle, 5, 5), "CheckRectangle stops before the right and bottom edges");
 
-    // Test 4: Outside rectangle
-    Position outside(10, 10);
-
-    if (!Collision::CheckRectangle(outside, rectangle, 5, 5))
-        std::cout << "PASS: CheckRectangle detects positions outside a rectangle.\n";
-    else
-        std::cout << "FAIL: CheckRectangle detected an outside position as inside.\n";
-
-    // Test 5: Left edge is included
-    Position leftEdge(2, 4);
-
-    if (Collision::CheckRectangle(leftEdge, rectangle, 5, 5))
-        std::cout << "PASS: CheckRectangle includes the left edge.\n";
-    else
-        std::cout << "FAIL: CheckRectangle excluded the left edge.\n";
-
-    // Test 6: Right edge is excluded
-    Position rightEdge(7, 4);
-
-    if (!Collision::CheckRectangle(rightEdge, rectangle, 5, 5))
-        std::cout << "PASS: CheckRectangle excludes the right edge.\n";
-    else
-        std::cout << "FAIL: CheckRectangle included the right edge.\n";
-
-    // Test 7: Top edge is included
-    Position topEdge(4, 2);
-
-    if (Collision::CheckRectangle(topEdge, rectangle, 5, 5))
-        std::cout << "PASS: CheckRectangle includes the top edge.\n";
-    else
-        std::cout << "FAIL: CheckRectangle excluded the top edge.\n";
-
-    // Test 8: Bottom edge is excluded
-    Position bottomEdge(4, 7);
-
-    if (!Collision::CheckRectangle(bottomEdge, rectangle, 5, 5))
-        std::cout << "PASS: CheckRectangle excludes the bottom edge.\n";
-    else
-        std::cout << "FAIL: CheckRectangle included the bottom edge.\n";
-
-    // Boundary tests
     Boundary boundary(80, 25, 0, 1, 79, 23);
 
-    if (Collision::CheckBoundary(Position(0, 10), boundary) == BoundarySide::Left)
-        std::cout << "PASS: CheckBoundary detects the left boundary.\n";
-    else
-        std::cout << "FAIL: CheckBoundary missed the left boundary.\n";
-
-    if (Collision::CheckBoundary(Position(79, 10), boundary) == BoundarySide::Right)
-        std::cout << "PASS: CheckBoundary detects the right boundary.\n";
-    else
-        std::cout << "FAIL: CheckBoundary missed the right boundary.\n";
-
-    if (Collision::CheckBoundary(Position(10, 1), boundary) == BoundarySide::Top)
-        std::cout << "PASS: CheckBoundary detects the top boundary.\n";
-    else
-        std::cout << "FAIL: CheckBoundary missed the top boundary.\n";
-
-    if (Collision::CheckBoundary(Position(10, 23), boundary) == BoundarySide::Bottom)
-        std::cout << "PASS: CheckBoundary detects the bottom boundary.\n";
-    else
-        std::cout << "FAIL: CheckBoundary missed the bottom boundary.\n";
-
-    if (Collision::CheckBoundary(Position(10, 10), boundary) == BoundarySide::None)
-        std::cout << "PASS: CheckBoundary detects positions inside the boundary.\n";
-    else
-        std::cout << "FAIL: CheckBoundary reported an interior position as a collision.\n";
+    Check(Collision::CheckBoundary(Position(0, 10), boundary) == BoundarySide::Left, "CheckBoundary finds the left wall");
+    Check(Collision::CheckBoundary(Position(79, 10), boundary) == BoundarySide::Right, "CheckBoundary finds the right wall");
+    Check(Collision::CheckBoundary(Position(10, 1), boundary) == BoundarySide::Top, "CheckBoundary finds the top wall");
+    Check(Collision::CheckBoundary(Position(10, 23), boundary) == BoundarySide::Bottom, "CheckBoundary finds the bottom wall");
+    Check(Collision::CheckBoundary(Position(10, 10), boundary) == BoundarySide::None, "CheckBoundary finds nothing in the middle");
 }
 
 
 // --------------------------------------------------
-// BOUNDARY TESTS
-// --------------------------------------------------
-
-void RunBoundaryTests()
-{
-    Boundary boundary(80, 25, 0, 1, 79, 23);
-
-    // Test 1: Width
-    if (boundary.GetWidth() == 80)
-        std::cout << "PASS: Boundary stores its width.\n";
-    else
-        std::cout << "FAIL: Boundary returned an incorrect width.\n";
-
-    // Test 2: Height
-    if (boundary.GetHeight() == 25)
-        std::cout << "PASS: Boundary stores its height.\n";
-    else
-        std::cout << "FAIL: Boundary returned an incorrect height.\n";
-
-    // Test 3: Left
-    if (boundary.GetLeft() == 0)
-        std::cout << "PASS: Boundary stores its left edge.\n";
-    else
-        std::cout << "FAIL: Boundary returned an incorrect left edge.\n";
-
-    // Test 4: Top
-    if (boundary.GetTop() == 1)
-        std::cout << "PASS: Boundary stores its top edge.\n";
-    else
-        std::cout << "FAIL: Boundary returned an incorrect top edge.\n";
-
-    // Test 5: Right
-    if (boundary.GetRight() == 79)
-        std::cout << "PASS: Boundary stores its right edge.\n";
-    else
-        std::cout << "FAIL: Boundary returned an incorrect right edge.\n";
-
-    // Test 6: Bottom
-    if (boundary.GetBottom() == 23)
-        std::cout << "PASS: Boundary stores its bottom edge.\n";
-    else
-        std::cout << "FAIL: Boundary returned an incorrect bottom edge.\n";
-
-    // Test 7: Draw creates the expected number of objects
-    ThemeManager themes;
-    Render render(themes);
-    std::vector<RenderObject> objects;
-
-    boundary.Draw(render, objects,
-        '_',   // top border
-        '-',   // bottom border
-        '|',   // vertical border
-        "Border"
-    );
-
-    int expectedCount = (80 * 2) + (25 * 2);
-
-    if (objects.size() == expectedCount)
-        std::cout << "PASS: Boundary Draw creates the expected number of objects.\n";
-    else
-        std::cout << "FAIL: Boundary Draw created an unexpected number of objects.\n";
-
-    // Test 8: Top boundary position
-    if (!objects.empty() &&
-        objects[0].position.GetX() == 0 &&
-        objects[0].position.GetY() == -1)
-        std::cout << "PASS: Boundary Draw positions the top edge correctly.\n";
-    else
-        std::cout << "FAIL: Boundary Draw positioned the top edge incorrectly.\n";
-
-    // Test 9: Top boundary role
-    if (!objects.empty() && objects[0].role == ThemeRoles::Border)
-        std::cout << "PASS: Boundary Draw assigns the border role.\n";
-    else
-        std::cout << "FAIL: Boundary Draw assigned an incorrect role.\n";
-}
-
-
-// --------------------------------------------------
-// THEME TESTS
-// --------------------------------------------------
-
-void RunThemeTests()
-{
-    Theme theme("TestTheme");
-
-    // Test 1: Name
-    if (theme.GetName() == "TestTheme")
-        std::cout << "PASS: Theme stores its name.\n";
-    else
-        std::cout << "FAIL: Theme returned an incorrect name.\n";
-
-    // Test 2: Set and retrieve a color
-    theme.SetColor(ThemeRoles::Ball, Colors::Color::Red, Colors::Color::Black);
-
-    ThemeColor ball = theme.GetColor(ThemeRoles::Ball);
-
-    if (ball.foreground == Colors::Color::Red &&
-        ball.background == Colors::Color::Black)
-        std::cout << "PASS: Theme stores and retrieves role colors.\n";
-    else
-        std::cout << "FAIL: Theme did not retrieve the assigned role colors.\n";
-
-    // Test 3: Update an existing role
-    theme.SetColor(ThemeRoles::Ball, Colors::Color::Green, Colors::Color::Blue);
-
-    ball = theme.GetColor(ThemeRoles::Ball);
-
-    if (ball.foreground == Colors::Color::Green &&
-        ball.background == Colors::Color::Blue)
-        std::cout << "PASS: Theme updates existing role colors.\n";
-    else
-        std::cout << "FAIL: Theme did not update the existing role colors.\n";
-
-    // Test 4: Store multiple roles
-    theme.SetColor(ThemeRoles::Paddle, Colors::Color::Yellow, Colors::Color::Black);
-    theme.SetColor(ThemeRoles::MenuText, Colors::Color::White, Colors::Color::DarkBlue);
-
-    ThemeColor paddle = theme.GetColor(ThemeRoles::Paddle);
-    ThemeColor menu = theme.GetColor(ThemeRoles::MenuText);
-
-    if (paddle.foreground == Colors::Color::Yellow &&
-        menu.foreground == Colors::Color::White &&
-        menu.background == Colors::Color::DarkBlue)
-        std::cout << "PASS: Theme stores multiple independent roles.\n";
-    else
-        std::cout << "FAIL: Theme did not preserve multiple roles.\n";
-
-    // Test 5: Missing role fallback
-    ThemeColor missing = theme.GetColor("MissingRole");
-
-    if (missing.foreground == Colors::Color::White &&
-        missing.background == Colors::Color::Black)
-        std::cout << "PASS: Theme returns default colors for missing roles.\n";
-    else
-        std::cout << "FAIL: Theme returned incorrect fallback colors.\n";
-}
-
-
-// --------------------------------------------------
-// THEME MANAGER TESTS
-// --------------------------------------------------
-
-void RunThemeManagerTests()
-{
-    ThemeManager manager;
-
-    Theme first("TestThemeOne");
-    Theme second("TestThemeTwo");
-
-    // Test 1: Register a theme
-    if (manager.RegisterTheme(first))
-        std::cout << "PASS: ThemeManager registers a new theme.\n";
-    else
-        std::cout << "FAIL: ThemeManager could not register a new theme.\n";
-
-    // Test 2: Retrieve a registered theme
-    if (manager.GetTheme("TestThemeOne") != nullptr)
-        std::cout << "PASS: ThemeManager retrieves registered themes.\n";
-    else
-        std::cout << "FAIL: ThemeManager could not retrieve a registered theme.\n";
-
-    // Test 3: Missing theme
-    if (manager.GetTheme("MissingTheme") == nullptr)
-        std::cout << "PASS: ThemeManager handles missing themes.\n";
-    else
-        std::cout << "FAIL: ThemeManager returned a nonexistent theme.\n";
-
-    // Test 4: Reject duplicate names
-    if (!manager.RegisterTheme(first))
-        std::cout << "PASS: ThemeManager rejects duplicate theme names.\n";
-    else
-        std::cout << "FAIL: ThemeManager accepted a duplicate theme name.\n";
-
-    // Test 5: Register another theme
-    if (manager.RegisterTheme(second))
-        std::cout << "PASS: ThemeManager registers multiple themes.\n";
-    else
-        std::cout << "FAIL: ThemeManager could not register a second theme.\n";
-
-    // Test 6: GetThemes collection
-    if (manager.GetThemes().size() >= 2)
-        std::cout << "PASS: ThemeManager exposes its registered theme collection.\n";
-    else
-        std::cout << "FAIL: ThemeManager returned an incomplete theme collection.\n";
-
-    // Test 7: First registered theme becomes active
-    if (manager.GetActiveTheme() != nullptr &&
-        manager.GetActiveTheme()->GetName() != "")
-        std::cout << "PASS: ThemeManager has an active theme.\n";
-    else
-        std::cout << "FAIL: ThemeManager does not have an active theme.\n";
-
-    // Test 8: Change active theme
-    if (manager.SetActiveTheme("TestThemeTwo") &&
-        manager.GetActiveTheme()->GetName() == "TestThemeTwo")
-        std::cout << "PASS: ThemeManager changes the active theme.\n";
-    else
-        std::cout << "FAIL: ThemeManager could not change the active theme.\n";
-
-    // Test 9: Reject nonexistent active theme
-    if (!manager.SetActiveTheme("MissingTheme"))
-        std::cout << "PASS: ThemeManager rejects nonexistent active themes.\n";
-    else
-        std::cout << "FAIL: ThemeManager accepted a nonexistent active theme.\n";
-
-    // Test 10: Invalid selection does not replace active theme
-    if (manager.GetActiveTheme()->GetName() == "TestThemeTwo")
-        std::cout << "PASS: Invalid theme selection preserves the active theme.\n";
-    else
-        std::cout << "FAIL: Invalid theme selection changed the active theme.\n";
-}
-
-
-// --------------------------------------------------
-// COLORS TESTS
-// --------------------------------------------------
-
-void RunColorsTests()
-{
-    // Test 1: Black
-    if (Colors::FromString("Black") == Colors::Color::Black)
-        std::cout << "PASS: FromString converts Black.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Black.\n";
-
-    // Test 2: White
-    if (Colors::FromString("White") == Colors::Color::White)
-        std::cout << "PASS: FromString converts White.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert White.\n";
-
-    // Test 3: Blue
-    if (Colors::FromString("Blue") == Colors::Color::Blue)
-        std::cout << "PASS: FromString converts Blue.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Blue.\n";
-
-    // Test 4: DarkBlue
-    if (Colors::FromString("DarkBlue") == Colors::Color::DarkBlue)
-        std::cout << "PASS: FromString converts DarkBlue.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkBlue.\n";
-
-    // Test 5: Green
-    if (Colors::FromString("Green") == Colors::Color::Green)
-        std::cout << "PASS: FromString converts Green.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Green.\n";
-
-    // Test 6: DarkGreen
-    if (Colors::FromString("DarkGreen") == Colors::Color::DarkGreen)
-        std::cout << "PASS: FromString converts DarkGreen.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkGreen.\n";
-
-    // Test 7: Cyan
-    if (Colors::FromString("Cyan") == Colors::Color::Cyan)
-        std::cout << "PASS: FromString converts Cyan.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Cyan.\n";
-
-    // Test 8: DarkCyan
-    if (Colors::FromString("DarkCyan") == Colors::Color::DarkCyan)
-        std::cout << "PASS: FromString converts DarkCyan.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkCyan.\n";
-
-    // Test 9: Red
-    if (Colors::FromString("Red") == Colors::Color::Red)
-        std::cout << "PASS: FromString converts Red.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Red.\n";
-
-    // Test 10: DarkRed
-    if (Colors::FromString("DarkRed") == Colors::Color::DarkRed)
-        std::cout << "PASS: FromString converts DarkRed.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkRed.\n";
-
-    // Test 11: Purple
-    if (Colors::FromString("Purple") == Colors::Color::Purple)
-        std::cout << "PASS: FromString converts Purple.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Purple.\n";
-
-    // Test 12: DarkPurple
-    if (Colors::FromString("DarkPurple") == Colors::Color::DarkPurple)
-        std::cout << "PASS: FromString converts DarkPurple.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkPurple.\n";
-
-    // Test 13: Yellow
-    if (Colors::FromString("Yellow") == Colors::Color::Yellow)
-        std::cout << "PASS: FromString converts Yellow.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Yellow.\n";
-
-    // Test 14: DarkYellow
-    if (Colors::FromString("DarkYellow") == Colors::Color::DarkYellow)
-        std::cout << "PASS: FromString converts DarkYellow.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkYellow.\n";
-
-    // Test 15: Gray
-    if (Colors::FromString("Gray") == Colors::Color::Gray)
-        std::cout << "PASS: FromString converts Gray.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Gray.\n";
-
-    // Test 16: DarkGray
-    if (Colors::FromString("DarkGray") == Colors::Color::DarkGray)
-        std::cout << "PASS: FromString converts DarkGray.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert DarkGray.\n";
-
-    // Test 17: Tan
-    if (Colors::FromString("Tan") == Colors::Color::Tan)
-        std::cout << "PASS: FromString converts Tan.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Tan.\n";
-
-    // Test 18: Brown
-    if (Colors::FromString("Brown") == Colors::Color::Brown)
-        std::cout << "PASS: FromString converts Brown.\n";
-    else
-        std::cout << "FAIL: FromString failed to convert Brown.\n";
-
-    // Test 19: Unknown name fallback
-    if (Colors::FromString("NotAColor") == Colors::Color::White)
-        std::cout << "PASS: FromString defaults unknown colors to White.\n";
-    else
-        std::cout << "FAIL: FromString returned an incorrect unknown-color fallback.\n";
-
-    // Test 20: Empty name fallback
-    if (Colors::FromString("") == Colors::Color::White)
-        std::cout << "PASS: FromString handles empty color names.\n";
-    else
-        std::cout << "FAIL: FromString returned an incorrect empty-name fallback.\n";
-}
-
-
-// --------------------------------------------------
-// FILE BOSS TESTS
+// FILE BOSS
 // --------------------------------------------------
 
 void RunFileBossTests()
 {
+    Section("FileBoss");
+
     FileBoss fileBoss;
-
-    const std::string testFile = "wonkle_fileboss_test.txt";
-    const std::string jsonFile = "wonkle_fileboss_test.json";
-    const std::string badJsonFile = "wonkle_fileboss_bad.json";
-
+    const std::string textFile = "wonkle_test.txt";
+    const std::string jsonFile = "wonkle_test.json";
     std::string content;
 
-    // Test 1: Empty path
-    if (!fileBoss.FileExists(""))
-        std::cout << "PASS: FileExists rejects an empty path.\n";
-    else
-        std::cout << "FAIL: FileExists accepted an empty path.\n";
+    Check(fileBoss.WriteFile(textFile, "Wonkle") && fileBoss.ReadFile(textFile, content) && content == "Wonkle",
+        "WriteFile then ReadFile gives the same text back");
 
-    // Test 2: Missing file
-    if (!fileBoss.FileExists(testFile))
-        std::cout << "PASS: FileExists detects a missing file.\n";
-    else
-        std::cout << "FAIL: FileExists found a file that should not exist.\n";
+    fileBoss.WriteFile(textFile, "Replaced");
+    Check(fileBoss.ReadFile(textFile, content) && content == "Replaced", "WriteFile replaces what was there");
 
-    // Test 3: Write file
-    if (fileBoss.WriteFile(testFile, "Wonkle test"))
-        std::cout << "PASS: WriteFile creates a file.\n";
-    else
-        std::cout << "FAIL: WriteFile could not create a file.\n";
+    fileBoss.AppendFile(textFile, " and more");
+    Check(fileBoss.ReadFile(textFile, content) && content == "Replaced and more", "AppendFile adds to the end");
 
-    // Test 4: Confirm file exists
-    if (fileBoss.FileExists(testFile))
-        std::cout << "PASS: FileExists detects a created file.\n";
-    else
-        std::cout << "FAIL: FileExists did not detect the created file.\n";
+    Check(!fileBoss.ReadFile("wonkle_no_such_file.txt", content), "ReadFile fails on a missing file");
 
-    // Test 5: Read file
-    if (fileBoss.ReadFile(testFile, content) && content == "Wonkle test")
-        std::cout << "PASS: ReadFile retrieves file contents.\n";
-    else
-        std::cout << "FAIL: ReadFile did not retrieve the expected contents.\n";
+    Check(!fileBoss.FileExists("") && !fileBoss.ReadFile("", content) &&
+        !fileBoss.WriteFile("", "x") && !fileBoss.AppendFile("", "x"), "an empty path is turned down everywhere");
 
-    // Test 6: Append file
-    if (fileBoss.AppendFile(testFile, " appended"))
-        std::cout << "PASS: AppendFile adds content to a file.\n";
-    else
-        std::cout << "FAIL: AppendFile could not append content.\n";
-
-    // Test 7: Verify appended content
-    content.clear();
-
-    if (fileBoss.ReadFile(testFile, content) &&
-        content == "Wonkle test appended")
-        std::cout << "PASS: AppendFile preserves existing content.\n";
-    else
-        std::cout << "FAIL: AppendFile did not preserve existing content.\n";
-
-    // Test 8: Overwrite file
-    if (fileBoss.WriteFile(testFile, "Replacement"))
-        std::cout << "PASS: WriteFile overwrites existing content.\n";
-    else
-        std::cout << "FAIL: WriteFile could not overwrite existing content.\n";
-
-    // Test 9: Verify overwritten content
-    content.clear();
-
-    if (fileBoss.ReadFile(testFile, content) && content == "Replacement")
-        std::cout << "PASS: WriteFile replaces the previous contents.\n";
-    else
-        std::cout << "FAIL: WriteFile did not replace the previous contents.\n";
-
-    // Test 10: Read missing file
-    if (!fileBoss.ReadFile("wonkle_missing_test_file.txt", content))
-        std::cout << "PASS: ReadFile handles missing files.\n";
-    else
-        std::cout << "FAIL: ReadFile unexpectedly opened a missing file.\n";
-
-    // Test 11: Write empty path
-    if (!fileBoss.WriteFile("", "test"))
-        std::cout << "PASS: WriteFile rejects an empty path.\n";
-    else
-        std::cout << "FAIL: WriteFile accepted an empty path.\n";
-
-    // Test 12: Append empty path
-    if (!fileBoss.AppendFile("", "test"))
-        std::cout << "PASS: AppendFile rejects an empty path.\n";
-    else
-        std::cout << "FAIL: AppendFile accepted an empty path.\n";
-
-    // Test 13: Read empty path
-    if (!fileBoss.ReadFile("", content))
-        std::cout << "PASS: ReadFile rejects an empty path.\n";
-    else
-        std::cout << "FAIL: ReadFile accepted an empty path.\n";
-
-    // Test 14: Write JSON
-    if (fileBoss.WriteFile(jsonFile, R"({"score":42,"name":"Wonkle"})"))
-        std::cout << "PASS: Test JSON file was created.\n";
-    else
-        std::cout << "FAIL: Test JSON file could not be created.\n";
-
-    // Test 15: Read JSON
     nlohmann::json data;
 
-    if (fileBoss.ReadJSON(jsonFile, data))
-        std::cout << "PASS: ReadJSON parses valid JSON.\n";
-    else
-        std::cout << "FAIL: ReadJSON could not parse valid JSON.\n";
+    fileBoss.WriteFile(jsonFile, R"({ "score": 42, "name": "Wonkle" })");
+    Check(fileBoss.ReadJSON(jsonFile, data) && data["score"] == 42 && data["name"] == "Wonkle", "ReadJSON reads valid json");
 
-    // Test 16: Verify JSON values
-    if (data.contains("score") && data["score"] == 42 &&
-        data.contains("name") && data["name"] == "Wonkle")
-        std::cout << "PASS: ReadJSON preserves parsed values.\n";
-    else
-        std::cout << "FAIL: ReadJSON returned incorrect parsed values.\n";
+    fileBoss.WriteFile(jsonFile, "{ broken json");
+    Check(!fileBoss.ReadJSON(jsonFile, data), "ReadJSON fails on broken json");
 
-    // Test 17: Malformed JSON
-    fileBoss.WriteFile(badJsonFile, "{ invalid json");
+    Check(!fileBoss.ReadJSON("wonkle_no_such_file.json", data), "ReadJSON fails on a missing file");
 
-    nlohmann::json badData;
-
-    if (!fileBoss.ReadJSON(badJsonFile, badData))
-        std::cout << "PASS: ReadJSON rejects malformed JSON.\n";
-    else
-        std::cout << "FAIL: ReadJSON accepted malformed JSON.\n";
-
-    // Test 18: Missing JSON file
-    nlohmann::json missingData;
-
-    if (!fileBoss.ReadJSON("wonkle_missing_test.json", missingData))
-        std::cout << "PASS: ReadJSON handles missing files.\n";
-    else
-        std::cout << "FAIL: ReadJSON opened a missing file.\n";
-
-    // Test 19: Empty JSON path
-    if (!fileBoss.ReadJSON("", missingData))
-        std::cout << "PASS: ReadJSON rejects an empty path.\n";
-    else
-        std::cout << "FAIL: ReadJSON accepted an empty path.\n";
-
-    // Clean up test files
-    std::filesystem::remove(testFile);
+    std::filesystem::remove(textFile);
     std::filesystem::remove(jsonFile);
-    std::filesystem::remove(badJsonFile);
-}
-
-// --------------------------------------------------
-// RENDER TESTS
-// --------------------------------------------------
-
-void RunRenderTests()
-{
-    ThemeManager themes;
-    Render render(themes);
-
-    // Test 1: BeginFrame
-    render.BeginFrame(20, 10, ThemeRoles::Background, 0, Position(85, 0));
-
-    std::cout << "PASS: Render begins a frame without errors.\n";
-
-    // Test 2: DrawCharacter inside frame
-    render.DrawCharacter(5, 5, 'X', ThemeRoles::Ball);
-
-    std::cout << "PASS: Render accepts character drawing inside a frame.\n";
-
-    // Test 3: DrawText inside frame
-    render.DrawText(1, 1, "Wonkle", ThemeRoles::MenuText);
-
-    std::cout << "PASS: Render accepts text drawing inside a frame.\n";
-
-    // Test 4: Horizontal line
-    render.DrawHorizontalLine(1, 2, 5, '-', ThemeRoles::Border);
-
-    std::cout << "PASS: Render accepts horizontal line drawing.\n";
-
-    // Test 5: Vertical line
-    render.DrawVerticalLine(10, 1, 5, '|', ThemeRoles::Border);
-
-    std::cout << "PASS: Render accepts vertical line drawing.\n";
-
-    // Test 6: Draw objects
-    std::vector<RenderObject> objects;
-    objects.push_back({ Position(3, 3), 'O', ThemeRoles::Ball });
-    objects.push_back({ Position(4, 3), '|', ThemeRoles::Paddle });
-
-    render.DrawObjects(objects);
-
-    std::cout << "PASS: Render accepts collections of render objects.\n";
-
-    // Test 7: Draw outside frame boundaries
-    render.DrawCharacter(-1, -1, 'X', ThemeRoles::Ball);
-    render.DrawCharacter(20, 10, 'X', ThemeRoles::Ball);
-
-    std::cout << "PASS: Render handles drawing outside frame boundaries.\n";
 }
 
 
 // --------------------------------------------------
-// MENU TESTS
+// GAME FILES
 // --------------------------------------------------
 
-void RunMenuTests()
+void RunGameFileTests()
 {
-    // This checks that the Menu object can be constructed.
+    Section("Game files");
 
-    Menu menu;
+    FileBoss fileBoss;
 
-    std::cout << "PASS: Menu object can be constructed.\n";
+    for (const std::string& file : GAME_FILES)
+    {
+        nlohmann::json config;
+
+        if (!fileBoss.ReadJSON(file, config) || !config.contains("game"))
+        {
+            Check(false, file + " loads");
+            continue;
+        }
+
+        const nlohmann::json& game = config["game"];
+
+        Check(game.contains("initial_state") && game.contains("rules"), file + " has initial_state and rules");
+
+        // the game menu prints these, a missing one crashes it
+        Check(game.contains("menu") && game["menu"].contains("art") &&
+            game["menu"].contains("description") && game["menu"].contains("controls"),
+            file + " has menu art, description and controls");
+
+        // loaded the same way GameController::SetupRules loads them
+        std::string ruleError;
+
+        try
+        {
+            WonkleRuntime runtime;
+            runtime.LoadRules(game.at("rules"));
+        }
+        catch (const std::exception& error)
+        {
+            ruleError = std::string(" (") + error.what() + ")";
+        }
+
+        Check(ruleError.empty(), file + " rules all load" + ruleError);
+
+        // a missing wav is skipped without a word during play, so check for it here
+        std::string missingSounds;
+
+        if (game.contains("sounds"))
+        {
+            for (const auto& sound : game["sounds"])
+            {
+                std::string wav = sound.value("file", "");
+
+                if (!fileBoss.FileExists(wav))
+                {
+                    missingSounds += " " + wav;
+                }
+            }
+        }
+
+        Check(missingSounds.empty(), file + " has every sound file it lists" +
+            (missingSounds.empty() ? "" : " (missing:" + missingSounds + ")"));
+
+        // the menu builds every game this way
+        bool built = true;
+
+        try
+        {
+            ThemeManager themes;
+            GameObjects build(themes, file);
+        }
+        catch (const std::exception&)
+        {
+            built = false;
+        }
+
+        Check(built, file + " builds a game");
+    }
 }
 
 
 // --------------------------------------------------
-// PONG TESTS
+// SAVES
 // --------------------------------------------------
 
-void RunPONGTests()
+// opens up the save functions GameController keeps protected, only the tests use this
+class SaveTestGame : public GameObjects
 {
-    ThemeManager themes;
+public:
+    using GameObjects::GameObjects;
+    using GameController::SaveGame;
+    using GameController::LoadGame;
+    using GameController::runtime;
+};
 
-    // Test 1: Construct PONG
-    PONG game(themes);
+void RunSaveTests()
+{
+    Section("Saves");
 
-    std::cout << "PASS: PONG object can be constructed with a ThemeManager.\n";
+    // these tests wipe wonkle_save.json, so keep the real one and put it back at the end
+    FileBoss fileBoss;
+    std::string realSaveFile;
+    bool hadSaveFile = fileBoss.ReadFile(GameController::SAVE_FILE, realSaveFile);
+
+    {
+        ThemeManager themes;
+        SaveTestGame game(themes, "snake.json");
+
+        GameController::ResetAllSaveData();
+        Check(!game.HasSave() && !game.LoadGame(), "with no save, HasSave is false and LoadGame fails");
+
+        game.runtime.SetStateValue("score", 40);
+        Check(game.SaveGame() && game.HasSave(), "SaveGame writes a save that HasSave finds");
+
+        game.runtime.SetStateValue("score", 0);
+
+        int score = 0;
+        Check(game.LoadGame() && game.runtime.GetStateValue("score", score) && score == 40,
+            "LoadGame puts the saved values back");
+
+        SaveTestGame other(themes, "pong.json");
+        Check(!other.HasSave(), "a save for one game doesn't show up for another");
+
+        Check(GameController::ResetAllSaveData() && !game.HasSave(), "ResetAllSaveData wipes the saves");
+    }
+
+    if (hadSaveFile)
+    {
+        fileBoss.WriteFile(GameController::SAVE_FILE, realSaveFile);
+    }
+    else
+    {
+        std::filesystem::remove(GameController::SAVE_FILE);
+    }
+}
+
+
+// --------------------------------------------------
+// THEMES
+// --------------------------------------------------
+
+void RunThemeTests()
+{
+    Section("Themes");
+
+    Theme theme("Test");
+    theme.SetColor(ThemeRoles::Ball, Colors::Color::Red, Colors::Color::Blue);
+
+    ThemeColor ball = theme.GetColor(ThemeRoles::Ball);
+    Check(ball.foreground == Colors::Color::Red && ball.background == Colors::Color::Blue, "a theme gives back the colors it was set to");
+
+    ThemeColor missing = theme.GetColor("NoSuchRole");
+    Check(missing.foreground == Colors::Color::White && missing.background == Colors::Color::Black,
+        "a role the theme doesn't have falls back to white on black");
+
+    // every color name Colors knows
+    const std::vector<std::pair<std::string, Colors::Color>> colorNames =
+    {
+        { "Black", Colors::Color::Black }, { "White", Colors::Color::White },
+        { "Blue", Colors::Color::Blue }, { "DarkBlue", Colors::Color::DarkBlue },
+        { "Green", Colors::Color::Green }, { "DarkGreen", Colors::Color::DarkGreen },
+        { "Cyan", Colors::Color::Cyan }, { "DarkCyan", Colors::Color::DarkCyan },
+        { "Red", Colors::Color::Red }, { "DarkRed", Colors::Color::DarkRed },
+        { "Purple", Colors::Color::Purple }, { "DarkPurple", Colors::Color::DarkPurple },
+        { "Yellow", Colors::Color::Yellow }, { "DarkYellow", Colors::Color::DarkYellow },
+        { "Gray", Colors::Color::Gray }, { "DarkGray", Colors::Color::DarkGray },
+        { "Tan", Colors::Color::Tan }, { "Brown", Colors::Color::Brown }
+    };
+
+    std::string wrongNames;
+
+    for (const auto& color : colorNames)
+    {
+        if (Colors::FromString(color.first) != color.second)
+        {
+            wrongNames += " " + color.first;
+        }
+    }
+
+    Check(wrongNames.empty(), "FromString knows all 18 color names" + wrongNames);
+    Check(Colors::FromString("NotAColor") == Colors::Color::White, "FromString turns an unknown name into White");
+
+    // themes.json, a misspelled color quietly turns White, so look for any
+    FileBoss fileBoss;
+    nlohmann::json themeFile;
+
+    if (!fileBoss.ReadJSON("themes.json", themeFile) || !themeFile.contains("themes"))
+    {
+        Check(false, "themes.json loads");
+        return;
+    }
+
+    std::string badColors;
+
+    for (const auto& themeData : themeFile["themes"])
+    {
+        if (!themeData.contains("colors"))
+        {
+            continue;
+        }
+
+        for (const auto& role : themeData.at("colors").items())
+        {
+            if (!role.value().is_object())
+            {
+                continue;
+            }
+
+            for (const char* side : { "foreground", "background" })
+            {
+                std::string name = role.value().value(side, "");
+
+                if (Colors::FromString(name) == Colors::Color::White && name != "White")
+                {
+                    badColors += " " + themeData.value("name", "?") + "/" + role.key() + "/" + side + "=" + name;
+                }
+            }
+        }
+    }
+
+    Check(badColors.empty(), "every color in themes.json is a real color name" + badColors);
+
+    ThemeManager manager;
+    Check(manager.GetThemes().size() == themeFile["themes"].size(), "ThemeManager loads every theme in themes.json");
+
+    Check(!manager.RegisterTheme(Theme(manager.GetThemes()[0].GetName())), "RegisterTheme turns down a name that's already used");
+
+    std::string current = manager.GetActiveTheme()->GetName();
+    Check(!manager.SetActiveTheme("NoSuchTheme") && manager.GetActiveTheme()->GetName() == current,
+        "picking a theme that doesn't exist keeps the current one");
+
+    std::string last = manager.GetThemes().back().GetName();
+    Check(manager.SetActiveTheme(last) && manager.GetActiveTheme()->GetName() == last, "SetActiveTheme switches themes");
 }

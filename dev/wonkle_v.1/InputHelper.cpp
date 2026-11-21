@@ -1,7 +1,8 @@
 #include "InputHelper.h"
+
 #include <iostream>
 #include <conio.h>
-#include <limits>
+#include <stdexcept>
 #include <Windows.h>
 
 constexpr int KEY_PRESSED = 0x8000;
@@ -17,7 +18,14 @@ int InputHelper::GetInt(const std::string& prompt, int min, int max)
 
         try
         {
-            int value = std::stoi(input);
+            size_t used = 0;
+            int value = std::stoi(input, &used);
+
+            if (used != input.size())
+            {
+                std::cout << "Please enter only a number.\n";
+                continue;
+            }
 
             if (value >= min && value <= max)
             {

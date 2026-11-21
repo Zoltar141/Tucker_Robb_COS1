@@ -1,5 +1,5 @@
 #include "Render.h"
-#include <iostream>
+
 #include <Windows.h>
 
 constexpr int TAB_WIDTH = 8;

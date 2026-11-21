@@ -1,0 +1,267 @@
+{
+  "game": {
+    "name": "Snake",
+    "field": {
+      "width": 80,
+      "height": 20,
+      "top": 0,
+      "bottom": 19,
+      "right_edge": 79,
+      "left_edge": 0
+    },
+    "menu": {
+      "art": [
+        "   _____    _     _    _____    _    _   ______",
+        "  ( ____)  ( )   ( )  ()---()  ( )  ( ) ( _____)",
+        " (  )___   (  )  ( ) ( )___( ) ( )_( )  ( )__",
+        "  (____ )  ( )( )( ) ( _____ ) ( __ )   ( ___)",
+        "   ___(  ) ( )  (  ) ( )   ( ) ( ) ( )  ( )____",
+        "  (_____)  (_)   (_) (_)   (_) (_)  (_) (______)"
+      ],
+      "description": "Eat the food to grow. \nReach 300 Points without \nhitting a wall or youself to win.",
+      "controls": "W/S/A/D: Turn the snake\nESC: Exit to main menu\nR: Restart after game over"
+    },
+    "snake": {
+      "columns": 39,
+      "rows": 20,
+      "cell_width": 2,
+      "origin_x": 1,
+      "keys": {
+        "up": 87,
+        "down": 83,
+        "left": 65,
+        "right": 68
+      }
+    },
+    "timing": {
+      "frame_delay_ms": 20,
+      "movement_interval_ms": 120
+    },
+    "controls": {
+      "exit": 27,
+      "restart": 82,
+      "display_text": "W/A/S/D: Move Snake    ESC: Exit"
+    },
+    "rendering": {
+      "extra_height": 4,
+      "scoreboard_column": 0,
+      "controls_row_offset": 3,
+      "controls_column": 0,
+      "world_vertical_offset": 2,
+      "scoreboard_row": 0,
+      "roles": {
+        "background": "Background",
+        "border": "Border",
+        "snake_head": "MenuHighlight",
+        "snake_body": "SnakeBody",
+        "food": "SnakeFood",
+        "ui": "UI"
+      },
+      "scoreboard": {
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "SCORE:",
+            "value": "score"
+          },
+          {
+            "label": "LENGTH:",
+            "value": "snake_length"
+          }
+        ]
+      },
+      "o": null,
+      "messages": {
+        "player_wins": "YOU WIN!!!",
+        "player_loses": "GAME OVER!!!",
+        "final_score": "  Final Score: ",
+        "restart_prompt": "    R: Restart    ESC: Menu"
+      },
+      "ascii": {
+        "snake_head": 219,
+        "snake_body": 219,
+        "food": 219,
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|"
+      }
+    },
+    "initial_state": {
+      "head_x": 10,
+      "head_y": 10,
+      "direction_x": 1,
+      "direction_y": 0,
+      "requested_direction_x": 1,
+      "requested_direction_y": 0,
+      "snake_length": 4,
+      "score": 0,
+      "winning_score": 300,
+      "food_x": -1,
+      "food_y": -1,
+      "body_under_head": 0,
+      "game_won": 0,
+      "game_lost": 0
+    },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "score",
+        "file": "eating.wav"
+      }
+    ],
+    "rules": [
+      {
+        "name": "hits_left_wall",
+        "conditions": [
+          {
+            "key": "head_x",
+            "comparison": "Less",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_right_wall",
+        "conditions": [
+          {
+            "key": "head_x",
+            "comparison": "Greater",
+            "value": 38
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_top_wall",
+        "conditions": [
+          {
+            "key": "head_y",
+            "comparison": "Less",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_bottom_wall",
+        "conditions": [
+          {
+            "key": "head_y",
+            "comparison": "Greater",
+            "value": 19
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "hits_body",
+        "conditions": [
+          {
+            "key": "body_under_head",
+            "comparison": "Greater",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "eats_food",
+        "conditions": [
+          {
+            "key": "head_x",
+            "comparison": "Equal",
+            "value": {
+              "state": "food_x"
+            }
+          },
+          {
+            "key": "head_y",
+            "comparison": "Equal",
+            "value": {
+              "state": "food_y"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "snake_length",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "score",
+            "operation": "Add",
+            "value": 10
+          },
+          {
+            "key": "food_x",
+            "operation": "Assign",
+            "value": -1
+          },
+          {
+            "key": "food_y",
+            "operation": "Assign",
+            "value": -1
+          }
+        ]
+      },
+      {
+        "name": "player_wins",
+        "conditions": [
+          {
+            "key": "score",
+            "comparison": "GreaterEqual",
+            "value": {
+              "state": "winning_score"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_won",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  }
+}

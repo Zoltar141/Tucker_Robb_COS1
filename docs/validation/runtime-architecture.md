@@ -1,8 +1,8 @@
-# Wonkle Pong — Mini-Wonkle Runtime Architecture
+# W.O.N.K.L.E. v.1 — Mini-Wonkle Runtime Architecture
 
 ## 1. Project Overview
 
-Wonkle Pong is a C++20 console-based Pong game powered by a small, reusable Wonkle runtime. The purpose of the runtime is to demonstrate how game behavior can be defined through state, conditions, rules, transformations, and simulation rather than being hardcoded into a game-specific engine.
+W.O.N.K.L.E. v.1 is a C++20 console-based game framework powered by a small, reusable WonkleRuntime. The purpose of the runtime is to demonstrate how game behavior can be defined through state, conditions, rules, transformations, and simulation rather than being hardcoded into a game-specific engine.
 
 Pong is the first application of the runtime. The architecture should allow other simple games to use the same core runtime without requiring Pong-specific code to be added to it.
 
@@ -10,7 +10,7 @@ Pong is the first application of the runtime. The architecture should allow othe
 
 The runtime maintains the current state of the simulation. State represents the data that rules can inspect and transformations can modify.
 
-For Wonkle Pong, the state will need to represent information such as:
+For W.O.N.K.L.E. v.1, the state will need to represent information such as:
 
 - Ball position and movement.
 - Paddle positions.

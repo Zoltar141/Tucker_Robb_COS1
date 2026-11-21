@@ -1,0 +1,561 @@
+{
+  "game": {
+    "name": "Calculator",
+    "field": {
+      "width": 70,
+      "height": 15,
+      "top": 0,
+      "bottom": 14,
+      "right_edge": 79,
+      "left_edge": 0
+    },
+    "menu": {
+      "art": [
+        "**       **                   **                    **             **",
+        "/**      /**                  /**                   /**            /**",
+        "/**   *  /**  ******  ******* /**  **       **   ** /**  ******   ******  ******  ******",
+        "/**  *** /** **////**//**///**/** **  *****/**  /** /** //////** ///**/  **////**//**//*",
+        "/** **/**/**/**   /** /**  /**/****  ///// /**  /** /**  *******   /**  /**   /** /** /",
+        "/**** //****/**   /** /**  /**/**/**       /**  /** /** **////**   /**  /**   /** /**",
+        "/**/   ///**//******  ***  /**/**//**      //****** ***//********  //** //****** /***",
+        "//       //  //////  ///   // //  //        ////// ///  ////////    //   //////  ///"
+      ],
+      "description": "Slide the lines to pick two nnumbers from 0 to 12, \nchoose +, -, *, or /, \nand the answer appears where the lines cross. \nWarning Devide by 0 at your own peril.",
+      "controls": "A/D: Slide the first number along the bottom\nW/S: Slide the second number up and down along the side.\nJ/K: Cycle through operators(+ - * /)\nESC: Back to the main menu\nR: Restart the Wonk-ulator."
+    },
+    "paddles": [
+      {
+        "position": "a_dial",
+        "moves_along": "x",
+        "fixed_at": 0,
+        "width": 1,
+        "height": 14,
+        "limits": [
+          6,
+          66
+        ],
+        "draw_as": "line_up"
+      },
+      {
+        "position": "b_dial",
+        "moves_along": "y",
+        "fixed_at": 3,
+        "width": 76,
+        "height": 1,
+        "limits": [
+          0,
+          12
+        ],
+        "draw_as": "line_across"
+      },
+      {
+        "position": "a_dial",
+        "moves_along": "x",
+        "width": 1,
+        "height": 1,
+        "step": 5,
+        "limits": [
+          6,
+          66
+        ],
+        "keys": {
+          "back": 65,
+          "forward": 68
+        },
+        "other_axis": {
+          "position": "b_dial",
+          "step": 1,
+          "limits": [
+            0,
+            12
+          ],
+          "keys": {
+            "back": 87,
+            "forward": 83
+          }
+        },
+        "draw_as": "crossing"
+      },
+      {
+        "position": "a_dial",
+        "moves_along": "x",
+        "fixed_at": 14,
+        "width": 1,
+        "height": 1,
+        "limits": [
+          6,
+          66
+        ],
+        "draw_as": "bottom_marker"
+      },
+      {
+        "position": "b_dial",
+        "moves_along": "y",
+        "fixed_at": 2,
+        "width": 1,
+        "height": 1,
+        "limits": [
+          0,
+          12
+        ],
+        "draw_as": "side_marker"
+      },
+      {
+        "position": "op",
+        "moves_along": "x",
+        "fixed_at": -5,
+        "width": 1,
+        "height": 1,
+        "step": 1,
+        "limits": [
+          1,
+          4
+        ],
+        "keys": {
+          "back": 74,
+          "forward": 75
+        },
+        "draw_as": "crossing"
+      }
+    ],
+    "text": [
+      {
+        "x": 0,
+        "y": 0,
+        "text": "12",
+        "role": "label"
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "text": "11",
+        "role": "label"
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "text": "10",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "text": "9",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 4,
+        "text": "8",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 5,
+        "text": "7",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 6,
+        "text": "6",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 7,
+        "text": "5",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 8,
+        "text": "4",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 9,
+        "text": "3",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 10,
+        "text": "2",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 11,
+        "text": "1",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 12,
+        "text": "0",
+        "role": "label"
+      },
+      {
+        "x": 6,
+        "y": 15,
+        "text": "0----1----2----3----4----5----6----7----8----9----10---11---12",
+        "role": "label"
+      },
+      {
+        "x": 1,
+        "y": 14,
+        "text": "+",
+        "when": "show_add",
+        "role": "sign"
+      },
+      {
+        "x": 1,
+        "y": 14,
+        "text": "-",
+        "when": "show_subtract",
+        "role": "sign"
+      },
+      {
+        "x": 1,
+        "y": 14,
+        "text": "*",
+        "when": "show_multiply",
+        "role": "sign"
+      },
+      {
+        "x": 1,
+        "y": 14,
+        "text": "/",
+        "when": "show_divide",
+        "role": "sign"
+      },
+      {
+        "x": {
+          "state": "a_dial"
+        },
+        "y": {
+          "state": "b_dial"
+        },
+        "value": "answer",
+        "role": "answer"
+      },
+      {
+        "x": {
+          "state": "a_dial"
+        },
+        "y": {
+          "state": "b_dial"
+        },
+        "text": "?",
+        "when": "error",
+        "role": "answer"
+      }
+    ],
+    "timing": {
+      "frame_delay_ms": 100
+    },
+    "controls": {
+      "exit": 27,
+      "restart": 82,
+      "display_text": "A/D: across   W/S: up and down   J/K: operator   ESC: Exit"
+    },
+    "rendering": {
+      "extra_height": 4,
+      "scoreboard_column": 0,
+      "controls_row_offset": 3,
+      "controls_column": 0,
+      "world_vertical_offset": 2,
+      "scoreboard_row": 0,
+      "roles": {
+        "background": "Background",
+        "border": "Border",
+        "ui": "UI",
+        "line_up": "Border",
+        "line_across": "Border",
+        "crossing": "Border",
+        "bottom_marker": "Paddle",
+        "side_marker": "Paddle",
+        "label": "UI",
+        "sign": "Paddle",
+        "answer": "SnakeFood"
+      },
+      "scoreboard": {
+        "separator": "   ",
+        "entries": [
+          {
+            "label": "ACROSS:",
+            "value": "a"
+          },
+          {
+            "label": "UP:",
+            "value": "b"
+          },
+          {
+            "label": "OP [1+ 2- 3* 4/]:",
+            "value": "op"
+          },
+          {
+            "label": "ANSWER:",
+            "value": "answer"
+          }
+        ]
+      },
+      "messages": {
+        "player_wins": "",
+        "player_loses": "W.O.N.K.L.E. CANNOT DIVIDE BY ZERO!!!",
+        "restart_prompt": "    R: Restart    ESC: Menu"
+      },
+      "ascii": {
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|",
+        "line_up": "|",
+        "line_across": "-",
+        "crossing": "+",
+        "bottom_marker": "^",
+        "side_marker": ">"
+      }
+    },
+    "initial_state": {
+      "a_dial": 31,
+      "b_dial": 6,
+      "op": 3,
+      "a": 5,
+      "b": 6,
+      "answer": 0,
+      "error": 0,
+      "show_add": 0,
+      "show_subtract": 0,
+      "show_multiply": 0,
+      "show_divide": 0,
+      "game_won": 0,
+      "game_lost": 0
+    },
+    "rules": [
+      {
+        "name": "read_dials",
+        "conditions": [],
+        "transformations": [
+          {
+            "key": "a",
+            "operation": "Assign",
+            "value": {
+              "state": "a_dial"
+            }
+          },
+          {
+            "key": "a",
+            "operation": "Subtract",
+            "value": 6
+          },
+          {
+            "key": "a",
+            "operation": "Divide",
+            "value": 5
+          },
+          {
+            "key": "b",
+            "operation": "Assign",
+            "value": 12
+          },
+          {
+            "key": "b",
+            "operation": "Subtract",
+            "value": {
+              "state": "b_dial"
+            }
+          }
+        ]
+      },
+      {
+        "name": "clear_signs",
+        "conditions": [],
+        "transformations": [
+          {
+            "key": "show_add",
+            "operation": "Assign",
+            "value": 0
+          },
+          {
+            "key": "show_subtract",
+            "operation": "Assign",
+            "value": 0
+          },
+          {
+            "key": "show_multiply",
+            "operation": "Assign",
+            "value": 0
+          },
+          {
+            "key": "show_divide",
+            "operation": "Assign",
+            "value": 0
+          },
+          {
+            "key": "error",
+            "operation": "Assign",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "name": "start_from_first_number",
+        "conditions": [],
+        "transformations": [
+          {
+            "key": "answer",
+            "operation": "Assign",
+            "value": 0
+          },
+          {
+            "key": "answer",
+            "operation": "Add",
+            "value": {
+              "state": "a"
+            }
+          }
+        ]
+      },
+      {
+        "name": "add",
+        "conditions": [
+          {
+            "key": "op",
+            "comparison": "Equal",
+            "value": 1
+          }
+        ],
+        "transformations": [
+          {
+            "key": "answer",
+            "operation": "Add",
+            "value": {
+              "state": "b"
+            }
+          },
+          {
+            "key": "show_add",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "subtract",
+        "conditions": [
+          {
+            "key": "op",
+            "comparison": "Equal",
+            "value": 2
+          }
+        ],
+        "transformations": [
+          {
+            "key": "answer",
+            "operation": "Subtract",
+            "value": {
+              "state": "b"
+            }
+          },
+          {
+            "key": "show_subtract",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "multiply",
+        "conditions": [
+          {
+            "key": "op",
+            "comparison": "Equal",
+            "value": 3
+          }
+        ],
+        "transformations": [
+          {
+            "key": "answer",
+            "operation": "Multiply",
+            "value": {
+              "state": "b"
+            }
+          },
+          {
+            "key": "show_multiply",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "divide",
+        "conditions": [
+          {
+            "key": "op",
+            "comparison": "Equal",
+            "value": 4
+          },
+          {
+            "key": "b",
+            "comparison": "NotEqual",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "answer",
+            "operation": "Divide",
+            "value": {
+              "state": "b"
+            }
+          },
+          {
+            "key": "show_divide",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "divide_by_zero",
+        "conditions": [
+          {
+            "key": "op",
+            "comparison": "Equal",
+            "value": 4
+          },
+          {
+            "key": "b",
+            "comparison": "Equal",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "answer",
+            "operation": "Assign",
+            "value": 0
+          },
+          {
+            "key": "show_divide",
+            "operation": "Assign",
+            "value": 1
+          },
+          {
+            "key": "error",
+            "operation": "Assign",
+            "value": 1
+          },
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  }
+}

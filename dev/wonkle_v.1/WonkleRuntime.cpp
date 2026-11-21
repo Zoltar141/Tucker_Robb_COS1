@@ -1,5 +1,7 @@
 #include "WonkleRuntime.h"
 
+#include <unordered_map>
+
 static Comparison GetComparison(const std::string& name)
 {
     static const std::unordered_map<std::string, Comparison> comparisons =
@@ -50,15 +52,7 @@ bool WonkleRuntime::GetStateValue(const std::string& key, int& value) const
 
 bool WonkleRuntime::GetStateValue(const std::string& key, double& value) const
 {
-    int storedValue = 0;
-
-    if (currentState.GetValue(key, storedValue))
-    {
-        value = storedValue;
-        return true;
-    }
-
-    return false;
+    return currentState.GetValue(key, value);
 }
 
 void WonkleRuntime::LoadRules(const nlohmann::json& ruleData)

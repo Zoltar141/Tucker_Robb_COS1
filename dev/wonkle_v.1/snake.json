@@ -9,27 +9,35 @@
       "right_edge": 79,
       "left_edge": 0
     },
-    "grid": {
+    "menu": {
+      "art": [
+        "   _____    _     _    _____    _    _   ______",
+        "  ( ____)  ( )   ( )  ()---()  ( )  ( ) ( _____)",
+        " (  )___   (  )  ( ) ( )___( ) ( )_( )  ( )__",
+        "  (____ )  ( )( )( ) ( _____ ) ( __ )   ( ___)",
+        "   ___(  ) ( )  (  ) ( )   ( ) ( ) ( )  ( )____",
+        "  (_____)  (_)   (_) (_)   (_) (_)  (_) (______)"
+      ],
+      "description": "Eat the food to grow. \nReach 300 Points without \nhitting a wall or youself to win.",
+      "controls": "W/S/A/D: Turn the snake\nESC: Exit to main menu\nR: Restart after game over"
+    },
+    "snake": {
       "columns": 39,
       "rows": 20,
       "cell_width": 2,
-      "origin_x": 1
-    },
-    "snake": {
-      "starting_length": 4
-    },
-    "scoring": {
-      "winning_score": 300
+      "origin_x": 1,
+      "keys": {
+        "up": 87,
+        "down": 83,
+        "left": 65,
+        "right": 68
+      }
     },
     "timing": {
       "frame_delay_ms": 20,
       "movement_interval_ms": 120
     },
     "controls": {
-      "up": 87,
-      "down": 83,
-      "left": 65,
-      "right": 68,
       "exit": 27,
       "restart": 82,
       "display_text": "W/A/S/D: Move Snake    ESC: Exit"
@@ -50,10 +58,19 @@
         "ui": "UI"
       },
       "scoreboard": {
-        "score_label": "SCORE:",
-        "length_label": "LENGTH:",
-        "separator": "  \t\t\t\t"
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "SCORE:",
+            "value": "score"
+          },
+          {
+            "label": "LENGTH:",
+            "value": "snake_length"
+          }
+        ]
       },
+      "o": null,
       "messages": {
         "player_wins": "YOU WIN!!!",
         "player_loses": "GAME OVER!!!",
@@ -85,6 +102,20 @@
       "game_won": 0,
       "game_lost": 0
     },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "score",
+        "file": "eating.wav"
+      }
+    ],
     "rules": [
       {
         "name": "hits_left_wall",

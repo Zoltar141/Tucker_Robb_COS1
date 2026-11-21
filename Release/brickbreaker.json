@@ -1,0 +1,265 @@
+{
+  "game": {
+    "name": "Brick Breaker",
+    "field": {
+      "width": 80,
+      "height": 25,
+      "top": 0,
+      "bottom": 24,
+      "right_edge": 78,
+      "left_edge": 1
+    },
+    "menu": {
+      "art": [
+        " ___   ___  _____  ____ |  /     ___   ___   ____   _   |  /   ____  ___ ",
+        "|___) |___)   |   |     |-<     |___) |___) |____  /_\\  |-<   |____ |___)",
+        "|___) |   \\ __|__ |____ |  \\    |___) |   \\ |____ /   \\ |  \\  |____ |   \\"
+      ],
+      "description": "Break every brick before the ball gets past you.",
+      "controls": "A/D: Move Paddle\nESC: Exit to main menu\nR: Restart after game over"
+    },
+    "ball": {
+      "bounces_off": [
+        "left",
+        "right",
+        "top"
+      ],
+      "bounce_multiplier": -1,
+      "keep_inside": [
+        "left",
+        "right",
+        "top"
+      ]
+    },
+    "paddles": [
+      {
+        "position": "player_paddle_x",
+        "moves_along": "x",
+        "fixed_at": 22,
+        "width": 9,
+        "height": 1,
+        "step": 2,
+        "limits": [
+          1,
+          70
+        ],
+        "keys": {
+          "back": 65,
+          "forward": 68
+        },
+        "bounce_velocity": -1,
+        "bounce_angles": [
+          -2,
+          -2,
+          -1,
+          -1,
+          0,
+          1,
+          1,
+          2,
+          2
+        ]
+      }
+    ],
+    "bricks": {
+      "origin_x": 1,
+      "origin_y": 3,
+      "width": 78,
+      "layout": [
+        "550000000000055005555550000055550005500005500055000000550000000000055555555000",
+        "044000000000440044000044000044044004400004400440000000440000000000044400000000",
+        "003300030003300330000003300033003003300003333300000000330000000000033333300000",
+        "000220222022000022000022000022002202200002200220000000220000000000022200000000",
+        "000011101110011001111110011011000111101101100011001100111111100110011111111011"
+      ]
+    },
+    "timing": {
+      "frame_delay_ms": 50
+    },
+    "controls": {
+      "left": 65,
+      "right": 68,
+      "exit": 27,
+      "restart": 82,
+      "display_text": "A/D: Move Paddle    ESC: Exit"
+    },
+    "collision": {
+      "paddle_bounce_velocity_y": -1,
+      "paddle_bounce_velocity_x": [
+        -2,
+        -2,
+        -1,
+        -1,
+        0,
+        1,
+        1,
+        2,
+        2
+      ],
+      "horizontal_boundary_bounce_multiplier": -1,
+      "vertical_boundary_bounce_multiplier": -1
+    },
+    "rendering": {
+      "extra_height": 4,
+      "scoreboard_column": 0,
+      "controls_row_offset": 3,
+      "controls_column": 0,
+      "world_vertical_offset": 2,
+      "scoreboard_row": 0,
+      "roles": {
+        "background": "Background",
+        "border": "Border",
+        "paddle": "Paddle",
+        "ball": "Ball",
+        "brick": "Brick",
+        "ui": "UI",
+        "brick_1": "Brick1",
+        "brick_2": "Brick2",
+        "brick_3": "Brick3",
+        "brick_4": "Brick4",
+        "brick_5": "Brick5"
+      },
+      "scoreboard": {
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "SCORE:",
+            "value": "score"
+          },
+          {
+            "label": "BRICKS:",
+            "value": "bricks_remaining"
+          }
+        ]
+      },
+      "messages": {
+        "player_wins": "YOU WIN!!!",
+        "player_loses": "GAME OVER!!!",
+        "final_score": "  Final Score: ",
+        "restart_prompt": "    R: Restart    ESC: Menu"
+      },
+      "ascii": {
+        "ball": "O",
+        "paddle": "=",
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|",
+        "brick": 219
+      }
+    },
+    "initial_state": {
+      "ball_position_x": 40,
+      "ball_position_y": 20,
+      "ball_velocity_x": 1,
+      "ball_velocity_y": -1,
+      "player_paddle_x": 36,
+      "score": 0,
+      "bricks_remaining": 0,
+      "brick_hits": 0,
+      "game_won": 0,
+      "game_lost": 0
+    },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "score",
+        "file": "tshhhh.wav"
+      },
+      {
+        "key": "ball_velocity_x",
+        "file": "Bonk.wav"
+      },
+      {
+        "key": "ball_velocity_y",
+        "file": "Bink.wav"
+      }
+    ],
+    "rules": [
+      {
+        "name": "brick_destroyed",
+        "conditions": [
+          {
+            "key": "brick_hits",
+            "comparison": "Equal",
+            "value": 1
+          }
+        ],
+        "transformations": [
+          {
+            "key": "score",
+            "operation": "Add",
+            "value": 10
+          },
+          {
+            "key": "bricks_remaining",
+            "operation": "Subtract",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "brick_hit",
+        "conditions": [
+          {
+            "key": "brick_hits",
+            "comparison": "Greater",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "brick_hits",
+            "operation": "Subtract",
+            "value": 1
+          },
+          {
+            "key": "ball_velocity_y",
+            "operation": "Multiply",
+            "value": -1
+          }
+        ]
+      },
+      {
+        "name": "player_wins",
+        "conditions": [
+          {
+            "key": "bricks_remaining",
+            "comparison": "LessEqual",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_won",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "player_loses",
+        "conditions": [
+          {
+            "key": "ball_position_y",
+            "comparison": "GreaterEqual",
+            "value": 24
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  }
+}

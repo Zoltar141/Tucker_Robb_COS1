@@ -9,14 +9,58 @@
       "right_edge": 78,
       "left_edge": 1
     },
-    "paddle": {
-      "width": 9,
-      "height": 1,
-      "movement_step": 4,
-      "player_y": 22,
-      "left_limit": 1,
-      "right_limit": 70
+    "menu": {
+      "art": [
+        " ___   ___  _____  ____ |  /     ___   ___   ____   _   |  /   ____  ___ ",
+        "|___) |___)   |   |     |-<     |___) |___) |____  /_\\  |-<   |____ |___)",
+        "|___) |   \\ __|__ |____ |  \\    |___) |   \\ |____ /   \\ |  \\  |____ |   \\"
+      ],
+      "description": "Break every brick before the ball gets past you.",
+      "controls": "A/D: Move Paddle\nESC: Exit to main menu\nR: Restart after game over"
     },
+    "ball": {
+      "bounces_off": [
+        "left",
+        "right",
+        "top"
+      ],
+      "bounce_multiplier": -1,
+      "keep_inside": [
+        "left",
+        "right",
+        "top"
+      ]
+    },
+    "paddles": [
+      {
+        "position": "player_paddle_x",
+        "moves_along": "x",
+        "fixed_at": 22,
+        "width": 9,
+        "height": 1,
+        "step": 2,
+        "limits": [
+          1,
+          70
+        ],
+        "keys": {
+          "back": 65,
+          "forward": 68
+        },
+        "bounce_velocity": -1,
+        "bounce_angles": [
+          -2,
+          -2,
+          -1,
+          -1,
+          0,
+          1,
+          1,
+          2,
+          2
+        ]
+      }
+    ],
     "bricks": {
       "origin_x": 1,
       "origin_y": 3,
@@ -76,9 +120,17 @@
         "brick_5": "Brick5"
       },
       "scoreboard": {
-        "score_label": "SCORE:",
-        "bricks_label": "BRICKS:",
-        "separator": "  \t\t\t\t"
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "SCORE:",
+            "value": "score"
+          },
+          {
+            "label": "BRICKS:",
+            "value": "bricks_remaining"
+          }
+        ]
       },
       "messages": {
         "player_wins": "YOU WIN!!!",
@@ -107,6 +159,28 @@
       "game_won": 0,
       "game_lost": 0
     },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "score",
+        "file": "tshhhh.wav"
+      },
+      {
+        "key": "ball_velocity_x",
+        "file": "Bonk.wav"
+      },
+      {
+        "key": "ball_velocity_y",
+        "file": "Bink.wav"
+      }
+    ],
     "rules": [
       {
         "name": "brick_destroyed",

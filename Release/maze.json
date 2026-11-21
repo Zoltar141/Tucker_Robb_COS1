@@ -1,0 +1,300 @@
+{
+  "game": {
+    "name": "Maze",
+    "field": {
+      "width": 80,
+      "height": 21,
+      "top": 0,
+      "bottom": 20,
+      "right_edge": 79,
+      "left_edge": 0
+    },
+    "menu": {
+      "art": [
+        " __  __     _    _____   _____",
+        "|  \\/  |   / \\  |__  /  | ____|",
+        "| |\\/| |  / _ \\   / /_  |  _|_",
+        "|_|  |_| /_/ \\_\\ /____| |_____|"
+      ],
+      "description": "Race to the finish line(XX) \nbefore time runs out!",
+      "controls": "W/S/A/D: Move\nESC: Exit to main menu\nR: Restart after game over"
+    },
+    "paddles": [
+      {
+        "position": "finish_x",
+        "moves_along": "x",
+        "width": 2,
+        "height": 1,
+        "limits": [
+          1,
+          77
+        ],
+        "other_axis": {
+          "position": "finish_y"
+        },
+        "draw_as": "finish"
+      },
+      {
+        "position": "player_x",
+        "moves_along": "x",
+        "width": 2,
+        "height": 1,
+        "step": 2,
+        "limits": [
+          1,
+          77
+        ],
+        "keys": {
+          "back": 65,
+          "forward": 68
+        },
+        "other_axis": {
+          "position": "player_y",
+          "step": 1,
+          "limits": [
+            0,
+            20
+          ],
+          "keys": {
+            "back": 87,
+            "forward": 83
+          }
+        }
+      }
+    ],
+    "bricks": {
+      "origin_x": 1,
+      "origin_y": 0,
+      "width": 78,
+      "hit_by": {
+        "x": "player_x",
+        "y": "player_y"
+      },
+      "layout": [
+        "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+        "110011000000000000000000000011000000110000000000000000000000000000000000110011",
+        "110011111100111111111100110011001100111111111100111111111111111111111100110011",
+        "110000001100110000001100110011001100000000000000110000000000110000001100110011",
+        "111111001100110011001100110011001111111111111111110011111100110011001100110011",
+        "110000001100110011001100110000001100000011000000110000001100000011001100000011",
+        "110011111111110011001100111111111100111111001100110011001111111111111111110011",
+        "110000001100000011000000110000000000110000001100000011000000000000000000110011",
+        "111111001100111111111111111111111100110011111111111111111111111111001111110011",
+        "110011001100000011000000000000000000110011000000000000000000000011000000000011",
+        "110011001100110011001111110011001111110011001111111111001111110011111111111111",
+        "110011001100110011001100000011001100000011000000110000001100000011000000000011",
+        "110011001100110011001100111111001100111111001111110011111111111111001111110011",
+        "110011001100110011001100110000001100000011001100000011000000110000001100000011",
+        "110011001111110011111100111111111111110011001100111111001100110011111100110011",
+        "110011000000000011000000110000000000110011001100000000001100000000001100110011",
+        "110011111111111111001100110011111100110011111111111111001111111111111100111111",
+        "110000001100000000001100110000001100110000001100000011000000110000001100000011",
+        "110011001100110011111111111111001100111111001100110011111111110011001111110011",
+        "110011000000110000000000000000001100000000000000110000000000000011000000000011",
+        "111111111111111111111111111111111111111111111111111111111111111111111111111111"
+      ]
+    },
+    "timing": {
+      "frame_delay_ms": 100
+    },
+    "controls": {
+      "exit": 27,
+      "restart": 82,
+      "display_text": "W/A/S/D: Move    ESC: Exit"
+    },
+    "rendering": {
+      "extra_height": 4,
+      "scoreboard_column": 0,
+      "controls_row_offset": 3,
+      "controls_column": 0,
+      "world_vertical_offset": 2,
+      "scoreboard_row": 0,
+      "roles": {
+        "background": "Background",
+        "border": "Border",
+        "brick": "GameBoundary",
+        "brick_1": "GameBoundary",
+        "paddle": "Paddle",
+        "finish": "SnakeFood",
+        "ui": "UI"
+      },
+      "scoreboard": {
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "TIME:",
+            "value": "time_left"
+          }
+        ]
+      },
+      "messages": {
+        "player_wins": "YOU ESCAPED!!!",
+        "player_loses": "OUT OF TIME!!!",
+        "restart_prompt": "    R: Restart    ESC: Menu"
+      },
+      "ascii": {
+        "paddle": "@",
+        "finish": "X",
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|",
+        "brick": 219
+      }
+    },
+    "initial_state": {
+      "player_x": 3,
+      "player_y": 1,
+      "last_x": 3,
+      "last_y": 1,
+      "finish_x": 75,
+      "finish_y": 19,
+      "brick_hits": 0,
+      "time_left": 60,
+      "ticks": 0,
+      "ticks_per_second": 10,
+      "game_won": 0,
+      "game_lost": 0
+    },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      }
+    ],
+      "rules": [
+        {
+          "name": "wall_stops_player",
+          "conditions": [
+            {
+              "key": "brick_hits",
+              "comparison": "Greater",
+              "value": 0
+            }
+          ],
+          "transformations": [
+            {
+              "key": "player_x",
+              "operation": "Assign",
+              "value": {
+                "state": "last_x"
+              }
+            },
+            {
+              "key": "player_y",
+              "operation": "Assign",
+              "value": {
+                "state": "last_y"
+              }
+            }
+          ]
+        },
+        {
+          "name": "remember_position",
+          "conditions": [],
+          "transformations": [
+            {
+              "key": "last_x",
+              "operation": "Assign",
+              "value": {
+                "state": "player_x"
+              }
+            },
+            {
+              "key": "last_y",
+              "operation": "Assign",
+              "value": {
+                "state": "player_y"
+              }
+            }
+          ]
+        },
+        {
+          "name": "player_wins",
+          "conditions": [
+            {
+              "key": "player_x",
+              "comparison": "Equal",
+              "value": {
+                "state": "finish_x"
+              }
+            },
+            {
+              "key": "player_y",
+              "comparison": "Equal",
+              "value": {
+                "state": "finish_y"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "key": "game_won",
+              "operation": "Assign",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "timer_tick",
+          "conditions": [],
+          "transformations": [
+            {
+              "key": "ticks",
+              "operation": "Add",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "second_passes",
+          "conditions": [
+            {
+              "key": "ticks",
+              "comparison": "GreaterEqual",
+              "value": {
+                "state": "ticks_per_second"
+              }
+            }
+          ],
+          "transformations": [
+            {
+              "key": "time_left",
+              "operation": "Subtract",
+              "value": 1
+            },
+            {
+              "key": "ticks",
+              "operation": "Assign",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "name": "player_loses",
+          "conditions": [
+            {
+              "key": "time_left",
+              "comparison": "LessEqual",
+              "value": 0
+            },
+            {
+              "key": "game_won",
+              "comparison": "Equal",
+              "value": 0
+            }
+          ],
+          "transformations": [
+            {
+              "key": "game_lost",
+              "operation": "Assign",
+              "value": 1
+            }
+          ]
+        }
+      ]
+  }
+}
