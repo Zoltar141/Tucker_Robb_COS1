@@ -83,4 +83,10 @@ Before Week 4, I plan to focus on:
 The overall goal is to make adding new games increasingly straightforward by allowing them to reuse the existing systems rather than rebuilding functionality for every project.
 ### Week 4
 
-My final stand up...
+Continued expanding W.O.N.K.L.E. v.1s game systems and configuration structure. Worked on integrating WAV sound effects through JSON, making it easier for games to reference audio without hardcoding file paths into the engine. Also developed a standardized JSON template that documents the configuration structure and the features currently supported by W.O.N.K.L.E. v.1.
+
+Worked through some issues with exporting audio from Audacity, including clips being cut off or having unwanted silence added. Also encountered compiler warnings originating from the nlohmann JSON library. These are currently warnings rather than build-stopping errors.
+
+Expanded the automated test suite to cover GameState, runtime operations, rule loading, collision, file handling, saves, themes, and game configuration. Added checks to verify that game JSON files reference existing WAV files. Created a reusable JSON configuration template based on the actual properties consumed by the engine. Documented required configuration sections, optional features, supported rules, state values, rendering, and sound configuration. Added new sound effects and began wiring them into game configurations.
+
+The next goal is to continue expanding W.O.N.K.L.E. v.1s functionality by adding more reusable systems and configuration options. I want to keep pushing more of the game's behavior into JSON so new games can take advantage of existing engine features without requiring additional hardcoded logic. This includes expanding the framework's support for different game types, improving how systems work together, and continuing to build toward a more flexible, general-purpose procedural game framework.

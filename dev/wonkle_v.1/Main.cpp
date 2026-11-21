@@ -3,7 +3,7 @@
 
 int main()
 {
-   /* RunAllTests();*/
+    /*RunAllTests();*/
 
     Menu menu;
     menu.Run();
