@@ -1,0 +1,459 @@
+{
+  "game": {
+    "name": "Pong",
+    "field": {
+      "width": 80,
+      "height": 25,
+      "top": 1,
+      "bottom": 23,
+      "right_edge": 79,
+      "left_edge": 0
+    },
+    "menu": {
+      "art": [
+        " :::::::::   ::::::::  ::::    :::  ::::::::",
+        " :+:    :+: :+:    :+: :+:+:   :+: :+:    :+:",
+        " +:+    +:+ +:+    +:+ :+:+:+  +:+ +:+",
+        " +#++:++#+  +#+    +:+ +#+ +:+ +#+ :#:",
+        " +#+        +#+    +#+ +#+  +#+#+# +#+   +#+#",
+        " #+#        #+#    #+# #+#   #+#+# #+#    #+#",
+        " ###         ########  ###    ####  ########"
+      ],
+      "description": "First to 10 points wins. \nDon't let the ball past your paddle!",
+      "controls": "W/S: Move Paddle\nESC: Exit to main menu\nR: Restart after game over"
+    },
+    "ball": {
+      "bounces_off": [
+        "top",
+        "bottom"
+      ],
+      "bounce_multiplier": -1
+    },
+    "paddles": [
+      {
+        "position": "player_paddle_y",
+        "moves_along": "y",
+        "fixed_at": 2,
+        "width": 4,
+        "height": 5,
+        "draw_width": 1,
+        "step": 1,
+        "limits": [
+          0,
+          20
+        ],
+        "keys": {
+          "back": 87,
+          "forward": 83
+        },
+        "bounce_velocity": 1,
+        "bounce_angles": [
+          -1,
+          -1,
+          null,
+          1,
+          1
+        ]
+      },
+      {
+        "position": "opponent_paddle_y",
+        "moves_along": "y",
+        "fixed_at": 77,
+        "width": 4,
+        "height": 5,
+        "draw_width": 1,
+        "step": 1,
+        "limits": [
+          0,
+          20
+        ],
+        "bounce_velocity": -1,
+        "bounce_angles": [
+          -1,
+          -1,
+          null,
+          1,
+          1
+        ]
+      }
+    ],
+    "scoring": {
+      "left_boundary": 1,
+      "right_boundary": 78,
+      "initial_player_score": 0,
+      "initial_opponent_score": 0
+    },
+    "timing": {
+      "frame_delay_ms": 50
+    },
+    "controls": {
+      "exit": 27,
+      "restart": 82,
+      "display_text": "W/S: Move Paddle    ESC: Exit"
+    },
+    "opponent": {
+      "miss_chance": 5,
+      "follow_ball": true
+    },
+    "rendering": {
+      "extra_height": 4,
+      "scoreboard_column": 0,
+      "controls_row_offset": 3,
+      "controls_column": 0,
+      "world_vertical_offset": 2,
+      "scoreboard_row": 0,
+      "roles": {
+        "background": "Background",
+        "border": "Border",
+        "paddle": "Paddle",
+        "ball": "Ball",
+        "ui": "UI"
+      },
+      "scoreboard": {
+        "separator": "  \t\t\t\t",
+        "entries": [
+          {
+            "label": "PLAYER:",
+            "value": "player_score"
+          },
+          {
+            "label": "OPPONENT:",
+            "value": "opponent_score"
+          }
+        ]
+      },
+      "messages": {
+        "player_wins": "\t\t\t\tYOU WIN!!!",
+        "player_loses": "YOU LOSE!!!",
+        "restart_prompt": "\tPress any key to return to the menu."
+      },
+      "ascii": {
+        "ball": "O",
+        "paddle": "|",
+        "top_border": "_",
+        "bottom_border": "-",
+        "vertical_border": "|",
+        "corner": "+"
+      }
+    },
+    "initial_state": {
+      "ball_position_x": 40,
+      "ball_position_y": 12,
+      "ball_velocity_x": 1,
+      "ball_velocity_y": 1,
+      "player_paddle_y": 10,
+      "opponent_paddle_y": 10,
+      "player_score": 0,
+      "opponent_score": 0,
+      "winning_score": 10,
+      "game_won": 0,
+      "game_lost": 0,
+      "opponent_reaction_timer": 0,
+      "opponent_reaction_delay": 2
+    },
+    "sounds": [
+      {
+        "key": "game_won",
+        "file": "winner.wav"
+      },
+      {
+        "key": "game_lost",
+        "file": "loser.wav"
+      },
+      {
+        "key": "player_score",
+        "file": "boop.wav"
+      },
+      {
+        "key": "opponent_score",
+        "file": "boop.wav"
+      },
+      {
+        "key": "ball_velocity_x",
+        "file": "Bink.wav"
+      },
+      {
+        "key": "ball_velocity_y",
+        "file": "Bonk.wav"
+      }
+    ],
+    "rules": [
+      {
+        "name": "opponent_scores",
+        "conditions": [
+          {
+            "key": "ball_position_x",
+            "comparison": "LessEqual",
+            "value": 1
+          }
+        ],
+        "transformations": [
+          {
+            "key": "opponent_score",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "ball_position_x",
+            "operation": "Assign",
+            "value": 40
+          },
+          {
+            "key": "ball_position_y",
+            "operation": "Assign",
+            "value": 12
+          },
+          {
+            "key": "ball_velocity_x",
+            "operation": "Assign",
+            "value": 1
+          },
+          {
+            "key": "ball_velocity_y",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "player_scores",
+        "conditions": [
+          {
+            "key": "ball_position_x",
+            "comparison": "GreaterEqual",
+            "value": 78
+          }
+        ],
+        "transformations": [
+          {
+            "key": "player_score",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "ball_position_x",
+            "operation": "Assign",
+            "value": 40
+          },
+          {
+            "key": "ball_position_y",
+            "operation": "Assign",
+            "value": 12
+          },
+          {
+            "key": "ball_velocity_x",
+            "operation": "Assign",
+            "value": -1
+          },
+          {
+            "key": "ball_velocity_y",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "opponent_reaction_tick",
+        "conditions": [],
+        "transformations": [
+          {
+            "key": "opponent_reaction_timer",
+            "operation": "Add",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "opponent_aims_paddle_middle",
+        "conditions": [],
+        "transformations": [
+          {
+            "key": "opponent_aim_y",
+            "operation": "Assign",
+            "value": {
+              "state": "ball_position_y"
+            }
+          },
+          {
+            "key": "opponent_aim_y",
+            "operation": "Subtract",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "name": "opponent_aim_stays_below_top",
+        "conditions": [
+          {
+            "key": "opponent_aim_y",
+            "comparison": "Less",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "opponent_aim_y",
+            "operation": "Assign",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "name": "opponent_aim_stays_above_bottom",
+        "conditions": [
+          {
+            "key": "opponent_aim_y",
+            "comparison": "Greater",
+            "value": 20
+          }
+        ],
+        "transformations": [
+          {
+            "key": "opponent_aim_y",
+            "operation": "Assign",
+            "value": 20
+          }
+        ]
+      },
+      {
+        "name": "opponent_moves_down",
+        "conditions": [
+          {
+            "key": "opponent_paddle_y",
+            "comparison": "Less",
+            "value": {
+              "state": "ball_position_y"
+            }
+          },
+          {
+            "key": "opponent_reaction_timer",
+            "comparison": "GreaterEqual",
+            "value": {
+              "state": "opponent_reaction_delay"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "opponent_paddle_y",
+            "operation": "Add",
+            "value": 1
+          },
+          {
+            "key": "opponent_reaction_timer",
+            "operation": "Assign",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "name": "opponent_moves_up",
+        "conditions": [
+          {
+            "key": "opponent_paddle_y",
+            "comparison": "Greater",
+            "value": {
+              "state": "ball_position_y"
+            }
+          },
+          {
+            "key": "opponent_reaction_timer",
+            "comparison": "GreaterEqual",
+            "value": {
+              "state": "opponent_reaction_delay"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "opponent_paddle_y",
+            "operation": "Subtract",
+            "value": 1
+          },
+          {
+            "key": "opponent_reaction_timer",
+            "operation": "Assign",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "name": "player_wins",
+        "conditions": [
+          {
+            "key": "player_score",
+            "comparison": "GreaterEqual",
+            "value": {
+              "state": "winning_score"
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_won",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "opponent_wins",
+        "conditions": [
+          {
+            "key": "opponent_score",
+            "comparison": "GreaterEqual",
+            "value": {
+              "state": "winning_score"
+            }
+          },
+          {
+            "key": "game_won",
+            "comparison": "Equal",
+            "value": 0
+          }
+        ],
+        "transformations": [
+          {
+            "key": "game_lost",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "ball_stays_below_top",
+        "conditions": [
+          {
+            "key": "ball_position_y",
+            "comparison": "Less",
+            "value": 1
+          }
+        ],
+        "transformations": [
+          {
+            "key": "ball_position_y",
+            "operation": "Assign",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "ball_stays_above_bottom",
+        "conditions": [
+          {
+            "key": "ball_position_y",
+            "comparison": "Greater",
+            "value": 23
+          }
+        ],
+        "transformations": [
+          {
+            "key": "ball_position_y",
+            "operation": "Assign",
+            "value": 23
+          }
+        ]
+      }
+    ]
+  }
+}
